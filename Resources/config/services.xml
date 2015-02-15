@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="glavweb_uploader.namer.uniqid.class">Glavweb\UploaderBundle\Naming\UniqidNamer</parameter>
+        <parameter key="glavweb_uploader.provider.file.class">Glavweb\UploaderBundle\Provider\FileProvider</parameter>
+        <parameter key="glavweb_uploader.provider.image.class">Glavweb\UploaderBundle\Provider\ImageProvider</parameter>
+        <parameter key="glavweb_uploader.provider.youtube.class">Glavweb\UploaderBundle\Provider\YoutubeProvider</parameter>
+    </parameters>
+
+    <services>
+        <service id="glavweb_uploader.controller.upload" class="Glavweb\UploaderBundle\Controller\UploadController">
+            <argument>%glavweb_uploader.config%</argument>
+            <argument type="service" id="glavweb_uploader.error_handler.standard" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" />
+
+        <service id="glavweb_uploader.uploader_manager" class="Glavweb\UploaderBundle\Manager\UploaderManager">
+            <argument>%glavweb_uploader.config%</argument>
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="glavweb_uploader.model_manager.orm" class="Glavweb\UploaderBundle\Model\OrmModelManager">
+            <argument type="service" id="doctrine" />
+        </service>
+
+        <service id="glavweb_uploader.storage.filesystem" class="Glavweb\UploaderBundle\Storage\FilesystemStorage">
+            <argument>%kernel.cache_dir%</argument>
+        </service>
+
+        <service id="glavweb_uploader.form.type.dropzone" class="Glavweb\UploaderBundle\Form\Type\DropzoneType">
+            <argument type="service" id="router" />
+            <argument type="service" id="glavweb_uploader.media_helper" />
+            <tag name="form.type" alias="glavweb_uploader_dropzone" />
+        </service>
+
+        <service id="glavweb_uploader.media_listener" class="Glavweb\UploaderBundle\Entity\Listener\MediaListener">
+            <argument type="service" id="glavweb_uploader.uploader_manager" />
+            <tag name="doctrine.orm.entity_listener" />
+        </service>
+
+        <service id="glavweb_uploader.media_helper" class="Glavweb\UploaderBundle\Helper\MediaHelper">
+            <argument>%glavweb_uploader.config%</argument>
+            <argument type="service" id="request_stack" />
+        </service>
+
+        <service id="glavweb_uploader.twig.uploader_extension" class="Glavweb\UploaderBundle\Twig\Extension\UploaderExtension">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="glavweb_uploader.media_helper" />
+            <argument type="service" id="glavweb_uploader.uploader_manager" />
+            <tag name="twig.extension" />
+        </service>
+
+        <!-- providers -->
+        <service id="glavweb_uploader.provider.file"    class="%glavweb_uploader.provider.file.class%">
+            <argument type="service" id="glavweb_uploader.media_helper" />
+        </service>
+
+        <service id="glavweb_uploader.provider.image"   class="%glavweb_uploader.provider.image.class%">
+            <argument type="service" id="glavweb_uploader.media_helper" />
+            <argument type="service" id="imagine.templating.helper" />
+        </service>
+
+        <service id="glavweb_uploader.provider.youtube" class="%glavweb_uploader.provider.youtube.class%" />
+
+        <!-- namer -->
+        <service id="glavweb_uploader.namer.uniqid" class="%glavweb_uploader.namer.uniqid.class%" />
+
+        <!-- validators -->
+        <service id="glavweb_uploader.validation_listener.max_size" class="Glavweb\UploaderBundle\EventListener\MaxSizeValidationListener">
+            <tag name="kernel.event_listener" event="oneup_uploader.validation" method="onValidate" />
+        </service>
+
+        <service id="glavweb_uploader.validation_listener.allowed_mimetype" class="Glavweb\UploaderBundle\EventListener\AllowedMimetypeValidationListener">
+            <tag name="kernel.event_listener" event="oneup_uploader.validation" method="onValidate" />
+        </service>
+
+        <service id="glavweb_uploader.validation_listener.disallowed_mimetype" class="Glavweb\UploaderBundle\EventListener\DisallowedMimetypeValidationListener">
+            <tag name="kernel.event_listener" event="oneup_uploader.validation" method="onValidate" />
+        </service>
+    </services>
+</container>

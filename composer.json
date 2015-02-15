@@ -1,0 +1,24 @@
+{
+    "name": "glavweb/uploader-bundle",
+    "description": "Symfony GlavwebUploaderBundle",
+    "authors": [
+        {
+            "name": "Andrey Nilov",
+            "email": "nilov@glavweb.ru",
+            "homepage": "http://glavweb.ru"
+        },
+        {
+            "name": "Glavweb Community",
+            "homepage": "https://github.com/glavweb/GlavwebUploaderBundle/contributors"
+        }
+    ],
+    "require": {
+        "symfony/http-foundation": "~2.3",
+        "symfony/form": "~2.3",
+        "symfony/security": "~2.3",
+        "symfony/console": "~2.3"
+    },
+    "autoload": {
+        "psr-4": { "Glavweb\\UploaderBundle\\": "" }
+    }
+}
