@@ -45,6 +45,7 @@
             position: absolute;
             top: 0;
             right: 0;
+            z-index: 1000;
         }
         .dz-rename.btn,
         .dz-rename.btn:hover,
@@ -129,6 +130,7 @@
                                                 <div class="dz-filename">
                                                     <span data-dz-name>{{ media.name }}</span>
                                                 </div>
+                                                <div class="dz-description" style="display: none;"><span>{{ media.description }}</span></div>
 
                                                 {% block glavweb_uploaded_files_buttons %}
                                                     <div class="dz-button _rename">

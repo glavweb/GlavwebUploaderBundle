@@ -112,7 +112,10 @@
                     var preview = $(this).closest('.dz-preview');
                     var fileId = preview.data('id');
                     var name = preview.find('.dz-filename').text().trim();
+                    var description = preview.find('.dz-description').text().trim();
+
                     $('#fileName').val(name);
+                    $('#description').val(description);
                     $('.do-rename-file').data('file-id', fileId);
                     $('#modalRenameFile').modal();
                 });
@@ -124,15 +127,18 @@
                     if (fileId) {
                         url = "{{ renameUrl }}";
                         name = $('#fileName').val();
+                        description = $('#description').val();
 
                         $.post(url, {
                             id: fileId,
                             request_id: "{{ requestId }}",
-                            name: name
+                            name: name,
+                            description: description
                         }, function (response) {
                             if (response.success) {
                                 var preview = $('#dz-preview-' + fileId);
                                 preview.find('.dz-filename span').text(name);
+                                preview.find('.dz-description span').text(description);
                             }
                         });
                     }
