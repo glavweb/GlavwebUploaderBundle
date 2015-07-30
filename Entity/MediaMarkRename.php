@@ -25,6 +25,11 @@ class MediaMarkRename
     private $newName;
 
     /**
+     * @var string
+     */
+    private $newDescription;
+
+    /**
      * @var \DateTime
      */
     private $createdAt;
@@ -91,6 +96,30 @@ class MediaMarkRename
     }
 
     /**
+     * Set newDescription
+     *
+     * @param string $newDescription
+     * @return MediaMarkRename
+     */
+    public function setNewDescription($newDescription)
+    {
+        $this->newDescription = $newDescription;
+
+        return $this;
+    }
+
+    /**
+     * Get newDescription
+     *
+     * @return string
+     */
+    public function getNewDescription()
+    {
+        return $this->newDescription;
+    }
+
+
+/**
      * Set createdAt
      *
      * @param \DateTime $createdAt

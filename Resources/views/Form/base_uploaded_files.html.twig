@@ -1,0 +1,189 @@
+{% block glavweb_uploaded_files %}
+    <style>
+        .glavweb {
+            height: 170px;
+            position: relative;
+        }
+        .glavweb-outer {
+            width: 200px;
+            height: 150px;
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .glavweb-inner {
+            height: 500%;
+            width: 100%;
+            position: absolute;
+            top: -200%;
+        }
+
+        .glavweb-img {
+            display: block;
+            position: absolute !important;
+            width: 100%;
+            height: auto;
+            left: 0; top: 0; bottom: 0; right: 0;
+            margin: auto;
+        }
+
+        .dz-details__img {
+            position: relative;
+        }
+         .dz-preview {
+            padding: 0 !important;
+             width: 200px !important;
+             display: block;
+             float: left;
+             margin-right: 30px;
+        }
+
+         .dz-progress {
+             display: none !important;
+         }
+        .dz-button._remove {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        .dz-rename.btn,
+        .dz-rename.btn:hover,
+        .dz-rename.btn:focus {
+            background: #fff;
+            box-shadow: none;
+            border: none;
+        }
+
+        .dz-filename-wr {
+            display: block;
+            position: relative;
+            z-index: 1;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .dz-button._rename {
+            position: absolute;
+            top: -3px;
+            right: 0;
+            z-index: 3;
+        }
+
+    </style>
+
+    {% block glavweb_uploaded_files_top %}{% endblock %}
+
+        {% for media in files %}
+
+                {# SET VARIABLES #}
+                {% set imgSrc = media|glavweb_uploader_thumbnail %}
+                {# //SET VARIABLES #}
+
+                {% block glavweb_uploaded_files_preview %}
+                    {# DZ-PREVIEW #}
+                    <div data-id="{{ media.id }}" data-src="{{ imgSrc }}" id="dz-preview-{{ media.id }}"
+                         class="dz-preview dz-processing dz-image-preview dz-success {% block glavweb_uploaded_files_preview_class %}{% endblock %}">
+
+                        {% block glavweb_uploaded_files_preview_wrapper %}
+                            {# DZ-PREVIEW:WRAPPER #}
+                            <div class="dz-preview__wrapper">
+
+                                {% block glavweb_uploaded_files_preview_top %}{% endblock %}
+
+                                {% block glavweb_uploaded_files_details %}
+                                    {# DZ-PREVIEW:DZ-DETAILS #}
+                                    <div class="dz-details">
+
+                                        {% block glavweb_uploaded_files_details_img %}
+                                            {# DZ-PREVIEW:DZ-DETAILS:IMG #}
+                                            <div class="dz-details__img">
+
+
+                                                {% if imgSrc is not empty %}
+                                                    <div class="glavweb">
+                                                        <div class="glavweb-outer">
+                                                            <div class="glavweb-inner">
+                                                                <img class="glavweb-img" data-dz-thumbnail
+                                                                     src="{{ imgSrc }}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+
+                                                {% block glavweb_uploaded_files_details_remove %}
+
+                                                    <div class="dz-button _remove">
+                                                        <button class="dz-remove btn btn-default" type="button">
+                                                            <span class="glyphicon glyphicon-remove"></span>
+                                                        </button>
+                                                    </div>
+
+                                                {% endblock %}
+
+                                            </div>
+                                            {# //DZ-PREVIEW:DZ-DETAILS:IMG #}
+                                        {% endblock %}
+
+                                        {% block glavweb_uploaded_files_filename %}
+                                            <div class="dz-filename-wr">
+                                                <div class="dz-filename">
+                                                    <span data-dz-name>{{ media.name }}</span>
+                                                </div>
+
+                                                {% block glavweb_uploaded_files_buttons %}
+                                                    <div class="dz-button _rename">
+                                                        <button class="dz-rename btn " type="button">
+                                                            <span class="glyphicon glyphicon-pencil"></span>
+                                                        </button>
+                                                    </div>
+                                                {% endblock %}
+                                            </div>
+                                        {% endblock %}
+
+                                    </div>
+                                    {# //DZ-PREVIEW:DZ-DETAILS #}
+                                {% endblock %}
+
+                                {% block glavweb_uploaded_files_progress %}
+                                    {# DZ-PREVIEW:DZ-PROGRESS #}
+                                    <div class="dz-progress">
+                                        <span class="dz-upload" data-dz-uploadprogress style="width: 100%;"></span>
+                                    </div>
+                                    {# //DZ-PREVIEW:DZ-PROGRESS #}
+                                {% endblock %}
+
+                                {% if showMark %}
+                                    {% block glavweb_uploaded_files_marks %}
+                                        {# DZ-PREVIEW:DZ-MARKS #}
+                                        <div class="dz-marks">
+                                            <div class="dz-success-mark">
+                                                <span>?</span>
+                                            </div>
+                                            <div class="dz-error-mark">
+                                                <span>?</span>
+                                            </div>
+                                        </div>
+                                        {# //DZ-PREVIEW:DZ-MARKS #}
+                                    {% endblock %}
+                                {% endif %}
+
+                                {% block glavweb_uploaded_files_error_message %}
+                                    {# DZ-PREVIEW:DZ-ERROR-MESSAGE #}
+                                    <div class="dz-error-message">
+                                        <span data-dz-errormessage></span>
+                                    </div>
+                                    {# //DZ-PREVIEW:DZ-ERROR-MESSAGE #}
+                                {% endblock %}
+
+
+                            </div>
+                            {# //DZ-PREVIEW:WRAPPER #}
+                        {% endblock %}
+
+                    </div>
+                    {# //DZ-PREVIEW #}
+                {% endblock %}
+
+        {% endfor %}
+
+{% endblock %}

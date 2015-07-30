@@ -151,6 +151,7 @@ class OrmModelManager extends BaseModelManager
             if ($row && $row->getMedia()->getContext() == $context) {
                 $media = $row->getMedia();
                 $media->setName($row->getNewName());
+                $media->setDescription($row->getNewDescription());
 
                 $changesAffected = true;
             }

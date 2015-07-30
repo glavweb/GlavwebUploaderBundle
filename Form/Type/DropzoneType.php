@@ -52,14 +52,19 @@ class DropzoneType extends AbstractType
 
         $files = $this->prepareFiles($options['files']);
 
-        $view->vars['type']      = $options['type'];
-        $view->vars['useLink']   = $options['useLink'];
-        $view->vars['useForm']   = $options['useForm'];
-        $view->vars['files']     = $files;
-        $view->vars['requestId'] = $options['requestId'];
-        $view->vars['uploadDir'] = $this->mediaHelper->getUploadDirectoryUrl($options['type']);
-        $view->vars['deleteUrl'] = $this->router->generate('glavweb_uploader_delete', array('context' => $options['type']));
-        $view->vars['renameUrl'] = $this->router->generate('glavweb_uploader_rename', array('context' => $options['type']));
+        $view->vars['uploadedFilesTpl'] = $options['uploadedFilesTpl'];
+        $view->vars['uploadItemTpl']    = $options['uploadItemTpl'];
+        $view->vars['type']             = $options['type'];
+        $view->vars['previewImg']       = $options['previewImg'];
+        $view->vars['useLink']          = $options['useLink'];
+        $view->vars['useForm']          = $options['useForm'];
+        $view->vars['showMark']         = $options['showMark'];
+        $view->vars['showUploadButton'] = $options['showUploadButton'];
+        $view->vars['files']            = $files;
+        $view->vars['requestId']        = $options['requestId'];
+        $view->vars['uploadDir']        = $this->mediaHelper->getUploadDirectoryUrl($options['type']);
+        $view->vars['deleteUrl']        = $this->router->generate('glavweb_uploader_delete', array('context' => $options['type']));
+        $view->vars['renameUrl']        = $this->router->generate('glavweb_uploader_rename', array('context' => $options['type']));
     }
 
     /**
@@ -68,11 +73,16 @@ class DropzoneType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'files'     => array(),
-            'requestId' => null,
-            'useLink'   => true,
-            'useForm'   => true,
-            'type'      => null
+            'files'                         => array(),
+            'previewImg'                    => null,
+            'requestId'                     => null,
+            'useLink'                       => true,
+            'useForm'                       => true,
+            'showMark'                      => true,
+            'showUploadButton'              => true,
+            'type'                          => null,
+            'uploadedFilesTpl'              => 'GlavwebUploaderBundle:Form:base_upload_item_tpl.html.twig',
+            'uploadItemTpl'                 => 'GlavwebUploaderBundle:Form:base_uploaded_files.html.twig',
         ));
     }
 

@@ -1,231 +1,135 @@
 {% block glavweb_uploader_dropzone_widget %}
-    <link rel="stylesheet" href="{{ asset('plugins/fancybox/jquery.fancybox.css') }}" type="text/css" media="screen" />
-    <link rel="stylesheet" href="{{ asset('css/dropzone.css') }}" type="text/css" media="screen" />
-
-    <script src="{{ asset('js/dropzone.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('plugins/fancybox/jquery.fancybox.pack.js') }}"></script>
-
-    <script>
-        $(document).ready(function() {
-            $(".fancybox").fancybox();
-        });
-    </script>
-
-    <style>
-        #actions {
-            margin: 15px 0;
-        }
-
-        /* Mimic table appearance */
-        div.table {
-            display: table;
-        }
-        div.table .file-row {
-            display: table-row;
-        }
-        div.table .file-row > div {
-            display: table-cell;
-            vertical-align: top;
-            border-top: 1px solid #ddd;
-            padding: 8px;
-        }
-        div.table .file-row:nth-child(odd) {
-            background: #f9f9f9;
-        }
-
-        /* Hide the progress bar when finished */
-        #previews .file-row.dz-success .progress {
-            opacity: 0;
-            transition: opacity 0.3s linear;
-        }
-
-        /* Hide the delete button initially */
-        #previews .file-row .delete {
-            display: none;
-        }
-
-        /* Hide the start and cancel buttons and show the delete button */
-        #previews .file-row.dz-success .start,
-        #previews .file-row.dz-success .cancel {
-            display: none;
-        }
-        #previews .file-row.dz-success .delete {
-            display: block;
-        }
-    </style>
-
-    <div>
-        <div class="modal fade" id="modalRemoveFile" tabindex="-1" role="dialog" aria-labelledby="modalRemoveFileLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="modalRemoveFileLabel">Подтверждение удаления файла</h4>
-                    </div>
-                    <div class="modal-body">
-                        Вы уверены, что хотите удалить этот файл?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                        <button type="button" class="btn btn-primary do-remove-file" data-file-id="0">Удалить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalRenameFile" tabindex="-1" role="dialog" aria-labelledby="modalRenameFileLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="modalRenameFileLabel">Переименовать файл</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="form-group">
-                                <label for="fileName" class="col-sm-3 control-label">Имя файла</label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" id="fileName">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                        <button type="button" class="btn btn-primary do-rename-file" data-file-id="0">Сохранить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    {# GLAVWEB:UPLOADER-DROPZONE #}
+    <div class="glavweb-uploader-dropzone">
         <input type="hidden" name="_glavweb_uploader_request_id" value="{{ requestId }}">
 
         {% if useLink %}
-            <div id="actions" class="row">
-                <div>
-                    <input style="margin-right: 10px" placeholder="Вставьте ссылку" type="text" name="uploadlink" class="uploadlink" />
-                    <span class="btn btn-primary uploadlink-button" data-loading-text="Загрузка...">
-                        <i class="glyphicon glyphicon-plus"></i>
-                        <span>Загр. по ссылке</span>
-                    </span>
-                </div>
-            </div>
+            {% include 'GlavwebUploaderBundle:Form:view-link.html.twig' %}
         {% endif %}
 
-        <div class="dz" {% if useForm == false and files is empty %}style="display: none"{% endif %}>
+        {# DZ #}
+        <div class="dz ">
             {% if useForm %}
-                <div class="dz-clickable dz-message" id="file-upload">
-                    Перетащите файл или кликните здесь
-                </div>
+                {% include 'GlavwebUploaderBundle:Form:view-form.html.twig' %}
             {% endif %}
 
-            <div id="previews">
-                <span id="template">
-                    <div class="dz-preview dz-processing dz-image-preview dz-success" data-id>
-                        <div class="dz-details">
-                            <div class="dz-filename"><span data-dz-name></span></div>
-                            <div class="dz-size" data-dz-size></div>
-                            <img data-dz-thumbnail>
-                        </div>
-                        <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress style="width: 100%;"></span></div>
-                        <div class="dz-success-mark"><span>?</span></div>
-                        <div class="dz-error-mark"><span>?</span></div>
-                        <div class="dz-error-message"><span data-dz-errormessage></span></div>
-                        <a class="dz-remove" href="javascript:undefined;"><span class="glyphicon glyphicon-remove" style="float: left;"></span>Удалить</a>
-                        <a class="dz-rename" href="javascript:undefined;"><span class="glyphicon glyphicon-pencil" style="float: left;"></span>Переим.</a>
-
-                    </div>
-                </span>
-
-                {%for media in files %}
-                    {% set imgSrc = media|glavweb_uploader_thumbnail %}
-                    <div class="dz-preview dz-processing dz-image-preview dz-success" data-id="{{ media.id }}" id="dz-preview-{{ media.id }}">
-                        <div class="dz-details">
-                            <div class="dz-filename"><span data-dz-name>{{ media.name }}</span></div>
-                            <div class="dz-size" data-dz-size></div>
-                            {% if imgSrc is not empty %}
-                                <img data-dz-thumbnail src="{{ imgSrc }}">
-                            {% endif %}
-                        </div>
-                        <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress style="width: 100%;"></span></div>
-                        <div class="dz-success-mark"><span>?</span></div>
-                        <div class="dz-error-mark"><span>?</span></div>
-                        <div class="dz-error-message"><span data-dz-errormessage></span></div>
-                        <a class="dz-remove" href="javascript:undefined;"><span class="glyphicon glyphicon-remove" style="float: left;"></span>Удалить</a>
-                        <a class="dz-rename" href="javascript:undefined;"><span class="glyphicon glyphicon-pencil" style="float: left;"></span>Переим.</a>
-                    </div>
-                {% endfor %}
+            {# PREVIEWS #}
+            <div id="previews" class="previews clearfix">
+                {% include uploadItemTpl with {'showMark': showMark} %}
+                {% include uploadedFilesTpl with {'files': files} %}
             </div>
+            {# //PREVIEWS #}
         </div>
+        {# //DZ #}
+
+    </div>
+    {# //GLAVWEB:UPLOADER-DROPZONE #}
+
+    {% block glavweb_uploader_dropzone_widget__madal_windows %}
+        {% include 'GlavwebUploaderBundle:Form:view-modal-remove.html.twig' %}
+        {% include 'GlavwebUploaderBundle:Form:view-modal-rename.html.twig' %}
+        {% include 'GlavwebUploaderBundle:Form:view-modal-error.html.twig' %}
+        {% include 'GlavwebUploaderBundle:Form:view-modal-error-format.html.twig' %}
+    {% endblock %}
+
+    {% block glavweb_uploader_dropzone_widget__stylesheet %}
+        <link rel="stylesheet" href="{{ asset('plugins/fancybox/jquery.fancybox.css') }}" type="text/css" media="screen"/>
+        <link rel="stylesheet" href="{{ asset('css/dropzone.css') }}" type="text/css" media="screen"/>
+
+    {% endblock %}
+
+    {% block glavweb_uploader_dropzone_widget__script %}
+    {# JAVASCRIPT #}
+        <script src="{{ asset('js/dropzone.min.js') }}"></script>
 
         <script type="text/javascript">
             var previewTemplate = $('#template').html();
             $('#template').remove();
 
             {% if useForm %}
-                var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
-                    url: "{{ path('glavweb_uploader_upload', {context: type}) }}", // Set the url
-                    thumbnailWidth: 80,
-                    thumbnailHeight: 80,
-                    parallelUploads: 20,
-                    previewTemplate: previewTemplate,
-                    autoQueue: true, // Make sure the files aren't queued until manually added
-                    autoProcessQueue : true,
-                    previewsContainer: "#previews", // Define the container to display the previews
-                    clickable: "#file-upload" // Define the element that should be used as click trigger to select files.
-                });
-
-                myDropzone.on("sending", function(file, xhr, formData) {
-                    formData.append('_glavweb_uploader_request_id', '{{ requestId }}');
-                });
-
-                myDropzone.on("success", function(file, response) {
-                    file.response = response;
-
-                    $(file.previewTemplate).attr('data-id', response.id);
-                    $(file.previewTemplate).attr('id', 'dz-preview-' + response.id);
-                });
-
-                myDropzone.on("removedfile", function(file) {
-                    var id = file.response.id;
-
-                    if (id !== undefined) {
-                        url = "{{ deleteUrl }}";
-                        $.post(url, {
-                            id         : id,
-                            request_id : "{{ requestId }}"
-                        });
+            var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+                url: "{{ path('glavweb_uploader_upload', {context: type}) }}", // Set the url
+                thumbnailWidth: 200,
+                thumbnailHeight: 150,
+                parallelUploads: 20,
+                previewTemplate: previewTemplate,
+                autoQueue: true, // Make sure the files aren't queued until manually added
+                autoProcessQueue: true,
+                previewsContainer: "#previews", // Define the container to display the previews
+                clickable: "#file-upload", // Define the element that should be used as click trigger to select files.
+                maxFilesize: 4,
+                error: function(file) {
+                    if (file.size > 4*1024*1024) {
+                        $('#modalErrorFile').modal();
+                        return false;
+                    } else {
+                        $('#modalErrorFormat').modal();
+                        $(file.previewTemplate).addClass('hidden-upload-item');
                     }
-                });
+                },
+                complete: function(file) {
+                    $('.js-article-preloader').addClass('hidden');
+                    if (file.size > 4*1024*1024) {
+                        $(file.previewTemplate).addClass('hidden-upload-item');
+                        return false;
+                    }
+                }
+            });
+
+
+            myDropzone.on("sending", function (file, xhr, formData) {
+                $('.js-article-preloader').removeClass('hidden');
+                formData.append('_glavweb_uploader_request_id', '{{ requestId }}');
+            });
+
+
+            myDropzone.on("success", function (file, response) {
+                file.response = response;
+                $(file.previewTemplate).attr('data-id', response.id);
+                $(file.previewTemplate).attr('data-src', response.contentPath);
+                $(file.previewTemplate).attr('id', 'dz-preview-' + response.id);
+                //$(file.previewTemplate).find('.dz-filename span').text('');
+
+            });
+
+            myDropzone.on("removedfile", function (file) {
+                var id = file.response.id;
+
+                if (id !== undefined) {
+                    url = "{{ deleteUrl }}";
+                    $.post(url, {
+                        id: id,
+                        request_id: "{{ requestId }}"
+                    });
+                }
+            });
             {% endif %}
 
-            $(document).ready(function() {
+            $(document).ready(function () {
 
                 // rename
-                $('#previews').on('click', '.dz-rename', function(){
+                $('#previews').on('click', '.dz-rename', function () {
                     var preview = $(this).closest('.dz-preview');
-                    var fileId  = preview.data('id');
-                    var name    = preview.find('.dz-filename').text();
-
+                    var fileId = preview.data('id');
+                    var name = preview.find('.dz-filename').text().trim();
                     $('#fileName').val(name);
                     $('.do-rename-file').data('file-id', fileId);
-
                     $('#modalRenameFile').modal();
                 });
 
-                $('.do-rename-file').click(function(){
-                    var button  = $(this);
-                    var fileId  = button.data('file-id');
+                $('.do-rename-file').click(function () {
+                    var button = $(this);
+                    var fileId = button.data('file-id');
 
                     if (fileId) {
-                        url  = "{{ renameUrl }}";
+                        url = "{{ renameUrl }}";
                         name = $('#fileName').val();
 
                         $.post(url, {
-                            id         : fileId,
-                            request_id : "{{ requestId }}",
-                            name       : name
-                        }, function(response){
+                            id: fileId,
+                            request_id: "{{ requestId }}",
+                            name: name
+                        }, function (response) {
                             if (response.success) {
                                 var preview = $('#dz-preview-' + fileId);
                                 preview.find('.dz-filename span').text(name);
@@ -236,25 +140,25 @@
                     $('#modalRenameFile').modal('hide');
                 });
 
-                $('#previews').on('click', '.dz-remove', function(){
+                $('#previews').on('click', '.dz-remove', function () {
                     var preview = $(this).closest('.dz-preview');
-                    var fileId  = preview.data('id');
+                    var fileId = preview.data('id');
 
                     $('.do-remove-file').data('file-id', fileId);
 
                     $('#modalRemoveFile').modal();
                 });
 
-                $('.do-remove-file').click(function(){
-                    var button  = $(this);
-                    var fileId  = button.data('file-id');
+                $('.do-remove-file').click(function () {
+                    var button = $(this);
+                    var fileId = button.data('file-id');
 
                     if (fileId) {
                         url = "{{ deleteUrl }}";
                         $.post(url, {
-                            id         : fileId,
-                            request_id : "{{ requestId }}"
-                        }, function(response){
+                            id: fileId,
+                            request_id: "{{ requestId }}"
+                        }, function (response) {
                             if (response.success) {
                                 var preview = $('#dz-preview-' + fileId);
                                 preview.remove();
@@ -264,63 +168,74 @@
 
                     $('#modalRemoveFile').modal('hide');
                 });
+                $('#modalErrorFile').modal('hide');
+
+                $('#previews').on('click', '.dz-remove', function () {
+                    var preview = $(this).closest('.dz-preview');
+                    var fileId = preview.data('id');
+
+                    $('.do-remove-file').data('file-id', fileId);
+
+
+                });
+
 
                 {% if useLink %}
-                    $('.uploadlink-button').click(function(){
-                        var value     = $('.uploadlink').val();
-                        var button    = $('.uploadlink-button');
-                        var uploadDir = '{{ uploadDir }}';
+                $('.uploadlink-button').click(function () {
+                    var value = $('.uploadlink').val();
+                    var button = $('.uploadlink-button');
+                    var uploadDir = '{{ uploadDir }}';
 
-                        if (value) {
-                            button.button('loading');
-                            $.ajax('{{ path('glavweb_uploader_uploadlink', {context: type}) }}', {
-                                'data': {
-                                    'file_link' : value,
-                                    '_glavweb_uploader_request_id': '{{ requestId }}'
-                                },
-                                'dataType' : 'json',
-                                // 'async': false,
-                                'complete' : function(response){
-                                    var json = response.responseJSON;
+                    if (value) {
+                        button.button('loading');
+                        $.ajax('{{ path('glavweb_uploader_uploadlink', {context: type}) }}', {
+                            'data': {
+                                'file_link': value,
+                                '_glavweb_uploader_request_id': '{{ requestId }}'
+                            },
+                            'dataType': 'json',
+                            // 'async': false,
+                            'complete': function (response) {
+                                var json = response.responseJSON;
 
-                                    if (response.status == 200) {
-                                        $('.uploadlink').val('');
+                                if (response.status == 200) {
+                                    $('.uploadlink').val('');
 
-                                        var fileId        = json['id'];
-                                        var thumbnailPath = json['thumbnail_path'];
-                                        var name          = json['name'];
+                                    var fileId = json['id'];
+                                    var thumbnailPath = json['thumbnail_path'];
+                                    var name = json['name'];
 
-                                        var template = $(previewTemplate);
+                                    var template = $(previewTemplate);
 
-                                        template.find('.dz-filename span').text(name);
-                                        template.find('.dz-details').parent().attr('data-id', fileId);
-                                        template.find('.dz-details').parent().attr('id', 'dz-preview-' + fileId);
+                                    template.find('.dz-filename span').text(name);
+                                    template.find('.dz-details').parent().attr('data-id', fileId);
+                                    template.find('.dz-details').parent().attr('id', 'dz-preview-' + fileId);
 
-                                        if (thumbnailPath) {
-                                            template.find('.dz-details img').attr('alt', name);
-                                            template.find('.dz-details img').attr('src', uploadDir + '/' + thumbnailPath);
-                                        }
-
-                                        $('#previews').append(template);
-                                        $('.dz').show();
-
-                                    } else if (json['error'] !== undefined) {
-                                        alert(json['error']);
-
-                                    } else {
-                                        alert('При загрузке произошла ошибка.');
+                                    if (thumbnailPath) {
+                                        template.find('.dz-details img').attr('alt', name);
+                                        template.find('.dz-details img').attr('src', uploadDir + '/' + thumbnailPath);
                                     }
 
-                                    button.button('reset');
-                                }
-                            });
-                        }
+                                    $('#previews').append(template);
+                                    $('.dz').show();
 
-                    });
+                                } else if (json['error'] !== undefined) {
+                                    alert(json['error']);
+
+                                } else {
+                                    alert('При загрузке произошла ошибка.');
+                                }
+                                $("#previews").scrollTop($("#previews")[0].scrollHeight);
+                                button.button('reset');
+                            }
+                        });
+                    }
+                });
                 {% endif %}
 
             });
         </script>
-    </div>
+    {# //JAVASCRIPT #}
+    {% endblock %}
 
 {% endblock %}

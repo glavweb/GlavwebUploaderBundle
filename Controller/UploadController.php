@@ -199,20 +199,23 @@ class UploadController extends Controller
     public function renameAction(Request $request, $context)
     {
         $em = $this->getDoctrine()->getManager();
-        $id        = $request->get('id');
-        $requestId = $request->get('request_id');
-        $name      = $request->get('name');
+        $id             = $request->get('id');
+        $requestId      = $request->get('request_id');
+        $name           = $request->get('name');
+        $description    = $request->get('description');
 
         /** @var \Glavweb\UploaderBundle\Entity\Media $media */
         $media = $em->find('GlavwebUploaderBundle:Media', $id);
 
         $success = false;
-        $isValid = $media && $requestId && $name;
+        $isValid = $media && $requestId && ($name || $description);
+
         if ($isValid) {
             if ($media->getIsOrphan()) {
                 $isValid = $media->getRequestId() == $requestId;
                 if ($isValid) {
                     $media->setName($name);
+                    $media->setDescription($description);
 
                     $em->flush();
                     $success = true;
@@ -223,6 +226,7 @@ class UploadController extends Controller
                 $mediaMarkRename = new MediaMarkRename();
                 $mediaMarkRename->setRequestId($requestId);
                 $mediaMarkRename->setNewName($name);
+                $mediaMarkRename->setNewDescription($description);
                 $mediaMarkRename->setMedia($media);
 
                 $em->persist($mediaMarkRename);
@@ -291,7 +295,9 @@ class UploadController extends Controller
         extract($uploaderManager->upload($file, $context, $requestId), EXTR_OVERWRITE);
 
         if ($media) {
-            $response['id'] = $media->getId();
+            $response['id']          = $media->getId();
+            $response['contentPath'] = $this->get('glavweb_uploader.media_helper')->getContentPath($media);
+
         }
 
         // post upload dispatch

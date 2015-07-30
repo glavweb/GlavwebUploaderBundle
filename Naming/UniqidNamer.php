@@ -19,8 +19,7 @@ class UniqidNamer implements NamerInterface
     {
         $extension = $file->guessExtension();
         if (!$extension) {
-            $extension = 'php';
-//            throw new \RuntimeException('The extension cannot be guessed.');
+            throw new \RuntimeException('The extension cannot be guessed.');
         }
 
         $replace = array(

@@ -77,15 +77,15 @@
 
         <!-- validators -->
         <service id="glavweb_uploader.validation_listener.max_size" class="Glavweb\UploaderBundle\EventListener\MaxSizeValidationListener">
-            <tag name="kernel.event_listener" event="oneup_uploader.validation" method="onValidate" />
+            <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>
 
         <service id="glavweb_uploader.validation_listener.allowed_mimetype" class="Glavweb\UploaderBundle\EventListener\AllowedMimetypeValidationListener">
-            <tag name="kernel.event_listener" event="oneup_uploader.validation" method="onValidate" />
+            <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>
 
         <service id="glavweb_uploader.validation_listener.disallowed_mimetype" class="Glavweb\UploaderBundle\EventListener\DisallowedMimetypeValidationListener">
-            <tag name="kernel.event_listener" event="oneup_uploader.validation" method="onValidate" />
+            <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>
     </services>
 </container>

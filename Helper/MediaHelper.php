@@ -68,4 +68,17 @@ class MediaHelper
         }
         return $contextConfig;
     }
+
+    /**
+     * @param MediaInterface $media
+     * @param bool           $isAbsolute
+     * @return string
+     */
+    public function getContentPath($media, $isAbsolute = false)
+    {
+        $contentPath = $media->getContentPath();
+        $context = $media->getContext();
+        $contentPath = $this->getUploadDirectoryUrl($context, $isAbsolute) . '/' . $contentPath;
+        return $contentPath;
+    }
 }

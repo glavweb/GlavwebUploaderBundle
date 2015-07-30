@@ -13,9 +13,10 @@
             <generator strategy="AUTO" />
         </id>
 
-        <field name="requestId" type="string"   column="request_id" nullable="false" />
-        <field name="newName"   type="string"   column="new_name"   nullable="false" />
-        <field name="createdAt" type="datetime" column="created_at" nullable="false" />
+        <field name="requestId"         type="string"   column="request_id"         nullable="false" />
+        <field name="newName"           type="string"   column="new_name"           nullable="true" />
+        <field name="newDescription"    type="text"     column="new_description"    nullable="true" />
+        <field name="createdAt"         type="datetime" column="created_at"         nullable="false" />
 
         <many-to-one target-entity="Glavweb\UploaderBundle\Entity\Media" field="media">
             <cascade>
