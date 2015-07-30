@@ -2,7 +2,6 @@
 
 namespace Glavweb\UploaderBundle\Provider;
 
-use Avalanche\Bundle\ImagineBundle\Templating\Helper\ImagineHelper;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Helper\MediaHelper;
 use Glavweb\UploaderBundle\Model\MediaInterface;
@@ -19,18 +18,11 @@ class ImageProvider extends FileProvider
     protected $mediaHelper;
 
     /**
-     * @var \Avalanche\Bundle\ImagineBundle\Templating\Helper\ImagineHelper
-     */
-    protected $imagineHelper;
-
-    /**
      * @param MediaHelper $mediaHelper
-     * @param ImagineHelper $imagineHelper
      */
-    public function __construct(MediaHelper $mediaHelper, ImagineHelper $imagineHelper)
+    public function __construct(MediaHelper $mediaHelper)
     {
         $this->mediaHelper   = $mediaHelper;
-        $this->imagineHelper = $imagineHelper;
     }
 
     /**
@@ -96,10 +88,6 @@ class ImageProvider extends FileProvider
         $contentPath   = $uploadDir . '/' . $media->getContentPath();
 
         $src = $options['thumbnail_content'] ? $thumbnailPath : $contentPath;
-        if (!empty($options['filter'])) {
-            $src = $this->imagineHelper->filter($src, $options['filter']);
-        }
-
         $imgTag = '<img src="' . $src . '">';
 
         if ($options['use_link']) {

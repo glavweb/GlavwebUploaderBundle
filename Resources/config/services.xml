@@ -67,7 +67,6 @@
 
         <service id="glavweb_uploader.provider.image"   class="%glavweb_uploader.provider.image.class%">
             <argument type="service" id="glavweb_uploader.media_helper" />
-            <argument type="service" id="imagine.templating.helper" />
         </service>
 
         <service id="glavweb_uploader.provider.youtube" class="%glavweb_uploader.provider.youtube.class%" />
