@@ -1,7 +1,10 @@
 {% block glavweb_uploader_dropzone_widget %}
     {# GLAVWEB:UPLOADER-DROPZONE #}
+
     <div class="glavweb-uploader-dropzone">
         <input type="hidden" name="_glavweb_uploader_request_id" value="{{ requestId }}">
+
+        <input type="hidden" name="_glavweb_uploader_sorted_array" id = "dz-sorted-array" value="">
 
         {% if useLink %}
             {% include 'GlavwebUploaderBundle:Form:view-link.html.twig' %}
@@ -10,14 +13,40 @@
         {# DZ #}
         <div class="dz ">
             {% if useForm %}
-                {% include 'GlavwebUploaderBundle:Form:view-form.html.twig' %}
+                {% include viewFormTpl %}
             {% endif %}
 
             {# PREVIEWS #}
+
+            <script src="{{ asset('js/Sortable.js') }}"></script>
+
             <div id="previews" class="previews clearfix">
                 {% include uploadItemTpl with {'showMark': showMark} %}
                 {% include uploadedFilesTpl with {'files': files} %}
             </div>
+
+            <script>
+                var imgPreview = document.getElementById('previews');
+                var sortableImgPreview = Sortable.create(imgPreview, {
+                    animation: 200,
+                    onSort: function (/**Event*/evt) {
+                        formSortedArray();
+                    }
+                });
+
+                function formSortedArray(){
+                    $('#dz-sorted-array').val('');
+
+                    var dzSortedArray = [];
+                    $('.dz-preview').each(function(){
+                        console.log();
+                        dzSortedArray.push($(this).data('id'));
+                    });
+
+                    $('#dz-sorted-array').val(dzSortedArray.join(','));
+                }
+
+            </script>
             {# //PREVIEWS #}
         </div>
         {# //DZ #}
@@ -89,6 +118,7 @@
                 $(file.previewTemplate).attr('data-src', response.contentPath);
                 $(file.previewTemplate).attr('id', 'dz-preview-' + response.id);
                 //$(file.previewTemplate).find('.dz-filename span').text('');
+                formSortedArray();
 
             });
 
@@ -168,11 +198,14 @@
                             if (response.success) {
                                 var preview = $('#dz-preview-' + fileId);
                                 preview.remove();
+                                formSortedArray();
                             }
                         });
                     }
 
                     $('#modalRemoveFile').modal('hide');
+
+
                 });
                 $('#modalErrorFile').modal('hide');
 

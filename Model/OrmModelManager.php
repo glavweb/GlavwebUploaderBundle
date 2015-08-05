@@ -183,4 +183,24 @@ class OrmModelManager extends BaseModelManager
 
         return $this->cacheMediaEntities;
     }
+
+    /**
+     * @param $entities
+     * @param $positions
+     */
+    public function sortMedia($entities, $positions)
+    {
+        $em = $this->doctrine->getManager();
+
+        $rows = $entities->toArray();
+
+        foreach ($rows as $row) {
+            $position = array_search($row->getId(), $positions);
+
+            if ($position!==false && $position!=$row->getPosition()) {
+                $row->setPosition($position);
+            }
+        }
+        $em->flush();
+    }
 }

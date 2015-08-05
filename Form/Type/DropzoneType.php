@@ -54,6 +54,7 @@ class DropzoneType extends AbstractType
 
         $view->vars['uploadedFilesTpl'] = $options['uploadedFilesTpl'];
         $view->vars['uploadItemTpl']    = $options['uploadItemTpl'];
+        $view->vars['viewFormTpl']      = $options['viewFormTpl'];
         $view->vars['type']             = $options['type'];
         $view->vars['previewImg']       = $options['previewImg'];
         $view->vars['useLink']          = $options['useLink'];
@@ -61,6 +62,7 @@ class DropzoneType extends AbstractType
         $view->vars['showMark']         = $options['showMark'];
         $view->vars['showUploadButton'] = $options['showUploadButton'];
         $view->vars['files']            = $files;
+        $view->vars['showLabel']        = $options['showLabel'];
         $view->vars['requestId']        = $options['requestId'];
         $view->vars['uploadDir']        = $this->mediaHelper->getUploadDirectoryUrl($options['type']);
         $view->vars['deleteUrl']        = $this->router->generate('glavweb_uploader_delete', array('context' => $options['type']));
@@ -83,6 +85,8 @@ class DropzoneType extends AbstractType
             'type'                          => null,
             'uploadedFilesTpl'              => 'GlavwebUploaderBundle:Form:base_upload_item_tpl.html.twig',
             'uploadItemTpl'                 => 'GlavwebUploaderBundle:Form:base_uploaded_files.html.twig',
+            'viewFormTpl'                   => 'GlavwebUploaderBundle:Form:view-form.html.twig',
+            'showLabel'                     => true,
         ));
     }
 

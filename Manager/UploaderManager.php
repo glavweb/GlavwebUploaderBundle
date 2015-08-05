@@ -243,17 +243,28 @@ class UploaderManager extends ContainerAware
     }
 
     /**
-     * @param string $context
-     * @param string $requestId
+     * @param $context
+     * @param $requestId
+     * @param array $options
      * @return array
      */
-    public function handleUpload($context, $requestId)
+    public function handleUpload($context, $requestId, $options = array())
     {
         $this->removeMarkedMedia($context, $requestId);
         $this->renameMarkedMedia($context, $requestId);
 
         return $this->uploadOrphans($context, $requestId);
     }
+
+    /**
+     * @param $entities
+     * @param $positions
+     */
+    public function sortMedia($entities, $positions)
+    {
+        $this->getModelManager()->sortMedia($entities, $positions);
+    }
+
     /**
      * @param string $context
      * @param string $requestId

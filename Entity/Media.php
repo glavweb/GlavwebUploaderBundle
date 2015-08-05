@@ -91,6 +91,11 @@ class Media implements MediaInterface
      */
     private $createdAt;
 
+    /*
+     * @var integer
+     */
+    private $position;
+
     /**
      * @return string
      */
@@ -471,5 +476,21 @@ class Media implements MediaInterface
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param mixed $position
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
     }
 }

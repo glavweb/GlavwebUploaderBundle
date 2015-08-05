@@ -44,20 +44,26 @@
 
                             {% block glavweb_upload_item_filename %}
                                 {#  DZ-PREVIEW:DZ-FILENAME #}
-                                <div class="dz-filename-wr">
-                                    <div class="dz-filename">
-                                        <span data-dz-name></span>
-                                    </div>
-                                    <div class="dz-description" style="display: none;"><span></span></div>
 
-                                    {% block glavweb_upload_item_button %}
-                                        <div class="dz-button _rename">
-                                            <button class="dz-rename btn " type="button">
-                                                <span class="glyphicon glyphicon-pencil"></span>
-                                            </button>
+                                {% if showLabel %}
+
+                                    <div class="dz-filename-wr">
+                                        <div class="dz-filename">
+                                            <span data-dz-name></span>
                                         </div>
-                                    {% endblock %}
-                                </div>
+                                        <div class="dz-description" style="display: none;"><span></span></div>
+
+                                        {% block glavweb_upload_item_button %}
+                                            <div class="dz-button _rename">
+                                                <button class="dz-rename btn " type="button">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                            </div>
+                                        {% endblock %}
+                                    </div>
+
+                                {% endif %}
+
                                 {#  //DZ-PREVIEW:DZ-FILENAME #}
                             {% endblock %}
 

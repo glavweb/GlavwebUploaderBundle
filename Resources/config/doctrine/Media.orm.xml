@@ -38,6 +38,7 @@
         <field name="requestId"         type="string"   column="request_id"         nullable="true" />
         <field name="updatedAt"         type="datetime" column="updated_at"         nullable="false" />
         <field name="createdAt"         type="datetime" column="created_at"         nullable="false" />
+        <field name="position"          type="integer"  column="position"           nullable="true" />
 
     </entity>
 </doctrine-mapping>
