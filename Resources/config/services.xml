@@ -26,6 +26,8 @@
             <argument>%glavweb_uploader.config%</argument>
             <call method="setContainer">
                 <argument type="service" id="service_container" />
+                <argument type="service" id="glavweb_uploader.data_driver.annotation" />
+                <argument type="service" id="request_stack" />
             </call>
         </service>
 
@@ -40,6 +42,8 @@
         <service id="glavweb_uploader.form.type.dropzone" class="Glavweb\UploaderBundle\Form\Type\DropzoneType">
             <argument type="service" id="router" />
             <argument type="service" id="glavweb_uploader.media_helper" />
+            <argument>%glavweb_uploader.config%</argument>
+            <argument type="service" id="glavweb_uploader.data_driver.annotation" />
             <tag name="form.type" alias="glavweb_uploader_dropzone" />
         </service>
 
@@ -85,6 +89,15 @@
 
         <service id="glavweb_uploader.validation_listener.disallowed_mimetype" class="Glavweb\UploaderBundle\EventListener\DisallowedMimetypeValidationListener">
             <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
+        </service>
+
+        <service id="glavweb_uploader.validation_listener.max_files" class="Glavweb\UploaderBundle\EventListener\MaxFilesValidationListener">
+            <argument type="service" id="doctrine" />
+            <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
+        </service>
+
+        <service id="glavweb_uploader.data_driver.annotation" class="Glavweb\UploaderBundle\Driver\AnnotationDriver">
+            <argument type="service" id="annotation_reader" />
         </service>
     </services>
 </container>

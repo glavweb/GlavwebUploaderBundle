@@ -1,3 +1,6 @@
-<div class="dz-clickable dz-message  clearfix" id="file-upload">
+<div class="dz-clickable dz-message  clearfix js-file-upload {% if countFiles >= maxFiles %} js-file-upload-hide {% endif %}" id="file-upload">
     Перетащите или выберите файлы
+</div>
+<div class="js-reached-limit-message {% if countFiles < maxFiles %}js-file-upload-hide{% endif %}">
+    Достигнуто максимальное количество загруженных файлов.
 </div>

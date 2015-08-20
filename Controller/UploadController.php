@@ -282,7 +282,7 @@ class UploadController extends Controller
         if (!($file instanceof FileInterface)) {
             $file = new FilesystemFile($file);
         }
-        
+
         // validate
         $this->validate($file, $request, $context);
 

@@ -3,6 +3,7 @@
 namespace Glavweb\UploaderBundle\Manager;
 
 use Glavweb\UploaderBundle\Exception\ProviderNotFoundException;
+use Glavweb\UploaderBundle\Exception\RequestEmptyException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Glavweb\UploaderBundle\Provider\FileProvider;
@@ -42,6 +43,16 @@ class UploaderManager extends ContainerAware
     );
 
     /**
+     * @var \Metadata\Driver\DriverInterface
+     */
+    private $driverAnnotation;
+
+    /**
+     * @var \Symfony\Component\HttpFoundation\RequestStack
+     */
+    private $requestStack;
+
+    /**
      * @param array $config
      */
     public function __construct(array $config)
@@ -59,6 +70,30 @@ class UploaderManager extends ContainerAware
         }
 
         return $this->storage;
+    }
+
+    /**
+     * @return \Glavweb\UploaderBundle\Driver\AnnotationDriver
+     */
+    public function getDriverAnnotation()
+    {
+        if (!$this->driverAnnotation) {
+            $this->driverAnnotation = $this->container->get('glavweb_uploader.data_driver.annotation');
+        }
+
+        return $this->driverAnnotation;
+    }
+
+    /**
+     * @return \Symfony\Component\HttpFoundation\RequestStack
+     */
+    public function getRequestStack()
+    {
+        if (!$this->requestStack) {
+            $this->requestStack = $this->container->get('request_stack');
+        }
+
+        return $this->requestStack;
     }
 
     /**
@@ -243,17 +278,66 @@ class UploaderManager extends ContainerAware
     }
 
     /**
-     * @param $context
-     * @param $requestId
+     * @param $entity
+     * @param null $requestId
      * @param array $options
-     * @return array
+     * @throws RequestEmptyException
+     * @throws \Glavweb\UploaderBundle\Exception\RequestEmptyException
      */
-    public function handleUpload($context, $requestId, $options = array())
+    public function handleUpload($entity, $requestId=null, $options = array())
     {
-        $this->removeMarkedMedia($context, $requestId);
-        $this->renameMarkedMedia($context, $requestId);
+        $request = $this->getRequestStack()->getCurrentRequest();
+        $requestId = $request->get('_glavweb_uploader_request_id');
 
-        return $this->uploadOrphans($context, $requestId);
+        if (!$requestId) {
+            throw new RequestEmptyException();
+        }
+
+        $driverAnnotation = $this->getDriverAnnotation();
+        $data = $driverAnnotation->loadDataForClass(new \ReflectionClass($entity));
+
+        foreach ($data as $property) {
+            $context = $property['mapping'];
+            $mediaEntities = $entity->$property['nameGetFunction']();
+
+            $this->removeMarkedMedia($context, $requestId);
+            $this->renameMarkedMedia($context, $requestId);
+            $uploadedMediaEntities = $this->uploadOrphans($context, $requestId);
+
+            $this->addMediaEntities($uploadedMediaEntities, $entity, $property );
+
+            $positions = explode(',', $request->get('_glavweb_uploader_sorted_array')[$context]);
+
+            $this->sortMedia($mediaEntities, $positions);
+        }
+    }
+
+    /**
+     * @param $mediaEntities
+     * @param $entity
+     * @param $property
+     */
+    private function addMediaEntities($mediaEntities, $entity, $property)
+    {
+        $nameAddFunction = $property['nameAddFunction'];
+        $nameGetFunction = $property['nameGetFunction'];
+        $mapping         = $property['mapping'];
+
+        $contextConfig = $this->config['mappings'][$mapping];
+
+        $entityMedia = $entity->$nameGetFunction();
+
+        $maxFiles = $contextConfig['max_files'] - $entityMedia->count();
+
+        if (!empty($mediaEntities)) {
+            foreach ($mediaEntities as $mediaEntity) {
+                if ($maxFiles == 0) {
+                    break;
+                }
+                $entity->$nameAddFunction($mediaEntity);
+                $maxFiles--;
+            }
+        }
     }
 
     /**

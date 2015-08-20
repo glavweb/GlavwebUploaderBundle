@@ -4,7 +4,7 @@
     <div class="glavweb-uploader-dropzone">
         <input type="hidden" name="_glavweb_uploader_request_id" value="{{ requestId }}">
 
-        <input type="hidden" name="_glavweb_uploader_sorted_array" id = "dz-sorted-array" value="">
+        <input type="hidden" name="_glavweb_uploader_sorted_array[{{ type }}]" id = "dz-sorted-array" value="">
 
         {% if useLink %}
             {% include 'GlavwebUploaderBundle:Form:view-link.html.twig' %}
@@ -18,7 +18,7 @@
 
             {# PREVIEWS #}
 
-            <script src="{{ asset('js/Sortable.js') }}"></script>
+            <script src="{{ asset('bundles/glavwebuploader/js/Sortable.js') }}"></script>
 
             <div id="previews" class="previews clearfix">
                 {% include uploadItemTpl with {'showMark': showMark} %}
@@ -39,7 +39,6 @@
 
                     var dzSortedArray = [];
                     $('.dz-preview').each(function(){
-                        console.log();
                         dzSortedArray.push($(this).data('id'));
                     });
 
@@ -62,20 +61,23 @@
     {% endblock %}
 
     {% block glavweb_uploader_dropzone_widget__stylesheet %}
-        <link rel="stylesheet" href="{{ asset('plugins/fancybox/jquery.fancybox.css') }}" type="text/css" media="screen"/>
-        <link rel="stylesheet" href="{{ asset('css/dropzone.css') }}" type="text/css" media="screen"/>
+        <link rel="stylesheet" href="{{ asset('bundles/glavwebuploader/css/dropzone.css') }}" type="text/css" media="screen"/>
 
     {% endblock %}
 
     {% block glavweb_uploader_dropzone_widget__script %}
     {# JAVASCRIPT #}
-        <script src="{{ asset('js/dropzone.min.js') }}"></script>
+        <script src="{{ asset('bundles/glavwebuploader/js/dropzone.js') }}"></script>
 
         <script type="text/javascript">
             var previewTemplate = $('#template').html();
             $('#template').remove();
 
             {% if useForm %}
+
+            var maxFiles = {{ maxFiles }};
+            var currentCountFiles = {{ countFiles }};
+
             var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
                 url: "{{ path('glavweb_uploader_upload', {context: type}) }}", // Set the url
                 thumbnailWidth: 200,
@@ -85,13 +87,14 @@
                 autoQueue: true, // Make sure the files aren't queued until manually added
                 autoProcessQueue: true,
                 previewsContainer: "#previews", // Define the container to display the previews
-                clickable: "#file-upload", // Define the element that should be used as click trigger to select files.
-                maxFilesize: 4,
-                error: function(file) {
-                    if (file.size > 4*1024*1024) {
+                clickable: ".js-file-upload", // Define the element that should be used as click trigger to select files.
+                maxFilesize: {{ maxSize }},
+                error: function(file, errorMessage) {
+                    if (file.size > {{ maxSize }}*1024*1024) {
                         $('#modalErrorFile').modal();
                         return false;
                     } else {
+
                         $('#modalErrorFormat').modal();
                         $(file.previewTemplate).addClass('hidden-upload-item');
                     }
@@ -133,6 +136,23 @@
                     });
                 }
             });
+
+            myDropzone.on("addedfile", function (file) {
+                currentCountFiles = currentCountFiles + 1;
+                changeVisibleButtonUpload();
+            });
+
+            function changeVisibleButtonUpload() {
+                if (currentCountFiles >= maxFiles) {
+                    $('.js-file-upload').addClass('js-file-upload-hide');
+                    $('.js-reached-limit-message').removeClass('js-file-upload-hide');
+                }
+                else {
+                    $('.js-file-upload').removeClass('js-file-upload-hide');
+                    $('.js-reached-limit-message').addClass('js-file-upload-hide');
+                }
+            }
+
             {% endif %}
 
             $(document).ready(function () {
@@ -205,7 +225,8 @@
 
                     $('#modalRemoveFile').modal('hide');
 
-
+                    currentCountFiles = currentCountFiles - 1;
+                    changeVisibleButtonUpload();
                 });
                 $('#modalErrorFile').modal('hide');
 
@@ -214,8 +235,6 @@
                     var fileId = preview.data('id');
 
                     $('.do-remove-file').data('file-id', fileId);
-
-
                 });
 
 

@@ -2,6 +2,9 @@
 
 namespace Glavweb\UploaderBundle\Form\Type;
 
+use Glavweb\UploaderBundle\Driver\AnnotationDriver;
+use Glavweb\UploaderBundle\Exception\MappingNotSetException;
+use Glavweb\UploaderBundle\Exception\NotFoundPropertiesInAnnotationException;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
@@ -16,6 +19,11 @@ use Glavweb\UploaderBundle\Helper\MediaHelper;
 class DropzoneType extends AbstractType
 {
     /**
+     * @var array
+     */
+    protected $config;
+
+    /**
      * @var \Symfony\Bundle\FrameworkBundle\Routing\Router
      */
     protected $router;
@@ -26,47 +34,76 @@ class DropzoneType extends AbstractType
     protected $mediaHelper;
 
     /**
-     * @param Router     $router
-     * @param MediaHelper $mediaHelper
+     * @var \Glavweb\UploaderBundle\Driver\AnnotationDriver;
      */
-    public function __construct(Router $router, MediaHelper $mediaHelper)
+    protected $driverAnnotation;
+
+    /**
+     * @param Router $router
+     * @param MediaHelper $mediaHelper
+     * @param array $config
+     * @param AnnotationDriver $driverAnnotation
+     */
+    public function __construct(Router $router, MediaHelper $mediaHelper, array $config, AnnotationDriver $driverAnnotation)
     {
-        $this->router     = $router;
-        $this->mediaHelper = $mediaHelper;
+        $this->router           = $router;
+        $this->mediaHelper      = $mediaHelper;
+        $this->config           = $config;
+        $this->driverAnnotation = $driverAnnotation;
     }
 
     /**
-     * @param FormView      $view
+     * @param FormView $view
      * @param FormInterface $form
-     * @param array         $options
+     * @param array $options
+     * @throws MappingNotSetException
+     * @throws NotFoundPropertiesInAnnotationException
+     * @throws \Glavweb\UploaderBundle\Exception\ClassNotUploadableException
+     * @throws \Glavweb\UploaderBundle\Exception\ValueEmptyException
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        if (!isset($options['files'])) {
-            $options['files'] = array();
-        }
+        $entity = $form->getParent()->getData();
+        $fieldName = $form->getConfig()->getName();
 
         if (!isset($options['requestId'])) {
             $options['requestId'] = uniqid();
         }
 
-        $files = $this->prepareFiles($options['files']);
+        $dataPropertyAnnotation = $this->driverAnnotation->getDataByFieldName(new \ReflectionClass($entity), $fieldName);
+
+        if (!$dataPropertyAnnotation) {
+            throw new NotFoundPropertiesInAnnotationException();
+        }
+
+        $files = $entity->$dataPropertyAnnotation['nameGetFunction']();
+        $context = $dataPropertyAnnotation['mapping'];
+
+        if (!$context) {
+            throw new MappingNotSetException();
+        }
+
+        $config = $this->getConfigByContext($context);
+        $maxFiles = $config['max_files'];
 
         $view->vars['uploadedFilesTpl'] = $options['uploadedFilesTpl'];
         $view->vars['uploadItemTpl']    = $options['uploadItemTpl'];
         $view->vars['viewFormTpl']      = $options['viewFormTpl'];
-        $view->vars['type']             = $options['type'];
+        $view->vars['type']             = $context;
         $view->vars['previewImg']       = $options['previewImg'];
         $view->vars['useLink']          = $options['useLink'];
         $view->vars['useForm']          = $options['useForm'];
         $view->vars['showMark']         = $options['showMark'];
         $view->vars['showUploadButton'] = $options['showUploadButton'];
         $view->vars['files']            = $files;
+        $view->vars['countFiles']       = $files->count();
         $view->vars['showLabel']        = $options['showLabel'];
         $view->vars['requestId']        = $options['requestId'];
-        $view->vars['uploadDir']        = $this->mediaHelper->getUploadDirectoryUrl($options['type']);
-        $view->vars['deleteUrl']        = $this->router->generate('glavweb_uploader_delete', array('context' => $options['type']));
-        $view->vars['renameUrl']        = $this->router->generate('glavweb_uploader_rename', array('context' => $options['type']));
+        $view->vars['uploadDir']        = $this->mediaHelper->getUploadDirectoryUrl($context);
+        $view->vars['deleteUrl']        = $this->router->generate('glavweb_uploader_delete', array('context' => $context));
+        $view->vars['renameUrl']        = $this->router->generate('glavweb_uploader_rename', array('context' => $context));
+        $view->vars['maxFiles']         = $maxFiles;
+        $view->vars['maxSize']          = $config['max_size'];
     }
 
     /**
@@ -75,14 +112,12 @@ class DropzoneType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'files'                         => array(),
             'previewImg'                    => null,
             'requestId'                     => null,
             'useLink'                       => true,
             'useForm'                       => true,
             'showMark'                      => true,
             'showUploadButton'              => true,
-            'type'                          => null,
             'uploadedFilesTpl'              => 'GlavwebUploaderBundle:Form:base_upload_item_tpl.html.twig',
             'uploadItemTpl'                 => 'GlavwebUploaderBundle:Form:base_uploaded_files.html.twig',
             'viewFormTpl'                   => 'GlavwebUploaderBundle:Form:view-form.html.twig',
@@ -124,5 +159,14 @@ class DropzoneType extends AbstractType
 //        }
 
         return $files;
+    }
+
+    /**
+     * @param string $context
+     * @return array
+     */
+    protected function getConfigByContext($context)
+    {
+        return $this->config['mappings'][$context];
     }
 }
