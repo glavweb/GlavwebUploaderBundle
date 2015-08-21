@@ -91,11 +91,6 @@
             <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>
 
-        <service id="glavweb_uploader.validation_listener.max_files" class="Glavweb\UploaderBundle\EventListener\MaxFilesValidationListener">
-            <argument type="service" id="doctrine" />
-            <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
-        </service>
-
         <service id="glavweb_uploader.data_driver.annotation" class="Glavweb\UploaderBundle\Driver\AnnotationDriver">
             <argument type="service" id="annotation_reader" />
         </service>
