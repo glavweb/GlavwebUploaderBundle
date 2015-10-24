@@ -1,7 +1,7 @@
 Installation
 ============
 
-## Get the bundle using composer
+### Get the bundle using composer
 
 Add GlavwebUploaderBundle by running this command from the terminal at the root of
 your Symfony project:
@@ -11,7 +11,7 @@ php composer.phar require glavweb/uploader-bundle
 ```
 
 
-## Enable the bundle
+### Enable the bundle
 
 To start using the bundle, register the bundle in your application's kernel class:
 
@@ -36,12 +36,12 @@ This bundle was designed to just work out of the box. The only thing you have to
 
 glavweb_uploader:
     mappings:
-        gallery:
+        entity_images:
             providers :
                 - glavweb_uploader.provider.image
             use_orphanage: true
-            upload_directory:     %kernel.root_dir%/../web/uploads/gallery
-            upload_directory_url: uploads/gallery
+            upload_directory:     %kernel.root_dir%/../web/uploads/entity_images
+            upload_directory_url: uploads/entity_images
             max_size: 4194304 # 4Mb
             allowed_mimetypes: [image/jpeg, image/gif, image/png]
             
@@ -59,4 +59,56 @@ To enable the dynamic routes, add the following to your routing configuration fi
 glavweb_uploader:
     resource: "@GlavwebUploaderBundle/Resources/config/routing.xml"
     prefix:   /
+```
+
+Basic Usage
+===========
+
+1. Added annotations for the entity which needs to support "GlavwebUploadable".
+"@Glavweb\Uploadable" before you can define an entity class:
+
+```
+
+/**
+ * Entity
+ * 
+ * @Glavweb\Uploadable
+ */
+class Entity
+{
+}
+```
+
+and another annotation "@Glavweb\UploadableField" before defining the properties of a many-to-many:
+
+```
+/**
+ * @var \Doctrine\Common\Collections\Collection
+ * 
+ * @ORM\ManyToMany(targetEntity="Glavweb\UploaderBundle\Entity\Media", inversedBy="entities", orphanRemoval=true)
+ * @ORM\OrderBy({"position" = "ASC"})
+ * @Glavweb\UploadableField(mapping="entity_images", nameAddFunction="addImage", nameGetFunction="getImages")
+ */
+private $images;
+```
+
+2. Add the field "glavweb_uploader_dropzone" in the form:
+
+```
+$builder
+    ->add('images', 'glavweb_uploader_dropzone', array(
+        'mapped' => false
+    ))
+;
+```
+
+3. While saving form running method "handleUpload()":
+
+```
+$uploaderManager = $this->get('glavweb_uploader.uploader_manager');
+if ($form->isValid()) {
+    $uploaderManager->handleUpload($entity);
+
+    ...
+}
 ```
