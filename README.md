@@ -51,6 +51,18 @@ glavweb_uploader:
             
 ```
 
+To add resources to a twig confinuration.
+
+```
+twig:
+    ...
+    form:
+        resources:
+            ...
+            - 'GlavwebUploaderBundle:Form:fields.html.twig'
+
+```
+
 To enable the dynamic routes, add the following to your routing configuration file.
 
 ```yaml
@@ -61,6 +73,12 @@ glavweb_uploader:
     prefix:   /
 ```
 
+### Execute "assets:install".
+
+```
+php app/console assets:install
+```
+
 Basic Usage
 ===========
 
@@ -68,6 +86,7 @@ Basic Usage
 "@Glavweb\Uploadable" before you can define an entity class:
 
 ```
+use Glavweb\UploaderBundle\Mapping\Annotation as Glavweb;
 
 /**
  * Entity
@@ -79,7 +98,7 @@ class Entity
 }
 ```
 
-and another annotation "@Glavweb\UploadableField" before defining the properties of a many-to-many:
+And another annotation "@Glavweb\UploadableField" before defining the properties of a many-to-many:
 
 ```
 /**
@@ -90,6 +109,19 @@ and another annotation "@Glavweb\UploadableField" before defining the properties
  * @Glavweb\UploadableField(mapping="entity_images", nameAddFunction="addImage", nameGetFunction="getImages")
  */
 private $images;
+```
+
+End add default collection in constructor:
+
+```
+/**
+ * Constructor
+ */
+public function __construct()
+{
+    ...
+    $this->images = new \Doctrine\Common\Collections\ArrayCollection();
+}
 ```
 
 2. Add the field "glavweb_uploader_dropzone" in the form:
