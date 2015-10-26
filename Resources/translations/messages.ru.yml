@@ -3,4 +3,6 @@ dropzone:
     mark_for_deletion: Загруженные, пометить на удаление
     modal_title_error_size: Большой размер файла
     modal_error_size: Размер Файла превышает максимальное допустимое значение: 4 МБ.
+    modal_title_error_format: Неверный формат
+    modal_error_format: Неверный формат файла.
     modal_close: Закрыть
