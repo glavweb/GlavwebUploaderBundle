@@ -1,3 +1,6 @@
 dropzone:
     button_add_file: Добавить файл
     mark_for_deletion: Загруженные, пометить на удаление
+    modal_title_error_size: Большой размер файла
+    modal_error_size: Размер Файла превышает максимальное допустимое значение: 4 МБ.
+    modal_close: Закрыть

@@ -12,20 +12,19 @@
             {# MODAL:HEADER #}
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="modalRemoveFileLabel">Большой размер файла</h4>
+                <h4 class="modal-title" id="modalRemoveFileLabel">{% trans %}dropzone.modal_title_error_size{% endtrans %}</h4>
             </div>
             {# //MODAL:HEADER #}
 
             {# MODAL:BODY #}
             <div class="modal-body">
-                <p>Размер Файла превышает максимальное допустимое значение: 4 МБ.</p>
-                <p>Для того, чтобы загрузить данный файл, уменьшите размер до 4 мегабайт.</p>
+                <p>{% trans %}dropzone.modal_error_size{% endtrans %}</p>
             </div>
             {# MODAL:BODY #}
 
             {# MODAL:FOOTER #}
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}dropzone.modal_close{% endtrans %}</button>
             </div>
             {# MODAL:FOOTER #}
 
