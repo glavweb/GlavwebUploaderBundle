@@ -1,4 +1,86 @@
 {% block glavweb_uploader_dropzone_widget %}
+    
+        <style>
+        .glavweb {
+            height: 170px;
+            position: relative;
+        }
+        .glavweb-outer {
+            width: 200px;
+            height: 150px;
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .glavweb-inner {
+            height: 500%;
+            width: 100%;
+            position: absolute;
+            top: -200%;
+        }
+
+        .glavweb-img {
+            display: block;
+            position: absolute !important;
+            width: 100%;
+            height: auto;
+            left: 0; top: 0; bottom: 0; right: 0;
+            margin: auto;
+        }
+
+        .dz-details__img {
+            position: relative;
+        }
+         .dz-preview {
+            padding: 0 !important;
+             width: 200px !important;
+             display: block;
+             float: left;
+             margin-right: 30px;
+        }
+
+         .dz-progress {
+             display: none !important;
+         }
+        .dz-button._remove {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .dz-rename.btn,
+        .dz-rename.btn:hover,
+        .dz-rename.btn:focus {
+            background: #fff;
+            box-shadow: none;
+            border: none;
+        }
+
+        .dz-filename-wr {
+            display: block;
+            position: relative;
+            z-index: 1;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .dz-button._rename {
+            position: absolute;
+            top: -3px;
+            right: 0;
+            z-index: 3;
+        }
+
+        .js-file-upload-hide {
+            display: none;
+        }
+
+        .js-reached-limit-message {
+            color: #ff0000;
+        }
+
+    </style>
+    
     {# GLAVWEB:UPLOADER-DROPZONE #}
 
     <div class="glavweb-uploader-dropzone">
@@ -21,8 +103,8 @@
             <script src="{{ asset('bundles/glavwebuploader/js/Sortable.js') }}"></script>
 
             <div id="previews" class="previews clearfix">
-                {% include uploadItemTpl with {'showMark': showMark} %}
-                {% include uploadedFilesTpl with {'files': files} %}
+              {#  {% include uploadItemTpl with {'showMark': showMark} %} #}
+               {% include uploadedFilesTpl with {'files': files} %} 
             </div>
 
             <script>
@@ -58,6 +140,7 @@
         {% include 'GlavwebUploaderBundle:Form:view-modal-rename.html.twig' %}
         {% include 'GlavwebUploaderBundle:Form:view-modal-error.html.twig' %}
         {% include 'GlavwebUploaderBundle:Form:view-modal-error-format.html.twig' %}
+        {% include 'GlavwebUploaderBundle:Form:view-modal-error-default.html.twig' %}
     {% endblock %}
 
     {% block glavweb_uploader_dropzone_widget__stylesheet %}
@@ -89,13 +172,24 @@
                 previewsContainer: "#previews", // Define the container to display the previews
                 clickable: ".js-file-upload", // Define the element that should be used as click trigger to select files.
                 maxFilesize: {{ maxSize }},
-                error: function(file, errorMessage) {
+                maxFiles: {{ maxFiles }},
+                acceptedFiles: ".png, .jpg",
+                error: function(file, errorMessage) {                    
+                    var message = 'При загрузке произошла ошибка.';
+
+                    if (typeof errorMessage == "string" && errorMessage.length < 200) {
+                        var message = errorMessage;
+                    }
+        
                     if (file.size > {{ maxSize }}*1024*1024) {
-                        $('#modalErrorFile').modal();
+                        $('#modalErrorDefault ').
+                        $('#modalErrorDefault').modal();
                         return false;
                     } else {
-
-                        $('#modalErrorFormat').modal();
+                        $('#modalErrorDefault #modalRemoveDefaultHeadLabel').text('');
+                        $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text(message);
+                        
+                        $('#modalErrorDefault').modal();
                         $(file.previewTemplate).addClass('hidden-upload-item');
                     }
                 },
@@ -105,17 +199,44 @@
                         $(file.previewTemplate).addClass('hidden-upload-item');
                         return false;
                     }
-                }
+                },
+                dictDefaultMessage: "Файлы были загружены",
+                dictFallbackMessage: "Ваш браузер не поддерживает drag'n'drop загрузку.",
+                dictFileTooBig: "Размер файла слишком большой.",
+                dictInvalidFileType: "Вы не можете загружать файлы данного формата.",
+                dictResponseError: "Скорее всего у вас включен блокировщик рекламы. Отключите его для данного сайта.",
+                dictCancelUpload: "Отмена загрузки",
+                dictCancelUploadConfirmation: "Вы действительно хотите отменить загрузку?",
+                dictRemoveFile: "Удаление файла",
+                dictRemoveFileConfirmation: null,
+                dictMaxFilesExceeded: "Вы не можете загрузить больше файлов.",
             });
 
+            {% for media in files %} 
+                {% set imgSrc = media|glavweb_uploader_thumbnail %}    
+                addFileToMyDropzone("{{ media.name }}", {{ media.id }}, "{{ imgSrc }}");                       
+            {% endfor %} 
 
+            function addFileToMyDropzone(mediaName, mediaId, mediaSrc) {         
+                var mockFile = { name: mediaName, size: 0, accepted: true};
+                myDropzone.emit("addedfile", mockFile);
+                myDropzone.emit("thumbnail", mockFile, mediaSrc);
+
+                $(mockFile.previewTemplate).attr('data-id', mediaId);
+                $(mockFile.previewTemplate).attr('data-src', mediaSrc);
+                $(mockFile.previewTemplate).attr('id', 'dz-preview-'+mediaId); 
+                 
+                mockFile.response = {id: mediaId, contentPath: mediaSrc}
+                                
+                myDropzone.files.push(mockFile);
+            }
+            
             myDropzone.on("sending", function (file, xhr, formData) {
                 $('.js-article-preloader').removeClass('hidden');
                 formData.append('_glavweb_uploader_request_id', '{{ requestId }}');
             });
 
-
-            myDropzone.on("success", function (file, response) {
+            myDropzone.on("success", function (file, response) {                
                 file.response = response;
                 $(file.previewTemplate).attr('data-id', response.id);
                 $(file.previewTemplate).attr('data-src', response.contentPath);
@@ -125,7 +246,7 @@
 
             });
 
-            myDropzone.on("removedfile", function (file) {
+            myDropzone.on("removedfile", function (file) {       
                 var id = file.response.id;
 
                 if (id !== undefined) {
@@ -135,32 +256,23 @@
                         request_id: "{{ requestId }}"
                     });
                 }
+                
+                currentCountFiles = currentCountFiles - 1;
+                formSortedArray();                
             });
 
             myDropzone.on("addedfile", function (file) {
                 currentCountFiles = currentCountFiles + 1;
-                changeVisibleButtonUpload();
             });
-
-            function changeVisibleButtonUpload() {
-                if (currentCountFiles >= maxFiles) {
-                    $('.js-file-upload').addClass('js-file-upload-hide');
-                    $('.js-reached-limit-message').removeClass('js-file-upload-hide');
-                }
-                else {
-                    $('.js-file-upload').removeClass('js-file-upload-hide');
-                    $('.js-reached-limit-message').addClass('js-file-upload-hide');
-                }
-            }
 
             {% endif %}
 
             $(document).ready(function () {
-
                 // rename
                 $('#previews').on('click', '.dz-rename', function () {
                     var preview = $(this).closest('.dz-preview');
                     var fileId = preview.data('id');
+                                        
                     var name = preview.find('.dz-filename').text().trim();
                     var description = preview.find('.dz-description').text().trim();
 
@@ -196,50 +308,8 @@
                     $('#modalRenameFile').modal('hide');
                 });
 
-                $('#previews').on('click', '.dz-remove', function () {
-                    var preview = $(this).closest('.dz-preview');
-                    var fileId = preview.data('id');
-
-                    $('.do-remove-file').data('file-id', fileId);
-
-                    $('#modalRemoveFile').modal();
-                });
-
-                $('.do-remove-file').click(function () {
-                    var button = $(this);
-                    var fileId = button.data('file-id');
-
-                    if (fileId) {
-                        url = "{{ deleteUrl }}";
-                        $.post(url, {
-                            id: fileId,
-                            request_id: "{{ requestId }}"
-                        }, function (response) {
-                            if (response.success) {
-                                var preview = $('#dz-preview-' + fileId);
-                                preview.remove();
-                                formSortedArray();
-                            }
-                        });
-                    }
-
-                    $('#modalRemoveFile').modal('hide');
-
-                    currentCountFiles = currentCountFiles - 1;
-                    changeVisibleButtonUpload();
-                });
-                $('#modalErrorFile').modal('hide');
-
-                $('#previews').on('click', '.dz-remove', function () {
-                    var preview = $(this).closest('.dz-preview');
-                    var fileId = preview.data('id');
-
-                    $('.do-remove-file').data('file-id', fileId);
-                });
-
-
                 {% if useLink %}
-                $('.uploadlink-button').click(function () {
+                $('.uploadlink-button').click(function () {                   
                     var value = $('.uploadlink').val();
                     var button = $('.uploadlink-button');
                     var uploadDir = '{{ uploadDir }}';

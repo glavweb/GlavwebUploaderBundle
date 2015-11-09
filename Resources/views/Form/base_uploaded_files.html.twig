@@ -122,7 +122,7 @@
                                                 {% block glavweb_uploaded_files_details_remove %}
 
                                                     <div class="dz-button _remove">
-                                                        <button class="dz-remove btn btn-default" type="button">
+                                                        <button class="dz-remove btn btn-default" type="button" data-dz-remove>
                                                             <span class="glyphicon glyphicon-remove"></span>
                                                         </button>
                                                     </div>
@@ -139,7 +139,7 @@
 
                                                 <div class="dz-filename-wr">
                                                     <div class="dz-filename">
-                                                        <span data-dz-name>{{ media.name }}</span>
+                                                    <span data-dz-name>{{ media.name }}</span>
                                                     </div>
                                                     <div class="dz-description" style="display: none;"><span>{{ media.description }}</span></div>
 
