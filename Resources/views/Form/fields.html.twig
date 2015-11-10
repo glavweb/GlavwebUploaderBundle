@@ -159,7 +159,6 @@
             {% if useForm %}
 
             var maxFiles = {{ maxFiles }};
-            var currentCountFiles = {{ countFiles }};
 
             var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
                 url: "{{ path('glavweb_uploader_upload', {context: type}) }}", // Set the url
@@ -174,13 +173,14 @@
                 maxFilesize: {{ maxSize }},
                 maxFiles: {{ maxFiles }},
                 acceptedFiles: ".png, .jpg",
-                error: function(file, errorMessage) {                    
-                    var message = 'При загрузке произошла ошибка.';
+                error: function(file, errorMessage) {     
+                    var message = errorMessage;
 
-                    if (typeof errorMessage == "string" && errorMessage.length < 200) {
-                        var message = errorMessage;
+                    if (typeof errorMessage == "string" && errorMessage.length > 200) {
+                        message = 'При загрузке произошла ошибка.';
+                        this.files.pop();                        
                     }
-        
+                    
                     if (file.size > {{ maxSize }}*1024*1024) {
                         $('#modalErrorDefault ').
                         $('#modalErrorDefault').modal();
@@ -257,12 +257,7 @@
                     });
                 }
                 
-                currentCountFiles = currentCountFiles - 1;
                 formSortedArray();                
-            });
-
-            myDropzone.on("addedfile", function (file) {
-                currentCountFiles = currentCountFiles + 1;
             });
 
             {% endif %}
