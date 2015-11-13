@@ -1,5 +1,5 @@
 {% block glavweb_uploader_dropzone_widget %}
-    
+
         <style>
         .glavweb {
             height: 170px;
@@ -80,17 +80,13 @@
         }
 
     </style>
-    
+
     {# GLAVWEB:UPLOADER-DROPZONE #}
 
     <div class="glavweb-uploader-dropzone">
         <input type="hidden" name="_glavweb_uploader_request_id" value="{{ requestId }}">
 
         <input type="hidden" name="_glavweb_uploader_sorted_array[{{ type }}]" id = "dz-sorted-array" value="">
-
-        {% if useLink %}
-            {% include 'GlavwebUploaderBundle:Form:view-link.html.twig' %}
-        {% endif %}
 
         {# DZ #}
         <div class="dz ">
@@ -131,6 +127,10 @@
             {# //PREVIEWS #}
         </div>
         {# //DZ #}
+
+        {% if useLink %}
+            {% include 'GlavwebUploaderBundle:Form:view-link.html.twig' %}
+        {% endif %}
 
     </div>
     {# //GLAVWEB:UPLOADER-DROPZONE #}
