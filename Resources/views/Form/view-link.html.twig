@@ -1,16 +1,16 @@
-{# GLAVWEB:UPLOADER-DROPZONE--LINK #}
-<div  id="actions" class="uploader-dropzone--link">
-
-    {# GLAVWEB:UPLOADER-DROPZONE:GROUP #}
-    <div class="uploader-dropzone__group">
-
-        <div class="input-group">
-            <input type="text" class="form-control uploadlink uploader-dropzone__input" placeholder="Вставьте ссылку" name="uploadlink"/>
-            <span class="btn btn-default input-group-addon uploadlink-button" data-loading-text="Загрузка...">Закачать</span>
+<div class="uploader-link" id="uploader-link">
+    <div class="uploader-link__label">
+        <div class="uploader-link-label">
+            URL изображения
         </div>
-
     </div>
-    {# //GLAVWEB:UPLOADER-DROPZONE:GROUP #}
-
+    <div class="uploader-link__control">
+        <div class="input-group">
+            <input type="text" class="js-uploader-link-control form-control uploader-link-control" placeholder="Вставьте ссылку" name="uploadlink"/>
+            <span class="btn btn-default input-group-addon js-uploadlink-button"
+                  data-loading-text="Загрузка...">
+                Закачать
+            </span>
+        </div>
+    </div>
 </div>
-{# GLAVWEB:UPLOADER-DROPZONE--LINK #}

@@ -89,12 +89,16 @@ class DropzoneType extends AbstractType
         $view->vars['uploadedFilesTpl'] = $options['uploadedFilesTpl'];
         $view->vars['uploadItemTpl']    = $options['uploadItemTpl'];
         $view->vars['viewFormTpl']      = $options['viewFormTpl'];
+        $view->vars['viewLinkTpl']      = $options['viewLinkTpl'];
         $view->vars['type']             = $context;
         $view->vars['previewImg']       = $options['previewImg'];
         $view->vars['useLink']          = $options['useLink'];
         $view->vars['useForm']          = $options['useForm'];
         $view->vars['showMark']         = $options['showMark'];
+        $view->vars['thumbnailWidth']   = $options['thumbnailWidth' ];
+        $view->vars['thumbnailHeight']  = $options['thumbnailHeight'];
         $view->vars['showUploadButton'] = $options['showUploadButton'];
+        $view->vars['uploaderClass']    = $options['uploaderClass'];
         $view->vars['files']            = $files;
         $view->vars['countFiles']       = $files->count();
         $view->vars['showLabel']        = $options['showLabel'];
@@ -112,16 +116,20 @@ class DropzoneType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'previewImg'                    => null,
-            'requestId'                     => null,
-            'useLink'                       => true,
-            'useForm'                       => true,
-            'showMark'                      => true,
-            'showUploadButton'              => true,
-            'uploadedFilesTpl'              => 'GlavwebUploaderBundle:Form:base_upload_item_tpl.html.twig',
-            'uploadItemTpl'                 => 'GlavwebUploaderBundle:Form:base_uploaded_files.html.twig',
-            'viewFormTpl'                   => 'GlavwebUploaderBundle:Form:view-form.html.twig',
-            'showLabel'                     => true,
+            'previewImg'         => null,
+            'requestId'          => null,
+            'useLink'            => true,
+            'useForm'            => true,
+            'showMark'           => true,
+            'showUploadButton'   => true,
+            'uploadedFilesTpl'   => 'GlavwebUploaderBundle:Form:base_upload_item_tpl.html.twig',
+            'uploadItemTpl'      => 'GlavwebUploaderBundle:Form:base_uploaded_files.html.twig',
+            'viewFormTpl'        => 'GlavwebUploaderBundle:Form:view-form.html.twig',
+            'viewLinkTpl'        => 'GlavwebUploaderBundle:Form:view-link.html.twig',
+            'showLabel'          => true,
+            'thumbnailWidth'     => 200,
+            'thumbnailHeight'    => 150,
+            'uploaderClass'      => '',
         ));
     }
 

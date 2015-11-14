@@ -1,13 +1,13 @@
 {% block glavweb_uploader_dropzone_widget %}
-
-        <style>
+    <style>
+        {% if thumbnailWidth %}
         .glavweb {
-            height: 170px;
+            height: {{ thumbnailHeight  }}px;
             position: relative;
         }
         .glavweb-outer {
-            width: 200px;
-            height: 150px;
+            width:{{ thumbnailWidth  }}px;
+            height:{{ thumbnailHeight  }}px;
             position: absolute;
             overflow: hidden;
         }
@@ -27,13 +27,15 @@
             left: 0; top: 0; bottom: 0; right: 0;
             margin: auto;
         }
+        {% endif %}
 
         .dz-details__img {
             position: relative;
         }
          .dz-preview {
             padding: 0 !important;
-             width: 200px !important;
+             width: {% if thumbnailWidth %}{{ thumbnailWidth  }}px {% else %}100%{% endif %} !important;
+
              display: block;
              float: left;
              margin-right: 30px;
@@ -78,29 +80,26 @@
         .js-reached-limit-message {
             color: #ff0000;
         }
-
     </style>
 
-    {# GLAVWEB:UPLOADER-DROPZONE #}
-
-    <div class="glavweb-uploader-dropzone">
+    <div class="glavweb-uploader-dropzone {{ uploaderClass }}">
         <input type="hidden" name="_glavweb_uploader_request_id" value="{{ requestId }}">
-
         <input type="hidden" name="_glavweb_uploader_sorted_array[{{ type }}]" id = "dz-sorted-array" value="">
 
-        {# DZ #}
         <div class="dz ">
+
             {% if useForm %}
                 {% include viewFormTpl %}
             {% endif %}
 
-            {# PREVIEWS #}
+            {% if useLink %}
+                {% include viewLinkTpl %}
+            {% endif %}
 
             <script src="{{ asset('bundles/glavwebuploader/js/Sortable.js') }}"></script>
 
             <div id="previews" class="previews clearfix">
-              {#  {% include uploadItemTpl with {'showMark': showMark} %} #}
-               {% include uploadedFilesTpl with {'files': files} %} 
+               {% include uploadedFilesTpl with {'files': files} %}
             </div>
 
             <script>
@@ -122,18 +121,9 @@
 
                     $('#dz-sorted-array').val(dzSortedArray.join(','));
                 }
-
             </script>
-            {# //PREVIEWS #}
         </div>
-        {# //DZ #}
-
-        {% if useLink %}
-            {% include 'GlavwebUploaderBundle:Form:view-link.html.twig' %}
-        {% endif %}
-
     </div>
-    {# //GLAVWEB:UPLOADER-DROPZONE #}
 
     {% block glavweb_uploader_dropzone_widget__madal_windows %}
         {% include 'GlavwebUploaderBundle:Form:view-modal-remove.html.twig' %}
@@ -149,12 +139,21 @@
     {% endblock %}
 
     {% block glavweb_uploader_dropzone_widget__script %}
-    {# JAVASCRIPT #}
         <script src="{{ asset('bundles/glavwebuploader/js/dropzone.js') }}"></script>
 
         <script type="text/javascript">
+
             var previewTemplate = $('#template').html();
             $('#template').remove();
+
+            function validURL(str) {
+                var regex = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i;
+                if(!regex .test(str)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
 
             {% if useForm %}
 
@@ -162,8 +161,8 @@
 
             var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
                 url: "{{ path('glavweb_uploader_upload', {context: type}) }}", // Set the url
-                thumbnailWidth: 200,
-                thumbnailHeight: 150,
+                thumbnailWidth: {% if thumbnailWidth %}{{ thumbnailWidth }}{% else %} null{% endif %},
+                thumbnailHeight: {% if thumbnailHeight %}{{ thumbnailHeight }}{% else %} null{% endif %},
                 parallelUploads: 20,
                 previewTemplate: previewTemplate,
                 autoQueue: true, // Make sure the files aren't queued until manually added
@@ -173,14 +172,14 @@
                 maxFilesize: {{ maxSize }},
                 maxFiles: {{ maxFiles }},
                 acceptedFiles: ".png, .jpg",
-                error: function(file, errorMessage) {     
+                error: function(file, errorMessage) {
                     var message = errorMessage;
 
                     if (typeof errorMessage == "string" && errorMessage.length > 200) {
                         message = 'При загрузке произошла ошибка.';
-                        this.files.pop();                        
+                        this.files.pop();
                     }
-                    
+
                     if (file.size > {{ maxSize }}*1024*1024) {
                         $('#modalErrorDefault ').
                         $('#modalErrorDefault').modal();
@@ -188,7 +187,7 @@
                     } else {
                         $('#modalErrorDefault #modalRemoveDefaultHeadLabel').text('');
                         $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text(message);
-                        
+
                         $('#modalErrorDefault').modal();
                         $(file.previewTemplate).addClass('hidden-upload-item');
                     }
@@ -212,31 +211,31 @@
                 dictMaxFilesExceeded: "Вы не можете загрузить больше файлов.",
             });
 
-            {% for media in files %} 
-                {% set imgSrc = media|glavweb_uploader_thumbnail %}    
-                addFileToMyDropzone("{{ media.name }}", {{ media.id }}, "{{ imgSrc }}");                       
-            {% endfor %} 
+            {% for media in files %}
+                {% set imgSrc = media|glavweb_uploader_thumbnail %}
+                addFileToMyDropzone("{{ media.name }}", {{ media.id }}, "{{ imgSrc }}");
+            {% endfor %}
 
-            function addFileToMyDropzone(mediaName, mediaId, mediaSrc) {         
+            function addFileToMyDropzone(mediaName, mediaId, mediaSrc) {
                 var mockFile = { name: mediaName, size: 0, accepted: true};
                 myDropzone.emit("addedfile", mockFile);
                 myDropzone.emit("thumbnail", mockFile, mediaSrc);
 
                 $(mockFile.previewTemplate).attr('data-id', mediaId);
                 $(mockFile.previewTemplate).attr('data-src', mediaSrc);
-                $(mockFile.previewTemplate).attr('id', 'dz-preview-'+mediaId); 
-                 
+                $(mockFile.previewTemplate).attr('id', 'dz-preview-'+mediaId);
+
                 mockFile.response = {id: mediaId, contentPath: mediaSrc}
-                                
+
                 myDropzone.files.push(mockFile);
             }
-            
+
             myDropzone.on("sending", function (file, xhr, formData) {
                 $('.js-article-preloader').removeClass('hidden');
                 formData.append('_glavweb_uploader_request_id', '{{ requestId }}');
             });
 
-            myDropzone.on("success", function (file, response) {                
+            myDropzone.on("success", function (file, response) {
                 file.response = response;
                 $(file.previewTemplate).attr('data-id', response.id);
                 $(file.previewTemplate).attr('data-src', response.contentPath);
@@ -246,7 +245,7 @@
 
             });
 
-            myDropzone.on("removedfile", function (file) {       
+            myDropzone.on("removedfile", function (file) {
                 var id = file.response.id;
 
                 if (id !== undefined) {
@@ -256,8 +255,8 @@
                         request_id: "{{ requestId }}"
                     });
                 }
-                
-                formSortedArray();                
+
+                formSortedArray();
             });
 
             {% endif %}
@@ -267,7 +266,7 @@
                 $('#previews').on('click', '.dz-rename', function () {
                     var preview = $(this).closest('.dz-preview');
                     var fileId = preview.data('id');
-                                        
+
                     var name = preview.find('.dz-filename').text().trim();
                     var description = preview.find('.dz-description').text().trim();
 
@@ -304,61 +303,80 @@
                 });
 
                 {% if useLink %}
-                $('.uploadlink-button').click(function () {                   
-                    var value = $('.uploadlink').val();
-                    var button = $('.uploadlink-button');
+                $('.js-uploadlink-button').click(function () {
+                    var value = $('.js-uploader-link-control').val();
+                    var button = $('.js-uploadlink-button');
                     var uploadDir = '{{ uploadDir }}';
-
-                    if (value) {
-                        button.button('loading');
-                        $.ajax('{{ path('glavweb_uploader_uploadlink', {context: type}) }}', {
-                            'data': {
-                                'file_link': value,
-                                '_glavweb_uploader_request_id': '{{ requestId }}'
-                            },
-                            'dataType': 'json',
-                            // 'async': false,
-                            'complete': function (response) {
-                                var json = response.responseJSON;
-
-                                if (response.status == 200) {
-                                    $('.uploadlink').val('');
-
-                                    var fileId = json['id'];
-                                    var thumbnailPath = json['thumbnail_path'];
-                                    var name = json['name'];
-
-                                    var template = $(previewTemplate);
-
-                                    template.find('.dz-filename span').text(name);
-                                    template.find('.dz-details').parent().attr('data-id', fileId);
-                                    template.find('.dz-details').parent().attr('id', 'dz-preview-' + fileId);
-
-                                    if (thumbnailPath) {
-                                        template.find('.dz-details img').attr('alt', name);
-                                        template.find('.dz-details img').attr('src', uploadDir + '/' + thumbnailPath);
-                                    }
-
-                                    $('#previews').append(template);
-                                    $('.dz').show();
-
-                                } else if (json['error'] !== undefined) {
-                                    alert(json['error']);
-
-                                } else {
-                                    alert('При загрузке произошла ошибка.');
-                                }
-                                $("#previews").scrollTop($("#previews")[0].scrollHeight);
-                                button.button('reset');
+                    if(value) {
+                        if (  myDropzone.files.length < {{ maxFiles }}) {
+                            var loadStatus = false;
+                            var ext = value.split('.').pop().toLowerCase();
+                            if( ext.localeCompare('png') != '-1' || ext.localeCompare('jpg')!= '-1' || ext.localeCompare('jpeg')!= '-1' || ext.localeCompare('gif')!= '-1' ) {
+                                loadStatus  = true;
                             }
-                        });
+                            if ( validURL(value) && loadStatus  ) {
+
+                                button.button('loading');
+                                $.ajax('{{ path('glavweb_uploader_uploadlink', {context: type}) }}', {
+                                    'data': {
+                                        'file_link': value,
+                                        '_glavweb_uploader_request_id': '{{ requestId }}'
+                                    },
+                                    'dataType': 'json',
+                                    'complete': function (response) {
+                                        var json = response.responseJSON;
+
+                                        if (response.status == 200) {
+                                            $('.uploadlink').val('');
+
+                                            var fileId = json['id'];
+                                            var thumbnailPath = json['thumbnail_path'];
+                                            var name = json['name'];
+                                            var mediaSrc = uploadDir + '/' + thumbnailPath;
+                                            var template = $(previewTemplate);
+
+                                            var mockFile = {name: name, size: 0, accepted: true};
+                                            myDropzone.emit("addedfile", mockFile);
+                                            myDropzone.emit("thumbnail", mockFile, mediaSrc);
+
+                                            template.attr('data-id', fileId);
+                                            template.attr('data-src', mediaSrc);
+                                            template.attr('id', 'dz-preview-' + fileId);
+
+                                            template.find('.dz-filename span').text(name);
+
+                                            if (thumbnailPath) {
+                                                template.find('.dz-details img').attr('alt', name);
+                                                template.find('.dz-details img').attr('src', mediaSrc);
+                                            }
+
+                                            mockFile.response = {id: fileId, contentPath: mediaSrc}
+                                            myDropzone.files.push(mockFile);
+
+                                        } else if (json['error'] !== undefined) {
+                                            alert(json['error']);
+
+                                        } else {
+                                            alert('При загрузке произошла ошибка.');
+                                        }
+                                        $("#previews").scrollTop($("#previews")[0].scrollHeight);
+                                        button.button('reset');
+                                    }
+                                });
+                            } else {
+                                $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text('URL должен содержать ссылку на изображение.');
+                                $('#modalErrorDefault').modal();
+                            }
+                        } else {
+                            $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text('Вы не можете загрузить больше файлов.');
+                            $('#modalErrorDefault').modal();
+                        }
+
+                        $('.js-uploader-link-control').val('');
                     }
                 });
                 {% endif %}
-
             });
         </script>
-    {# //JAVASCRIPT #}
     {% endblock %}
-
 {% endblock %}

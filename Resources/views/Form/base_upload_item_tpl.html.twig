@@ -22,7 +22,9 @@
                                     <div class="glavweb">
                                         <div class="glavweb-outer">
                                             <div class="glavweb-inner">
+                                                {% block glavweb_upload_item_details_img_tag %}
                                                 <img class="glavweb-img" data-dz-thumbnail>
+                                                {% endblock %}
                                             </div>
                                         </div>
                                     </div>
@@ -102,6 +104,7 @@
                         {# //DZ-PREVIEW:DZ-ERROR-MESSAGE #}
                     {% endblock %}
 
+                    {% block glavweb_upload_item_preview_bottom %}{% endblock %}
 
                 </div>
                 {# //DZ-PREVIEW:WRAPPER #}
