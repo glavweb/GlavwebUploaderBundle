@@ -1,16 +1,20 @@
-<div class="uploader-link" id="uploader-link">
-    <div class="uploader-link__label">
-        <div class="uploader-link-label">
-            URL изображения
+<div class="product-uploader-link">
+    <div class="uploader-link" id="uploader-link">
+        <div class="uploader-link__label">
+            <div class="uploader-link-label">
+                URL изображения
+            </div>
         </div>
-    </div>
-    <div class="uploader-link__control">
-        <div class="input-group">
-            <input type="text" class="js-uploader-link-control form-control uploader-link-control" placeholder="Вставьте ссылку" name="uploadlink"/>
-            <span class="btn btn-default input-group-addon js-uploadlink-button"
-                  data-loading-text="Загрузка...">
-                Закачать
-            </span>
+        <div class="uploader-link__control">
+            <input  onblur="uploaderUploadLinkBlur()" type="text" class="js-uploader-link-control form-control uploader-link-control" placeholder="Вставьте ссылку" name="uploadlink"/>
+            <span class="js-uploadlink-button hidden" >Закачать</span>
         </div>
+        <div class="js-uploader-link-load uploader-link__load hidden">
+            <span>Загрузка.</span>
+        </div>
+        <div class="js-uploader-link-error uploader-link__error hidden">
+            <span class="uploader-link-error">URL должен содержать ссылку на изображение.</span>
+        </div>
+
     </div>
 </div>

@@ -99,6 +99,7 @@ class DropzoneType extends AbstractType
         $view->vars['thumbnailHeight']  = $options['thumbnailHeight'];
         $view->vars['showUploadButton'] = $options['showUploadButton'];
         $view->vars['uploaderClass']    = $options['uploaderClass'];
+        $view->vars['isShowErrorPopup'] = $options['isShowErrorPopup'];
         $view->vars['files']            = $files;
         $view->vars['countFiles']       = $files->count();
         $view->vars['showLabel']        = $options['showLabel'];
@@ -130,6 +131,7 @@ class DropzoneType extends AbstractType
             'thumbnailWidth'     => 200,
             'thumbnailHeight'    => 150,
             'uploaderClass'      => '',
+            'isShowErrorPopup'   => true,
         ));
     }
 

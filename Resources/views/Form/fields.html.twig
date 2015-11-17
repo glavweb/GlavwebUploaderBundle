@@ -80,6 +80,16 @@
         .js-reached-limit-message {
             color: #ff0000;
         }
+        .uploading-error {
+            margin: 20px 0;
+        }
+        .uploading-error__text {
+            color: #ff0000;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 
     <div class="glavweb-uploader-dropzone {{ uploaderClass }}">
@@ -95,6 +105,10 @@
             {% if useLink %}
                 {% include viewLinkTpl %}
             {% endif %}
+
+            <div class="js-no-uploading-error uploading-error hidden">
+                <span class="js-no-uploading-error-text uploading-error__text"></span>
+            </div>
 
             <script src="{{ asset('bundles/glavwebuploader/js/Sortable.js') }}"></script>
 
@@ -185,10 +199,15 @@
                         $('#modalErrorDefault').modal();
                         return false;
                     } else {
-                        $('#modalErrorDefault #modalRemoveDefaultHeadLabel').text('');
-                        $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text(message);
+                        {% if isShowErrorPopup %}
+                            $('#modalErrorDefault #modalRemoveDefaultHeadLabel').text('');
+                            $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text(message);
+                            $('#modalErrorDefault').modal();
+                        {% else %}
+                            $('.js-no-uploading-error').removeClass('hidden').find('.js-no-uploading-error-text').text(message);
+                        {% endif %}
 
-                        $('#modalErrorDefault').modal();
+
                         $(file.previewTemplate).addClass('hidden-upload-item');
                     }
                 },
@@ -242,7 +261,7 @@
                 $(file.previewTemplate).attr('id', 'dz-preview-' + response.id);
                 //$(file.previewTemplate).find('.dz-filename span').text('');
                 formSortedArray();
-
+                $('.js-no-uploading-error').addClass('hidden');
             });
 
             myDropzone.on("removedfile", function (file) {
@@ -257,6 +276,8 @@
                 }
 
                 formSortedArray();
+
+                $('.js-no-uploading-error').addClass('hidden');
             });
 
             {% endif %}
@@ -305,18 +326,17 @@
                 {% if useLink %}
                 $('.js-uploadlink-button').click(function () {
                     var value = $('.js-uploader-link-control').val();
+                    $('.js-uploader-link-control').val('');
                     var button = $('.js-uploadlink-button');
                     var uploadDir = '{{ uploadDir }}';
+
                     if(value) {
                         if (  myDropzone.files.length < {{ maxFiles }}) {
-                            var loadStatus = false;
-                            var ext = value.split('.').pop().toLowerCase();
-                            if( ext.localeCompare('png') != '-1' || ext.localeCompare('jpg')!= '-1' || ext.localeCompare('jpeg')!= '-1' || ext.localeCompare('gif')!= '-1' ) {
-                                loadStatus  = true;
-                            }
-                            if ( validURL(value) && loadStatus  ) {
+                            $('js-no-uploading-images-error').addClass('hidden');
+                            if ( validURL(value)  ) {
+                                $('.js-uploader-link-error').addClass('hidden');
+                                $('.js-uploader-link-load').removeClass('hidden');
 
-                                button.button('loading');
                                 $.ajax('{{ path('glavweb_uploader_uploadlink', {context: type}) }}', {
                                     'data': {
                                         'file_link': value,
@@ -327,7 +347,6 @@
                                         var json = response.responseJSON;
 
                                         if (response.status == 200) {
-                                            $('.uploadlink').val('');
 
                                             var fileId = json['id'];
                                             var thumbnailPath = json['thumbnail_path'];
@@ -353,26 +372,28 @@
                                             mockFile.response = {id: fileId, contentPath: mediaSrc}
                                             myDropzone.files.push(mockFile);
 
-                                        } else if (json['error'] !== undefined) {
-                                            alert(json['error']);
+                                            $('.js-uploader-link-control').val('');
+                                            $('.js-no-uploading-error').addClass('hidden');
 
-                                        } else {
-                                            alert('При загрузке произошла ошибка.');
+                                        } else  {
+                                            $('.js-uploader-link-control').val(value);
+                                            $('.js-uploader-link-error').removeClass('hidden');
                                         }
+
                                         $("#previews").scrollTop($("#previews")[0].scrollHeight);
-                                        button.button('reset');
+                                        $('.js-uploader-link-load').addClass('hidden');
                                     }
                                 });
-                            } else {
-                                $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text('URL должен содержать ссылку на изображение.');
-                                $('#modalErrorDefault').modal();
+
+                             } else {
+                                $('.js-uploader-link-control').val(value);
+                                $('.js-uploader-link-error').removeClass('hidden');
                             }
                         } else {
-                            $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text('Вы не можете загрузить больше файлов.');
-                            $('#modalErrorDefault').modal();
+                            $('js-no-uploading-images-error').removeClass('hidden');
                         }
-
-                        $('.js-uploader-link-control').val('');
+                    } else {
+                        $('.js-uploader-link-error').addClass('hidden');
                     }
                 });
                 {% endif %}
