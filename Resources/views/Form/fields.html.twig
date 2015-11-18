@@ -98,9 +98,11 @@
 
         <div class="dz ">
 
-            {% if useForm %}
-                {% include viewFormTpl %}
-            {% endif %}
+            <div class="js-glavweb-uploader-dropzone-main">
+                {% if useForm %}
+                    {% include viewFormTpl %}
+                {% endif %}
+            </div>
 
             {% if useLink %}
                 {% include viewLinkTpl %}
@@ -173,7 +175,7 @@
 
             var maxFiles = {{ maxFiles }};
 
-            var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+            var myDropzone = new Dropzone('.js-glavweb-uploader-dropzone-main', { // Make the whole body a dropzone
                 url: "{{ path('glavweb_uploader_upload', {context: type}) }}", // Set the url
                 thumbnailWidth: {% if thumbnailWidth %}{{ thumbnailWidth }}{% else %} null{% endif %},
                 thumbnailHeight: {% if thumbnailHeight %}{{ thumbnailHeight }}{% else %} null{% endif %},
