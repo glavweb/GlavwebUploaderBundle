@@ -196,22 +196,15 @@
                         this.files.pop();
                     }
 
-                    if (file.size > {{ maxSize }}*1024*1024) {
-                        $('#modalErrorDefault ').
+                    {% if isShowErrorPopup %}
+                        $('#modalErrorDefault #modalRemoveDefaultHeadLabel').text('');
+                        $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text(message);
                         $('#modalErrorDefault').modal();
-                        return false;
-                    } else {
-                        {% if isShowErrorPopup %}
-                            $('#modalErrorDefault #modalRemoveDefaultHeadLabel').text('');
-                            $('#modalErrorDefault #modalRemoveDefaultBodyLabel').text(message);
-                            $('#modalErrorDefault').modal();
-                        {% else %}
-                            $('.js-no-uploading-error').removeClass('hidden').find('.js-no-uploading-error-text').text(message);
-                        {% endif %}
+                    {% else %}
+                        $('.js-no-uploading-error').removeClass('hidden').find('.js-no-uploading-error-text').text(message);
+                    {% endif %}
 
-
-                        $(file.previewTemplate).addClass('hidden-upload-item');
-                    }
+                    $(file.previewTemplate).addClass('hidden-upload-item');
                 },
                 complete: function(file) {
                     $('.js-article-preloader').addClass('hidden');
