@@ -39,7 +39,6 @@
             display: block;
             float: left;
             margin-right: 30px;
-            margin-bottom: 30px;
         }
 
         .dz-progress {
@@ -193,7 +192,7 @@
                     var message = errorMessage;
 
                     if (typeof errorMessage == "string" && errorMessage.length > 200) {
-                        message = 'При загрузке произошла ошибка.';
+                        message = "{{ 'dropzone.loading_error'|trans }}";
                         this.files.pop();
                     }
 
@@ -214,16 +213,16 @@
                         return false;
                     }
                 },
-                dictDefaultMessage: "Файлы были загружены",
-                dictFallbackMessage: "Ваш браузер не поддерживает drag'n'drop загрузку.",
-                dictFileTooBig: "Размер файла слишком большой.",
-                dictInvalidFileType: "Вы не можете загружать файлы данного формата.",
-                dictResponseError: "Скорее всего у вас включен блокировщик рекламы. Отключите его для данного сайта.",
-                dictCancelUpload: "Отмена загрузки",
-                dictCancelUploadConfirmation: "Вы действительно хотите отменить загрузку?",
-                dictRemoveFile: "Удаление файла",
+                dictDefaultMessage: "{{ 'dropzone.files_uploaded'|trans }}",
+                dictFallbackMessage: "{{ 'dropzone.browser_not_support_drag_n_drop'|trans }}",
+                dictFileTooBig: "{{ 'dropzone.file_size_too_large'|trans }}",
+                dictInvalidFileType: "{{ 'dropzone.wrong_format'|trans }}",
+                dictResponseError: "{{ 'dropzone.disable_adblocker'|trans }}",
+                dictCancelUpload: "{{ 'dropzone.cancel_upload'|trans }}",
+                dictCancelUploadConfirmation: "{{ 'dropzone.cancel_upload_confirmation'|trans }}",
+                dictRemoveFile: "{{ 'dropzone.remove_file'|trans }}",
                 dictRemoveFileConfirmation: null,
-                dictMaxFilesExceeded: "Вы не можете загрузить больше файлов.",
+                dictMaxFilesExceeded: "{{ 'dropzone.max_files_exceeded'|trans }}"
             });
 
             {% for media in files %}

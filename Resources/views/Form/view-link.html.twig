@@ -2,18 +2,18 @@
     <div class="uploader-link" id="uploader-link">
         <div class="uploader-link__label">
             <div class="uploader-link-label">
-                URL изображения
+                {{ 'dropzone.image_url'|trans }}
             </div>
         </div>
         <div class="uploader-link__control">
-            <input  onblur="uploaderUploadLinkBlur()" type="text" class="js-uploader-link-control form-control uploader-link-control" placeholder="Вставьте ссылку" name="uploadlink"/>
-            <span class="js-uploadlink-button hidden" >Закачать</span>
+            <input  onblur="uploaderUploadLinkBlur()" type="text" class="js-uploader-link-control form-control uploader-link-control" placeholder="{{ 'dropzone.insert_link'|trans }}" name="uploadlink"/>
+            <span class="js-uploadlink-button hidden">{{ 'dropzone.download'|trans }}</span>
         </div>
         <div class="js-uploader-link-load uploader-link__load hidden">
-            <span>Загрузка.</span>
+            <span>{{ 'dropzone.downloading'|trans }}.</span>
         </div>
         <div class="js-uploader-link-error uploader-link__error hidden">
-            <span class="uploader-link-error">URL должен содержать ссылку на изображение.</span>
+            <span class="uploader-link-error">{{ 'dropzone.url_must_contain_link_image'|trans }}</span>
         </div>
 
     </div>

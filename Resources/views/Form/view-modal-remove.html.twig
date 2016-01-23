@@ -12,20 +12,20 @@
             {# MODAL:HEADER #}
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="modalRemoveFileLabel">Подтверждение удаления файла</h4>
+                <h4 class="modal-title" id="modalRemoveFileLabel">{{ 'dropzone.modal_file_delete_confirmation_title'|trans }}</h4>
             </div>
             {# //MODAL:HEADER #}
 
             {# MODAL:BODY #}
             <div class="modal-body">
-                Вы уверены, что хотите удалить этот файл?
+                {{ 'dropzone.modal_file_delete_confirmation_boby'|trans }}
             </div>
             {# MODAL:BODY #}
 
             {# MODAL:FOOTER #}
             <div class="modal-footer">
-                <button type="button" class="btn btn-success do-remove-file" data-file-id="0">Удалить</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success do-remove-file" data-file-id="0">{{ 'dropzone.delete'|trans }}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'dropzone.cancel'|trans }}</button>
             </div>
             {# MODAL:FOOTER #}
 

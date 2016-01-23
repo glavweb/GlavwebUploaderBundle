@@ -1,0 +1,31 @@
+dropzone:
+    button_add_file:                 Add file
+    mark_for_deletion:               Loaded, mark for deletion
+    modal_title_error_size:          Large file size
+    modal_error_size:                File size exceeds the maximum allowed value.
+    modal_title_error_format:        Invalid format
+    modal_error_format:              Invalid file format.
+    modal_close:                     Close
+    loading_error:                   An error occurred when loading.
+    files_uploaded:                  Files were uploaded
+    browser_not_support_drag_n_drop: "Your browser does not support drag'n drop uploading."
+    file_size_too_large:             File size too large.
+    wrong_format:                    You cannot download files in this format.
+    disable_adblocker:               Most likely you have enabled adblocker. Disable it for this site.
+    cancel_upload:                   Cancel download
+    cancel_upload_confirmation:      Are you sure you want to cancel the download?
+    remove_file:                     Delete a file
+    max_files_exceeded:              You can not upload more files.
+    drag_or_click_files:             Drag files here (or click)
+    reached_maximum_uploaded_files:  You have reached the maximum number of uploaded files.
+    insert_link:                     Insert link
+    image_url:                       The URL of the image
+    download:                        Download
+    downloading:                     Downloading
+    url_must_contain_link_image:     The URL must contain a link to an image.
+    modal_file_delete_confirmation_title: File removal confirmation
+    modal_file_delete_confirmation_boby: Are you sure you want to delete this file?
+    delete:                          Delete
+    cancel:                          Cancel
+    edit:                            Edit
+    save:                            Save
