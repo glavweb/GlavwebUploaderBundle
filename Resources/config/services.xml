@@ -44,6 +44,7 @@
             <argument type="service" id="glavweb_uploader.media_helper" />
             <argument>%glavweb_uploader.config%</argument>
             <argument type="service" id="glavweb_uploader.data_driver.annotation" />
+            <argument type="service" id="translator" />
             <tag name="form.type" alias="glavweb_uploader_dropzone" />
         </service>
 
