@@ -9,9 +9,9 @@
 
                     {% block glavweb_uploader_preview_image %}
                         <div class="dz-image gwu-preview__image">
-                            <div class="gwu-preview-image">
-                                <div class="gwu-preview-image__box">
-                                    <img class="glavweb-img" data-dz-thumbnail>
+                            <div class="gwu-table">
+                                <div class="gwu-table-cell">
+                                    <img class="gwu-preview-img" data-dz-thumbnail  alt=""/>
                                 </div>
                             </div>
                         </div>
@@ -19,7 +19,7 @@
 
                     {% block glavweb_uploader_preview_details %}
                         {% if previewShow.isDetails %}
-                        <div class="dz-details gwu-preview-details">
+                        <div class="dz-details gwu-preview__details">
                             {% if previewShow.isSize %}
                                 <div class="dz-size gwu-preview-details__size">
                                     <span data-dz-size=""></span>

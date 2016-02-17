@@ -1,12 +1,11 @@
 {% block glavweb_uploader_dropzone_widget %}
-    <div class="dz dropzone gwu-dropzone {{ uploaderOptions.uploaderClass }}">
+    <div class="gwu gwu-dropzone {{ uploaderOptions.uploaderClass }}">
         <input type="hidden" name="_glavweb_uploader_request_id" value="{{ requestId }}">
-        {#<input type="hidden" name="_glavweb_uploader_sorted_array[{{ type }}]" id = "dz-sorted-array" value="">#}
+        <input type="hidden" name="_glavweb_uploader_sorted_array[{{ uploaderOptions.type }}]" id = "dz-sorted-array" value="">
 
         <div id="{{ uploaderOptions.dropzoneContainer[1:] }}" class="js-gwu-dropzone">
             {% include 'GlavwebUploaderBundle:Form/form:' ~ uploaderOptions.formViewType ~ '.html.twig' %}
         </div>
-
 
         {% include 'GlavwebUploaderBundle:Form/item:base.html.twig'  %}
 
@@ -18,10 +17,7 @@
             {#</div>#}
 
 
-            <div id="{{ dropzoneOptions.previewsContainer[1:] }}" class="previews">
-                {#{% include uploadedFilesTpl with {'files': files} %}#}
-            </div>
-
+            <div id="{{ dropzoneOptions.previewsContainer[1:] }}" class="dropzone previews gwu-previews"></div>
     </div>
 
     {% block glavweb_uploader_dropzone_widget__madal %}
@@ -138,7 +134,7 @@
 
                     {% for media in files %}
                         {% set imgSrc = media|glavweb_uploader_thumbnail %}
-                        $uploader.glavwebUploaderDropzone('addFile','{{ media.name }}', {{ media.id }}, '{{ imgSrc }}');
+                        $uploader.glavwebUploaderDropzone('addFile','{{ media.name }}', {{ media.id }}, '{{ imgSrc }}', {{ media.contentSize }} );
                     {% endfor %}
                 });
             })(jQuery);

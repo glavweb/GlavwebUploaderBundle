@@ -103,7 +103,6 @@ class DropzoneType extends AbstractType
 
         $view->vars['requestId']        = $options['requestId'];
         $view->vars['views']            = $options['views' ];
-        $view->vars['thumbnailOptions'] = $options['thumbnailOptions'];
         $view->vars['type']             = $context;
         $view->vars['files']            = $files;
         // $view->vars['previewImg']    = $options['previewImg'];
@@ -127,7 +126,6 @@ class DropzoneType extends AbstractType
             'requestId'         => $options['requestId'],
             'dropzoneContainer' => '#js-gwu-dropzone_' . $options['requestId'],
             'previewShow'       => $view->vars['previewShow'],
-            'thumbnailOptions'  => $view->vars['thumbnailOptions'],
             'uploadDir'         => $uploadDir,
             'countFiles'        => $files->count(),
             'maxFiles'          => $view->vars['dropzoneOptions']['maxFiles'],
@@ -153,7 +151,7 @@ class DropzoneType extends AbstractType
             'showLabel'          => true,
             'thumbnailOptions'   => array(
                 'width'     => 200,
-                'height'    => 150,
+                'height'    => 200,
             ),
             'views'              => array(
 //                'form' => 'path/to/view',
@@ -202,8 +200,8 @@ class DropzoneType extends AbstractType
                 'clickable'                    => null,
                 'maxFilesize'                  => 2,
                 'maxFiles'                     => 20,
-                'thumbnailWidth'               => 250,
-                'thumbnailHeight'              => 150,
+                'thumbnailWidth'               => 350,
+                'thumbnailHeight'              => 350,
                 'parallelUploads'              => 20,
                 'autoQueue'                    => true,
                 'autoProcessQueue'             => true,

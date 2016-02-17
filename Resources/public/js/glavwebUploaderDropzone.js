@@ -1,5 +1,7 @@
 (function ($) {
 
+    Dropzone.autoDiscover = false;
+
     var isDebug = true,
         _log = function (message) {
             if (window.console && isDebug) {
@@ -24,6 +26,7 @@
             if(uploader.uploaderOptions.popup) {
                 $(uploader.uploaderOptions.popupContainer).plainModal();
             }
+            methods.bindEvents();
             _log('init');
             _log(dropzone);
             return this;
@@ -48,8 +51,12 @@
         /**
          * Добавляем mock файлы в dropzone
          */
-        addFile: function ( name, id, src) {
-            var mockFile = { name: name, size: 0, accepted: true};
+        addFile: function ( name, id, src, size) {
+            var mockFile = {
+                name: name,
+                size: size,
+                accepted: true
+            };
             dropzone.emit('addedfile', mockFile);
 
             if (uploader.uploaderOptions.isThumbnail) {
@@ -62,6 +69,7 @@
 
             $mockFileTpl.data('id',  id);
             $mockFileTpl.data('src', src);
+            $mockFileTpl.addClass('dz-complete');
             $mockFileTpl.attr('id', 'dz-preview-' + id);
 
             mockFile.response = {
@@ -151,12 +159,13 @@
          */
         bindEvents: function () {
 
-            $dropzone.on("sending", function (file, xhr, formData) {
+            dropzone.on("sending", function (file, xhr, formData) {
                 $(uploader.uploaderOptions.preloader).removeClass('hidden');
                 formData.append('_glavweb_uploader_request_id', uploader.uploaderOptions.requestId);
             });
 
-            $dropzone.on("success", function (file, response) {
+            dropzone.on("success", function (file, response) {
+                //console.log(response);
                 file.response = response;
                 var $template = $(file.previewTemplate);
                 $template.data('id', response.id);
@@ -167,7 +176,7 @@
                 methods.hideErrors();
             });
 
-            $dropzone.on("removedfile", function (file) {
+            dropzone.on("removedfile", function (file) {
                 var id = file.response.id;
 
                 if (id !== undefined) {
