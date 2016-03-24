@@ -59,9 +59,9 @@ class MediaHelper
             return $uri;
         }
 
-        $hosts    = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : '';
+        $isHosts  = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? true : false;
         $httpHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-        $currentUri = sprintf('http%s://%s/', $hosts ? 's' : '', $httpHost);
+        $currentUri = sprintf('http%s://%s/', $isHosts ? 's' : '', $httpHost);
 
         // protocol relative URL
         if (0 === strpos($uri, '//')) {
