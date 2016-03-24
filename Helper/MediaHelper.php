@@ -32,22 +32,58 @@ class MediaHelper
     }
 
     /**
-     * @param MediaInterface $media
-     * @param bool           $isAbsolute
+     * @param string $context
+     * @param bool   $isAbsolute
      * @return string
      */
     public function getUploadDirectoryUrl($context, $isAbsolute = false)
     {
-        $request = $this->request;
-
-        $basePath = '/';
+        $uploadDirectoryUrl = '/' . $this->getContextConfig($context, 'upload_directory_url');
         if ($isAbsolute) {
-            $basePath = $request->getScheme() . '://'
-                . $request->getHttpHost()
-                . $request->getBasePath() . '/';
+            return $this->getAbsoluteUri($uploadDirectoryUrl);
         }
 
-        return $basePath . $this->getContextConfig($context, 'upload_directory_url');
+        return $uploadDirectoryUrl;
+    }
+
+    /**
+     * Takes a URI and converts it to absolute if it is not already absolute.
+     *
+     * @param string $uri A URI
+     * @return string An absolute URI
+     */
+    public function getAbsoluteUri($uri)
+    {
+        // already absolute?
+        if (0 === strpos($uri, 'http://') || 0 === strpos($uri, 'https://')) {
+            return $uri;
+        }
+
+        $hosts    = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : '';
+        $httpHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        $currentUri = sprintf('http%s://%s/', $hosts ? 's' : '', $httpHost);
+
+        // protocol relative URL
+        if (0 === strpos($uri, '//')) {
+            return parse_url($currentUri, PHP_URL_SCHEME) . ':' . $uri;
+        }
+
+        // anchor?
+        if (!$uri || '#' == $uri[0]) {
+            return preg_replace('/#.*?$/', '', $currentUri) . $uri;
+        }
+
+        if ('/' !== $uri[0]) {
+            $path = parse_url($currentUri, PHP_URL_PATH);
+
+            if ('/' !== substr($path, -1)) {
+                $path = substr($path, 0, strrpos($path, '/') + 1);
+            }
+
+            $uri = $path . $uri;
+        }
+
+        return preg_replace('#^(.*?//[^/]+)\/.*$#', '$1', $currentUri) . $uri;
     }
 
     /**
