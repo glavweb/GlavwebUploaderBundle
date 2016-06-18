@@ -100,8 +100,8 @@ class DropzoneType extends AbstractType
         $view->vars['showUploadButton'] = $options['showUploadButton'];
         $view->vars['uploaderClass']    = $options['uploaderClass'];
         $view->vars['isShowErrorPopup'] = $options['isShowErrorPopup'];
-        $view->vars['files']            = $files;
-        $view->vars['countFiles']       = $files->count();
+        $view->vars['files']            = $files ? $files : [];
+        $view->vars['countFiles']       = $files ? $files->count() : 0;
         $view->vars['showLabel']        = $options['showLabel'];
         $view->vars['requestId']        = $options['requestId'];
         $view->vars['uploadDir']        = $this->mediaHelper->getUploadDirectoryUrl($context);
