@@ -6,20 +6,20 @@ use Glavweb\UploaderBundle\Exception\ProviderNotFoundException;
 use Glavweb\UploaderBundle\Exception\RequestEmptyException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Model\MediaInterface;
-use Glavweb\UploaderBundle\Provider\FileProvider;
 use Glavweb\UploaderBundle\Provider\ProviderFileInterface;
 use Glavweb\UploaderBundle\Provider\ProviderInterface;
 use Glavweb\UploaderBundle\Provider\ProviderTypes;
-use Glavweb\UploaderBundle\Provider\YoutubeProvider;
-use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Class UploaderManager
  * @package Glavweb\UploaderBundle\Manager
  */
-class UploaderManager extends ContainerAware
+class UploaderManager implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     /**
      * @var \Glavweb\UploaderBundle\Model\ModelManagerInterface
      */

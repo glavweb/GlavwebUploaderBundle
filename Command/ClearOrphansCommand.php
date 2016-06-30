@@ -2,16 +2,19 @@
 
 namespace Glavweb\UploaderBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Class ClearOrphansCommand
  * @package Glavweb\UploaderBundle\Command
  */
-class ClearOrphansCommand extends ContainerAwareCommand
+class ClearOrphansCommand implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     protected function configure()
     {
         $this->setName('glavweb:uploader:clear-orphans');
