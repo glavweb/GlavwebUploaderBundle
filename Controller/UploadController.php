@@ -72,7 +72,7 @@ class UploadController extends Controller
             }
         }
 
-        return $this->createSupportedJsonResponse($response->assemble());
+        return $this->createSupportedJsonResponse($response->assemble(), $request);
     }
 
     /**
@@ -112,15 +112,15 @@ class UploadController extends Controller
             $this->errorHandler->addException($response, $e);
         }
 
-        return $this->createSupportedJsonResponse($response->assemble());
+        return $this->createSupportedJsonResponse($response->assemble(), $request);
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function progressAction()
+    public function progressAction(Request $request)
     {
-        $request = $this->container->get('request');
         $session = $this->container->get('session');
 
         $prefix = ini_get('session.upload_progress.prefix');
@@ -135,11 +135,11 @@ class UploadController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function cancelAction()
+    public function cancelAction(Request $request)
     {
-        $request = $this->container->get('request');
         $session = $this->container->get('session');
 
         $prefix = ini_get('session.upload_progress.prefix');
@@ -366,18 +366,17 @@ class UploadController extends Controller
      * On top of that, if the client does not support the application/json type,
      * then the content type of the response will be set to text/plain instead.
      *
-     * @param mixed  $data
-     * @param int    $status
-     *
+     * @param mixed $data
+     * @param Request $request
+     * @param int $status
      * @return JsonResponse
      */
-    protected function createSupportedJsonResponse($data, $status = null)
+    protected function createSupportedJsonResponse($data, Request $request, $status = null)
     {
         if ($status === null) {
             $status = isset($data['error']) ? 400 : 200;
         }
 
-        $request = $this->container->get('request');
         $response = new JsonResponse($data, $status);
         $response->headers->set('Vary', 'Accept');
 
