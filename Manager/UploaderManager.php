@@ -290,7 +290,7 @@ class UploaderManager implements ContainerAwareInterface
         $requestId = $request->get('_glavweb_uploader_request_id');
 
         if (!$requestId) {
-            throw new RequestEmptyException();
+            return;
         }
 
         $driverAnnotation = $this->getDriverAnnotation();
