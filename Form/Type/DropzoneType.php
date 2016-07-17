@@ -11,6 +11,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Glavweb\UploaderBundle\Helper\MediaHelper;
+use Symfony\Component\Translation\DataCollectorTranslator;
 
 /**
  * Class DropzoneType
@@ -39,17 +40,24 @@ class DropzoneType extends AbstractType
     protected $driverAnnotation;
 
     /**
+     * @var DataCollectorTranslator
+     */
+    protected $translator;
+
+
+    /**
      * @param Router $router
      * @param MediaHelper $mediaHelper
      * @param array $config
      * @param AnnotationDriver $driverAnnotation
      */
-    public function __construct(Router $router, MediaHelper $mediaHelper, array $config, AnnotationDriver $driverAnnotation)
+    public function __construct(Router $router, MediaHelper $mediaHelper, array $config, AnnotationDriver $driverAnnotation, DataCollectorTranslator $translator)
     {
         $this->router           = $router;
         $this->mediaHelper      = $mediaHelper;
         $this->config           = $config;
         $this->driverAnnotation = $driverAnnotation;
+        $this->translator       = $translator;
     }
 
     /**
@@ -84,31 +92,46 @@ class DropzoneType extends AbstractType
         }
 
         $config = $this->getConfigByContext($context);
-        $maxFiles = $config['max_files'];
 
-        $view->vars['uploadedFilesTpl'] = $options['uploadedFilesTpl'];
-        $view->vars['uploadItemTpl']    = $options['uploadItemTpl'];
-        $view->vars['viewFormTpl']      = $options['viewFormTpl'];
-        $view->vars['viewLinkTpl']      = $options['viewLinkTpl'];
-        $view->vars['type']             = $context;
-        $view->vars['previewImg']       = $options['previewImg'];
-        $view->vars['useLink']          = $options['useLink'];
-        $view->vars['useForm']          = $options['useForm'];
-        $view->vars['showMark']         = $options['showMark'];
-        $view->vars['thumbnailWidth']   = $options['thumbnailWidth' ];
-        $view->vars['thumbnailHeight']  = $options['thumbnailHeight'];
-        $view->vars['showUploadButton'] = $options['showUploadButton'];
-        $view->vars['uploaderClass']    = $options['uploaderClass'];
-        $view->vars['isShowErrorPopup'] = $options['isShowErrorPopup'];
-        $view->vars['files']            = $files ? $files : [];
-        $view->vars['countFiles']       = $files ? $files->count() : 0;
-        $view->vars['showLabel']        = $options['showLabel'];
+        $router    = $this->router;
+        $uploadDir = $this->mediaHelper->getUploadDirectoryUrl($context);
+        $urls      = array(
+            'upload' => $router->generate('glavweb_uploader_upload', array('context' => $context)),
+            'rename' => $router->generate('glavweb_uploader_rename', array('context' => $context)),
+            'delete' => $router->generate('glavweb_uploader_delete', array('context' => $context)),
+        );
+
         $view->vars['requestId']        = $options['requestId'];
-        $view->vars['uploadDir']        = $this->mediaHelper->getUploadDirectoryUrl($context);
-        $view->vars['deleteUrl']        = $this->router->generate('glavweb_uploader_delete', array('context' => $context));
-        $view->vars['renameUrl']        = $this->router->generate('glavweb_uploader_rename', array('context' => $context));
-        $view->vars['maxFiles']         = $maxFiles;
-        $view->vars['maxSize']          = $config['max_size'];
+        $view->vars['views']            = $options['views' ];
+        $view->vars['type']             = $context;
+        $view->vars['files']            = $files;
+        // $view->vars['previewImg']    = $options['previewImg'];
+        $view->vars['previewShow']      = array_merge($options['previewShowDefault'],$options['previewShow']);
+
+        // Dropzone
+        $view->vars['dropzoneOptions'] = array_merge($options['dropzoneOptionsDefault'], array(
+            'url'               => $urls['upload'],
+            'uploadDir'         => $uploadDir,
+            'previewTemplate'   => '#js-gwu-template_' . $options['requestId'],
+            'previewsContainer' => '#js-gwu-previews_' . $options['requestId'],
+            'form'              => '.js-gwu-from_' . $options['requestId'],
+            'link'              => '.js-gwu-link_' . $options['requestId'],
+            'maxFilesize'       => $config['max_size'],
+            'clickable'         => '.js-gwu-clickable_' . $options['requestId'],
+        ),$options['dropzoneOptions']);
+
+        // Uploader
+        $view->vars['uploaderOptions'] = array_merge($options['uploaderOptionsDefault'], array(
+            'urls'              => $urls,
+            'requestId'         => $options['requestId'],
+            'dropzoneContainer' => '#js-gwu-dropzone_' . $options['requestId'],
+            'previewShow'       => $view->vars['previewShow'],
+            'uploadDir'         => $uploadDir,
+            'countFiles'        => $files->count(),
+            'maxFiles'          => $view->vars['dropzoneOptions']['maxFiles'],
+            'type'              => $context,
+            'clickable'         => '.js-gwu-clickable_' . $options['requestId'],
+        ), $options['uploaderOptions']);
     }
 
     /**
@@ -116,6 +139,8 @@ class DropzoneType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
+        $translator = $this->translator;
+
         $resolver->setDefaults(array(
             'previewImg'         => null,
             'requestId'          => null,
@@ -123,15 +148,75 @@ class DropzoneType extends AbstractType
             'useForm'            => true,
             'showMark'           => true,
             'showUploadButton'   => true,
-            'uploadedFilesTpl'   => 'GlavwebUploaderBundle:Form:base_upload_item_tpl.html.twig',
-            'uploadItemTpl'      => 'GlavwebUploaderBundle:Form:base_uploaded_files.html.twig',
-            'viewFormTpl'        => 'GlavwebUploaderBundle:Form:view-form.html.twig',
-            'viewLinkTpl'        => 'GlavwebUploaderBundle:Form:view-link.html.twig',
             'showLabel'          => true,
-            'thumbnailWidth'     => 200,
-            'thumbnailHeight'    => 150,
-            'uploaderClass'      => '',
-            'isShowErrorPopup'   => true,
+            'thumbnailOptions'   => array(
+                'width'     => 200,
+                'height'    => 200,
+            ),
+            'views'              => array(
+//                'form' => 'path/to/view',
+//                'link' => 'path/to/view',
+//                'preview' => 'path/to/view',
+            ),
+            'previewShow'        => array(),
+            'previewShowDefault' => array(
+                'isDetails'  => true,
+                'isSize'     => true,
+                'isFilename' => true,
+                'isProgress' => true,
+                'isError'    => true,
+                'isShowMark' => true
+            ),
+            'uploaderOptions'    => array(),
+            'uploaderOptionsDefault' => array(
+                'type'             => null,
+                'uploaderClass'    => '',
+                'formViewType'     => 'form',
+                'previewViewType'  => 'image',
+                'preloader'        => '.js-gwu-preloader',
+                'upoloaderError'   => '.js-gwu-error',
+                'previewContainer' => '.js-gwu-preview',
+                'rename'           => '.js-gwu-rename',
+                'filename'         => '.js-gwu-filename',
+                'description'      => '.js-gwu-description',
+                'form'             => '.js-gwu-form',
+                'link'             => '.js-gwu-link',
+                'popup'            => '.js-gwu-popup',
+                'isPopup'          => true,
+                'isName'           => true,
+                'isDescription'    => false,
+                'isSort'           => false,
+                'isShowErrorPopup' => false,
+                'isThumbnail'      => true,
+                'isUploadButton'   => true,
+                'thumbnailOptions' => array(),
+                'countFiles'       => 0
+            ),
+            'dropzoneOptions'    => array(),
+            'dropzoneOptionsDefault' => array(
+                'url'                          => null,
+                'previewTemplate'              => null,
+                'previewsContainer'            => null,
+                'clickable'                    => null,
+                'maxFilesize'                  => 2,
+                'maxFiles'                     => 20,
+                'thumbnailWidth'               => 350,
+                'thumbnailHeight'              => 350,
+                'parallelUploads'              => 20,
+                'autoQueue'                    => true,
+                'autoProcessQueue'             => true,
+                'acceptedFiles'                => '.png, .jpg',
+                'dictDefaultMessage'           => $translator->trans('dropzone.files_uploaded'),
+                'dictFallbackMessage'          => $translator->trans('dropzone.browser_not_support_drag_n_drop'),
+                'dictFileTooBig'               => $translator->trans('dropzone.file_size_too_large'),
+                'dictInvalidFileType'          => $translator->trans('dropzone.wrong_format'),
+                'dictResponseError'            => $translator->trans('dropzone.disable_adblocker'),
+                'dictCancelUpload'             => $translator->trans( 'dropzone.cancel_upload'),
+                'dictCancelUploadConfirmation' => $translator->trans('dropzone.cancel_upload_confirmation'),
+                'dictRemoveFile'               => $translator->trans('dropzone.remove_file'),
+                'dictRemoveFileConfirmation'   => null,
+                'dictMaxFilesExceeded'         => $translator->trans('dropzone.max_files_exceeded')
+            ),
         ));
     }
 
