@@ -39,15 +39,6 @@
             <argument>%kernel.cache_dir%</argument>
         </service>
 
-        <service id="glavweb_uploader.form.type.dropzone" class="Glavweb\UploaderBundle\Form\Type\DropzoneType">
-            <argument type="service" id="router" />
-            <argument type="service" id="glavweb_uploader.media_helper" />
-            <argument>%glavweb_uploader.config%</argument>
-            <argument type="service" id="glavweb_uploader.data_driver.annotation" />
-            <argument type="service" id="translator" />
-            <tag name="form.type" alias="glavweb_uploader_dropzone" />
-        </service>
-
         <service id="glavweb_uploader.media_listener" class="Glavweb\UploaderBundle\Entity\Listener\MediaListener">
             <argument type="service" id="glavweb_uploader.uploader_manager" />
             <tag name="doctrine.orm.entity_listener" />
