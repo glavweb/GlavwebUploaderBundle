@@ -149,9 +149,9 @@ if ($form->isValid()) {
 
 Bundle has 3 events:
 
-- glavweb_uploader.validation. // First event, will execute before your file will be uploaded
+- glavweb_uploader.validation; // First event, will execute before your file will be uploaded
 - glavweb_uploader.pre_upload; // Will execute before your file will be uploaded
-- glavweb_uploader.post_upload; // Will execute after your file will be uploaded
+- glavweb_uploader.post_upload. // Will execute after your file will be uploaded
 
 ### Example
 
@@ -186,7 +186,7 @@ Other listeners work on a similar logics.
 Also you can define listeners only for your context, as example if context is "article":
 
     article_post_upload_listener:
-        class: AppBundle\Listener\PostUploadListener
+        class: AppBundle\Listener\ArticlePostUploadListener
         tags:
             - { name: kernel.event_listener, event: glavweb_uploader.post_upload_article, method: onPostUpload }
 
