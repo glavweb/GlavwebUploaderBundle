@@ -145,7 +145,7 @@ if ($form->isValid()) {
 }
 ```
 
-## Listeners
+## Events
 
 Bundle has 3 events:
 
