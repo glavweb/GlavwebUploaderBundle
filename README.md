@@ -188,5 +188,5 @@ Also you can define listeners only for your context, as example if context is "a
     article_post_upload_listener:
         class: AppBundle\Listener\ArticlePostUploadListener
         tags:
-            - { name: kernel.event_listener, event: glavweb_uploader.post_upload_article, method: onPostUpload }
+            - { name: kernel.event_listener, event: glavweb_uploader.post_upload.article, method: onPostUpload }
 
