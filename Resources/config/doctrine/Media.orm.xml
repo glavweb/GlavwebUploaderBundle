@@ -15,7 +15,7 @@
 
         <entity-listeners>
             <entity-listener class="Glavweb\UploaderBundle\Entity\Listener\MediaListener">
-                <lifecycle-callback type="postRemove" method="postRemoveHandler" />
+                <lifecycle-callback type="preRemove" method="preRemoveHandler" />
             </entity-listener>
         </entity-listeners>
 

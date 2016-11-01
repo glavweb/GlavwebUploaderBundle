@@ -29,7 +29,7 @@ class MediaListener
      * @param Media               $media
      * @param LifecycleEventArgs $event
      */
-    public function postRemoveHandler(Media $media, LifecycleEventArgs $event)
+    public function preRemoveHandler(Media $media, LifecycleEventArgs $event)
     {
         $this->uploaderManager->removeMediaFromStorage($media);
     }
