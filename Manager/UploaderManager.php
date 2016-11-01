@@ -118,6 +118,7 @@ class UploaderManager implements ContainerAwareInterface
      */
     public function upload($link, $context, $requestId = null)
     {
+        $this->providers = null;
         $provider = $this->getProvider($context, $link);
 
         if (!$provider) {
