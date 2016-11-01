@@ -87,6 +87,7 @@ class UploadController extends Controller
         $requestId       = $request->get('_glavweb_uploader_request_id');
 
         // extract $uploadedFile, $media
+        /** @var Media $media */
         $uploadedFile = null;
         $media        = null;
 
@@ -94,15 +95,16 @@ class UploadController extends Controller
             extract($uploaderManager->upload($link, $context, $requestId), EXTR_OVERWRITE);
 
             if ($media) {
-                $response['id']             = $media->getId();
-                $response['name']           = $media->getName();
-                $response['description']    = $media->getDescription();
-                $response['thumbnail_path'] = $media->getThumbnailPath();
-                $response['content_path']   = $media->getContentPath();
-                $response['content_type']   = $media->getContentType();
-                $response['content_size']   = $media->getContentSize();
-                $response['width']          = $media->getWidth();
-                $response['height']         = $media->getHeight();
+                $response['id']                 = $media->getId();
+                $response['name']               = $media->getName();
+                $response['description']        = $media->getDescription();
+                $response['thumbnail_path']     = $media->getThumbnailPath();
+                $response['content_path']       = $media->getContentPath();
+                $response['content_type']       = $media->getContentType();
+                $response['content_size']       = $media->getContentSize();
+                $response['width']              = $media->getWidth();
+                $response['height']             = $media->getHeight();
+                $response['provider_reference'] = $media->getProviderReference();
             }
 
         } catch (UploadException $e) {
