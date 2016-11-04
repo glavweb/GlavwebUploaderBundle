@@ -112,9 +112,22 @@ class MediaHelper
      */
     public function getContentPath($media, $isAbsolute = false)
     {
-        $contentPath = $media->getContentPath();
-        $context = $media->getContext();
-        $contentPath = $this->getUploadDirectoryUrl($context, $isAbsolute) . '/' . $contentPath;
+        $context     = $media->getContext();
+        $contentPath = $this->getUploadDirectoryUrl($context, $isAbsolute) . '/' . $media->getContentPath();
+
+        return $contentPath;
+    }
+
+    /**
+     * @param MediaInterface $media
+     * @param bool           $isAbsolute
+     * @return string
+     */
+    public function getThumbnailPath($media, $isAbsolute = false)
+    {
+        $context     = $media->getContext();
+        $contentPath = $this->getUploadDirectoryUrl($context, $isAbsolute) . '/' . $media->getThumbnailPath();
+
         return $contentPath;
     }
 }
