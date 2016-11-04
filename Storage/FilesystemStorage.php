@@ -196,6 +196,18 @@ class FilesystemStorage implements StorageInterface
     }
 
     /**
+     * @param $directory
+     * @param $name
+     * @return bool
+     */
+    public function isFile($directory, $name)
+    {
+        $path = sprintf('%s/%s', $directory, $name);
+
+        return is_file($path);
+    }
+
+    /**
      * @param FileInterface $file
      */
     public function removeFile(FileInterface $file)

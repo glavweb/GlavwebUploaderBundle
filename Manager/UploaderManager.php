@@ -409,11 +409,15 @@ class UploaderManager implements ContainerAwareInterface
 
         $files = array();
         if (($contentPath = $media->getContentPath())) {
-            $files[] = $storage->getFile($directory, $contentPath);
+            if ($storage->isFile($directory, $contentPath)) {
+                $files[] = $storage->getFile($directory, $contentPath);
+            }
         }
 
         if (($thumbnailPath = $media->getThumbnailPath()) && $thumbnailPath != $contentPath) {
-            $files[] = $storage->getFile($directory, $thumbnailPath);
+            if ($storage->isFile($directory, $contentPath)) {
+                $files[] = $storage->getFile($directory, $thumbnailPath);
+            }
         }
 
         foreach ($files as $file) {
