@@ -12,14 +12,6 @@
     </parameters>
 
     <services>
-        <service id="glavweb_uploader.controller.upload" class="Glavweb\UploaderBundle\Controller\UploadController">
-            <argument>%glavweb_uploader.config%</argument>
-            <argument type="service" id="glavweb_uploader.error_handler.standard" />
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-        </service>
-
         <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" />
 
         <service id="glavweb_uploader.uploader_manager" class="Glavweb\UploaderBundle\Manager\UploaderManager">

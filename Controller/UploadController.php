@@ -2,10 +2,10 @@
 
 namespace Glavweb\UploaderBundle\Controller;
 
+use Glavweb\UploaderBundle\Entity\Media;
 use Glavweb\UploaderBundle\Entity\MediaMarkRemove;
 use Glavweb\UploaderBundle\Entity\MediaMarkRename;
 use Glavweb\UploaderBundle\ErrorHandler\ErrorHandlerInterface;
-use Glavweb\UploaderBundle\Event\PostPersistEvent;
 use Glavweb\UploaderBundle\Event\PostUploadEvent;
 use Glavweb\UploaderBundle\Event\PreUploadEvent;
 use Glavweb\UploaderBundle\Event\ValidationEvent;
@@ -40,16 +40,6 @@ class UploadController extends Controller
     protected $errorHandler;
 
     /**
-     * @param array                 $config
-     * @param ErrorHandlerInterface $errorHandler
-     */
-    public function __construct(array $config, ErrorHandlerInterface $errorHandler)
-    {
-        $this->config       = $config;
-        $this->errorHandler = $errorHandler;
-    }
-
-    /**
      * @param Request $request
      * @param string  $context
      * @return JsonResponse
@@ -65,10 +55,10 @@ class UploadController extends Controller
                 $this->handleUpload($file, $response, $request, $context);
 
             } catch (UploadException $e) {
-                $this->errorHandler->addException($response, $e);
+                $this->getErrorHandler()->addException($response, $e);
 
             } catch (ProviderNotFoundException $e) {
-                $this->errorHandler->addException($response, $e);
+                $this->getErrorHandler()->addException($response, $e);
             }
         }
 
@@ -108,10 +98,10 @@ class UploadController extends Controller
             }
 
         } catch (UploadException $e) {
-            $this->errorHandler->addException($response, $e);
+            $this->getErrorHandler()->addException($response, $e);
 
         } catch (ProviderNotFoundException $e) {
-            $this->errorHandler->addException($response, $e);
+            $this->getErrorHandler()->addException($response, $e);
         }
 
         return $this->createSupportedJsonResponse($response->assemble(), $request);
@@ -395,6 +385,48 @@ class UploadController extends Controller
      */
     protected function getConfigByContext($context)
     {
-        return $this->config['mappings'][$context];
+        $config = $this->getConfig();
+
+        return $config['mappings'][$context];
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        if (!$this->config) {
+            $this->config = $this->getParameter('glavweb_uploader.config');
+        }
+
+        return $this->config;
+    }
+
+    /**
+     * @param array $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return ErrorHandlerInterface
+     */
+    public function getErrorHandler()
+    {
+        if (!$this->errorHandler) {
+            $this->errorHandler = $this->get('glavweb_uploader.error_handler.standard');
+        }
+
+        return $this->errorHandler;
+    }
+
+    /**
+     * @param ErrorHandlerInterface $errorHandler
+     */
+    public function setErrorHandler($errorHandler)
+    {
+        $this->errorHandler = $errorHandler;
     }
 }
