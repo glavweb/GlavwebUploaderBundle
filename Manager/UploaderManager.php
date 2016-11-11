@@ -299,7 +299,7 @@ class UploaderManager implements ContainerAwareInterface
 
         foreach ($data as $property) {
             $context = $property['mapping'];
-            $mediaEntities = $entity->$property['nameGetFunction']();
+            $mediaEntities = $entity->{$property['nameGetFunction']}();
 
             $this->removeMarkedMedia($context, $requestId);
             $this->renameMarkedMedia($context, $requestId);
