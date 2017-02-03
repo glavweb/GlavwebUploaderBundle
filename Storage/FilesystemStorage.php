@@ -51,13 +51,16 @@ class FilesystemStorage implements StorageInterface
 
     /**
      * @param string $link
-     * @param string $name
-     * @param string $directory
      * @return FileInterface|false
      */
     public function uploadTmpFileByLink($link)
     {
-        $fileContents = $this->getContentsByLink($link);
+        if ($this->isUrl($link)) {
+            $fileContents = $this->getContentsByLink($link);
+
+        } else {
+            $fileContents = $this->getContentsFromBase64($link);
+        }
 
         if (!$fileContents) {
             return false;
@@ -91,6 +94,15 @@ class FilesystemStorage implements StorageInterface
         fclose($handle);
 
         return $fileContents;
+    }
+
+    /**
+     * @param string $base64
+     * @return string
+     */
+    private function getContentsFromBase64($base64)
+    {
+        return base64_decode($base64);
     }
 
     /**
