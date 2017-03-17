@@ -1,16 +1,21 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: 1
- * Date: 16.01.2015
- * Time: 9:04
+
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Glavweb\UploaderBundle\Exception;
 
 /**
- * Class Exception
- * @package Glavweb\UploaderBundle\Exception
+ * Class ProviderNotFoundException
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class ProviderNotFoundException extends Exception
 {}

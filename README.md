@@ -51,32 +51,14 @@ glavweb_uploader:
             
 ```
 
-To add resources to a twig confinuration.
-
-```
-twig:
-    ...
-    form:
-        resources:
-            ...
-            - 'GlavwebUploaderBundle:Form:fields.html.twig'
-
-```
-
 To enable the dynamic routes, add the following to your routing configuration file.
 
 ```yaml
 #  app/config/routing.yml
 
 glavweb_uploader:
-    resource: "@GlavwebUploaderBundle/Resources/config/routing.xml"
+    resource: "@GlavwebUploaderBundle/Resources/config/routing.yml"
     prefix:   /
-```
-
-### Execute "assets:install".
-
-```
-php app/console assets:install
 ```
 
 Basic Usage
@@ -106,14 +88,10 @@ And another annotation "@Glavweb\UploadableField" before defining the properties
  * 
  * @ORM\ManyToMany(targetEntity="Glavweb\UploaderBundle\Entity\Media", inversedBy="entities", orphanRemoval=true)
  * @ORM\OrderBy({"position" = "ASC"})
- * @Glavweb\UploadableField(mapping="entity_images", nameAddFunction="addImage", nameGetFunction="getImages")
+ * @Glavweb\UploadableField(mapping="entity_images")
  */
 private $images;
-```
 
-End add default collection in constructor:
-
-```
 /**
  * Constructor
  */
@@ -122,28 +100,22 @@ public function __construct()
     ...
     $this->images = new \Doctrine\Common\Collections\ArrayCollection();
 }
-```
-
-2. Add the field "glavweb_uploader_dropzone" in the form:
 
 ```
-$builder
-    ->add('images', 'glavweb_uploader_dropzone', array(
-        'mapped' => false
-    ))
-;
-```
 
-3. While saving form running method "handleUpload()":
+Or many-to-one:
 
 ```
-$uploaderManager = $this->get('glavweb_uploader.uploader_manager');
-if ($form->isValid()) {
-    $uploaderManager->handleUpload($entity);
-
-    ...
-}
+/**
+ * @var Media
+ *
+ * @ORM\OneToOne(targetEntity="Glavweb\UploaderBundle\Entity\Media", orphanRemoval=true)
+ * @ORM\JoinColumn(name="image_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+ */
+private $image;
 ```
+
+2. For build form, you can use [GlavwebUploaderDropzoneBundle].
 
 ## Events
 
@@ -190,3 +162,5 @@ Also you can define listeners only for your context, as example if context is "a
         tags:
             - { name: kernel.event_listener, event: glavweb_uploader.post_upload.article, method: onPostUpload }
 
+
+[GlavwebUploaderDropzoneBundle]: https://github.com/glavweb/GlavwebUploaderDropzoneBundle

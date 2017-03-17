@@ -1,0 +1,3 @@
+_glavweb_uploader_upload_controller:
+    type:     annotation
+    resource: "@GlavwebUploaderBundle/Controller/UploadController.php"

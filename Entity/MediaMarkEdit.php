@@ -1,43 +1,82 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * MediaMarkRename
+ * Class MediaMarkEdit
+ *
+ * @ORM\Table(name="glavweb_media_mark_edit")
+ * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
-class MediaMarkRename
+class MediaMarkEdit
 {
     /**
-     * @var integer
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="request_id", type="string")
      */
     private $requestId;
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="new_name", type="string", nullable=true)
      */
     private $newName;
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="new_description", type="string", nullable=true)
      */
     private $newDescription;
 
     /**
      * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
     /**
-     * @var \Glavweb\UploaderBundle\Entity\Media
+     * @var Media
+     *
+     * @ORM\ManyToOne(targetEntity="Glavweb\UploaderBundle\Entity\Media", inversedBy="mediaMarkEdits", cascade={"persist"})
+     * @ORM\JoinColumn(name="media_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $media;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function prePersist()
+    {
+        $this->setCreatedAt(new \DateTime());
+    }
 
     /**
      * Get id
@@ -53,7 +92,7 @@ class MediaMarkRename
      * Set requestId
      *
      * @param string $requestId
-     * @return MediaMarkRename
+     * @return MediaMarkEdit
      */
     public function setRequestId($requestId)
     {
@@ -76,7 +115,7 @@ class MediaMarkRename
      * Set newName
      *
      * @param string $newName
-     * @return MediaMarkRename
+     * @return MediaMarkEdit
      */
     public function setNewName($newName)
     {
@@ -99,7 +138,7 @@ class MediaMarkRename
      * Set newDescription
      *
      * @param string $newDescription
-     * @return MediaMarkRename
+     * @return MediaMarkEdit
      */
     public function setNewDescription($newDescription)
     {
@@ -118,12 +157,11 @@ class MediaMarkRename
         return $this->newDescription;
     }
 
-
-/**
+    /**
      * Set createdAt
      *
      * @param \DateTime $createdAt
-     * @return MediaMarkRename
+     * @return MediaMarkEdit
      */
     public function setCreatedAt($createdAt)
     {
@@ -146,9 +184,9 @@ class MediaMarkRename
      * Set media
      *
      * @param \Glavweb\UploaderBundle\Entity\Media $media
-     * @return MediaMarkRename
+     * @return MediaMarkEdit
      */
-    public function setMedia(\Glavweb\UploaderBundle\Entity\Media $media)
+    public function setMedia(Media $media)
     {
         $this->media = $media;
 
@@ -163,13 +201,5 @@ class MediaMarkRename
     public function getMedia()
     {
         return $this->media;
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function prePersist()
-    {
-        $this->setCreatedAt(new \DateTime());
     }
 }

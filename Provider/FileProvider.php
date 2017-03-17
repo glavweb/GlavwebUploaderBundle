@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Provider;
 
 use Glavweb\UploaderBundle\File\FileInterface;
@@ -8,7 +17,9 @@ use Glavweb\UploaderBundle\Model\MediaInterface;
 
 /**
  * Class FileProvider
- * @package Glavweb\UploaderBundle\Provider
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class FileProvider extends BaseFileProvider
 {

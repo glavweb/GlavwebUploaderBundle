@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Manager;
 
+use Glavweb\UploaderBundle\Driver\AnnotationDriver;
 use Glavweb\UploaderBundle\Exception\ProviderNotFoundException;
-use Glavweb\UploaderBundle\Exception\RequestEmptyException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Glavweb\UploaderBundle\Provider\ProviderFileInterface;
@@ -14,7 +23,9 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Class UploaderManager
+ *
  * @package Glavweb\UploaderBundle\Manager
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class UploaderManager implements ContainerAwareInterface
 {
@@ -43,7 +54,7 @@ class UploaderManager implements ContainerAwareInterface
     );
 
     /**
-     * @var \Metadata\Driver\DriverInterface
+     * @var AnnotationDriver
      */
     private $driverAnnotation;
 
@@ -115,8 +126,9 @@ class UploaderManager implements ContainerAwareInterface
      * @param string               $context
      * @param string               $requestId
      * @return array
+     * @throws ProviderNotFoundException
      */
-    public function upload($link, $context, $requestId = null)
+    public function upload($link, $context, $requestId)
     {
         $this->providers = null;
         $provider = $this->getProvider($context, $link);
@@ -125,10 +137,11 @@ class UploaderManager implements ContainerAwareInterface
             throw new ProviderNotFoundException('Provider not found.');
         }
 
-        $useOrphanage      = $this->getContextConfig($context, 'use_orphanage');
-        $thumbnailPath     = null;
-        $contentPath       = null;
-        $name              = $provider->getName();
+        $useOrphanage  = $this->getContextConfig($context, 'use_orphanage');
+        $thumbnailPath = null;
+        $contentPath   = null;
+        $name          = $provider->getName();
+        $uploadedFile  = null;
 
         if ($provider instanceof ProviderFileInterface) {
             $uploadedFile = $this->uploadFile($provider->getFile(), $context);
@@ -167,7 +180,7 @@ class UploaderManager implements ContainerAwareInterface
         $media->setContentSize($provider->getContentSize());
         $media->setIsOrphan($useOrphanage);
         $media->setRequestId($requestId);
-        $this->getModelManager()->updateMedia($media, true);
+        $this->getModelManager()->updateMedia($media);
 
         return array(
             'uploadedFile' => $uploadedFile,
@@ -279,85 +292,34 @@ class UploaderManager implements ContainerAwareInterface
     }
 
     /**
-     * @param $entity
-     * @param null $requestId
-     * @param array $options
-     * @throws RequestEmptyException
-     * @throws \Glavweb\UploaderBundle\Exception\RequestEmptyException
+     * @param string $requestId
+     * @return MediaInterface[] Array of uploaded media entities
      */
-    public function handleUpload($entity, $requestId=null, $options = array())
+    public function handleUpload($requestId)
     {
-        $request = $this->getRequestStack()->getCurrentRequest();
-        $requestId = $request->get('_glavweb_uploader_request_id');
+        $this->removeMarkedMedia($requestId);
+        $this->renameMarkedMedia($requestId);
+        $uploadedMedias = $this->uploadOrphans($requestId);
 
-        if (!$requestId) {
-            return;
-        }
-
-        $driverAnnotation = $this->getDriverAnnotation();
-        $data = $driverAnnotation->loadDataForClass(new \ReflectionClass($entity));
-
-        foreach ($data as $property) {
-            $context = $property['mapping'];
-            $mediaEntities = $entity->{$property['nameGetFunction']}();
-
-            $this->removeMarkedMedia($context, $requestId);
-            $this->renameMarkedMedia($context, $requestId);
-            $uploadedMediaEntities = $this->uploadOrphans($context, $requestId);
-
-            $this->addMediaEntities($uploadedMediaEntities, $entity, $property );
-
-            $positions = explode(',', $request->get('_glavweb_uploader_sorted_array')[$context]);
-
-            $this->sortMedia($mediaEntities, $positions);
-        }
+        return $uploadedMedias;
     }
 
     /**
-     * @param $mediaEntities
-     * @param $entity
-     * @param $property
+     * @param MediaInterface[] $medias    Array of medias
+     * @param array            $positions Array of positions medias like as [mediaId, mediaId,  ...]
      */
-    private function addMediaEntities($mediaEntities, $entity, $property)
+    public function sortMedias(array $medias, array $positions)
     {
-        $nameAddFunction = $property['nameAddFunction'];
-        $nameGetFunction = $property['nameGetFunction'];
-        $mapping         = $property['mapping'];
-
-        $contextConfig = $this->config['mappings'][$mapping];
-
-        $entityMedia = $entity->$nameGetFunction();
-
-        $maxFiles = $contextConfig['max_files'] - $entityMedia->count();
-
-        if (!empty($mediaEntities)) {
-            foreach ($mediaEntities as $mediaEntity) {
-                if ($maxFiles == 0) {
-                    break;
-                }
-                $entity->$nameAddFunction($mediaEntity);
-                $maxFiles--;
-            }
-        }
+        $this->getModelManager()->sortMedias($medias, $positions);
     }
 
     /**
-     * @param $entities
-     * @param $positions
-     */
-    public function sortMedia($entities, $positions)
-    {
-        $this->getModelManager()->sortMedia($entities, $positions);
-    }
-
-    /**
-     * @param string $context
      * @param string $requestId
      * @return array
      */
-    public function uploadOrphans($context, $requestId)
+    public function uploadOrphans($requestId)
     {
-        $medias = $this->getModelManager()->findOrphans($context, $requestId);
+        $medias = $this->getModelManager()->findOrphans($requestId);
 
         // update file models
         $uploadMedias = array();
@@ -372,21 +334,19 @@ class UploaderManager implements ContainerAwareInterface
     }
 
     /**
-     * @param string $context
      * @param string $requestId
      */
-    public function removeMarkedMedia($context, $requestId)
+    public function removeMarkedMedia($requestId)
     {
-        $this->getModelManager()->removeMarkedMedia($context, $requestId);
+        $this->getModelManager()->removeMarkedMedia($requestId);
     }
 
     /**
-     * @param string $context
      * @param string $requestId
      */
-    public function renameMarkedMedia($context, $requestId)
+    public function renameMarkedMedia($requestId)
     {
-        $this->getModelManager()->renameMarkedMedia($context, $requestId);
+        $this->getModelManager()->renameMarkedMedia($requestId);
     }
 
     /**
@@ -436,11 +396,13 @@ class UploaderManager implements ContainerAwareInterface
         if (!isset($this->config['mappings'][$context])) {
             throw new \RuntimeException('Context "' . $context . '" not defined.');
         }
+
         $contextConfig = $this->config['mappings'][$context];
 
         if ($option) {
             return $contextConfig[$option];
         }
+
         return $contextConfig;
     }
 

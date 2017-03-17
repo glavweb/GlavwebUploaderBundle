@@ -1,100 +1,184 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class Media
- * @package Glavweb\UploaderBundle\Entity
+ *
+ * @ORM\Table(name="glavweb_media")
+ * @ORM\Entity(repositoryClass="Glavweb\UploaderBundle\Entity\Repository\MediaRepository")
+ * @ORM\EntityListeners({"Glavweb\UploaderBundle\Entity\Listener\MediaListener"})
+ * @ORM\HasLifecycleCallbacks
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class Media implements MediaInterface
 {
     /**
-     * @var integer
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="context", type="string")
      */
     private $context;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="provider_name", type="string")
      */
     private $providerName;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="provider_reference", type="string", nullable=true)
      */
     private $providerReference;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="content_path", type="string", nullable=true)
      */
     private $contentPath;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="thumbnail_path", type="string", nullable=true)
      */
     private $thumbnailPath;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="name", type="string")
      */
     private $name;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
     /**
      * @var integer
+     * 
+     * @ORM\Column(name="width", type="integer", nullable=true)
      */
     private $width;
 
     /**
      * @var integer
+     * 
+     * @ORM\Column(name="height", type="integer", nullable=true)
      */
     private $height;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="content_type", type="string")
      */
     private $contentType;
 
     /**
      * @var integer
+     * 
+     * @ORM\Column(name="content_size", type="integer", nullable=true)
      */
     private $contentSize;
 
     /**
      * @var boolean
+     * 
+     * @ORM\Column(name="is_orphan", type="boolean")
      */
     private $isOrphan;
 
     /**
      * @var string
+     * 
+     * @ORM\Column(name="request_id", type="string", nullable=true)
      */
     private $requestId;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="token", type="string")
+     */
+    private $token;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="position", type="integer", nullable=true)
+     */
+    private $position;
+
+    /**
      * @var \DateTime
+     * 
+     * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
 
     /**
      * @var \DateTime
+     * 
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
-    /*
-     * @var integer
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="Glavweb\UploaderBundle\Entity\MediaMarkRemove", mappedBy="media")
      */
-    private $position;
+    private $mediaMarkRemoves;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="Glavweb\UploaderBundle\Entity\MediaMarkEdit", mappedBy="media")
+     */
+    private $mediaMarkEdits;
+
+    /**
+     * Media constructor.
+     */
+    public function __construct()
+    {
+        $this->mediaMarkRemoves = new ArrayCollection();
+        $this->mediaMarkEdits   = new ArrayCollection();
+    }
 
     /**
      * @return string
@@ -105,22 +189,35 @@ class Media implements MediaInterface
     }
 
     /**
+     * @ORM\PrePersist
+     * 
      * Lifecycle callback (pre persist)
      */
     public function prePersist()
     {
-        $date = new \DateTime('NOW');
+        $date = new \DateTime();
 
         $this->setCreatedAt($date);
         $this->setUpdatedAt($date);
+        $this->setToken($this->generateToken());
     }
 
     /**
+     * @ORM\PreUpdate
+     *
      * Lifecycle callback (pre persist)
      */
     public function preUpdate()
     {
-        $this->setUpdatedAt(new \DateTime('NOW'));
+        $this->setUpdatedAt(new \DateTime());
+    }
+
+    /**
+     * @return string
+     */
+    public function generateToken()
+    {
+        return rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
     }
 
     /**
@@ -433,6 +530,52 @@ class Media implements MediaInterface
     }
 
     /**
+     * Set token
+     *
+     * @param string $token
+     * @return Media
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
+    /**
+     * Get token
+     *
+     * @return string
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * Set position
+     *
+     * @param int $position
+     * @return Media
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    /**
+     * Get position
+     *
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
      * Set updatedAt
      *
      * @param \DateTime $updatedAt
@@ -479,18 +622,66 @@ class Media implements MediaInterface
     }
 
     /**
-     * @return mixed
+     * Add mediaMarkRemove
+     *
+     * @param MediaMarkRemove $mediaMarkRemove
+     *
+     * @return Media
      */
-    public function getPosition()
+    public function addMediaMarkRemove(MediaMarkRemove $mediaMarkRemove)
     {
-        return $this->position;
+        $this->mediaMarkRemoves[] = $mediaMarkRemove;
+
+        return $this;
     }
 
     /**
-     * @param mixed $position
+     * Remove mediaMarkRemove
+     *
+     * @param MediaMarkRemove $mediaMarkRemove
      */
-    public function setPosition($position)
+    public function removeMediaMarkRemove(MediaMarkRemove $mediaMarkRemove)
     {
-        $this->position = $position;
+        $this->mediaMarkRemoves->removeElement($mediaMarkRemove);
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getMediaMarkRemoves()
+    {
+        return $this->mediaMarkRemoves;
+    }
+
+    /**
+     * Add mediaMarkEdit
+     *
+     * @param MediaMarkEdit $mediaMarkEdit
+     *
+     * @return Media
+     */
+    public function addMediaMarkEdit(MediaMarkEdit $mediaMarkEdit)
+    {
+        $this->mediaMarkEdits[] = $mediaMarkEdit;
+
+        return $this;
+    }
+
+    /**
+     * Remove mediaMarkEdit
+     *
+     * @param MediaMarkEdit $mediaMarkEdit
+     */
+    public function removeMediaMarkEdit(MediaMarkEdit $mediaMarkEdit)
+    {
+        $this->mediaMarkEdits->removeElement($mediaMarkEdit);
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getMediaMarkEdits()
+    {
+        return $this->mediaMarkEdits;
     }
 }

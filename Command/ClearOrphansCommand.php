@@ -1,7 +1,17 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Command;
 
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -9,12 +19,17 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Class ClearOrphansCommand
- * @package Glavweb\UploaderBundle\Command
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
-class ClearOrphansCommand implements ContainerAwareInterface
+class ClearOrphansCommand extends Command implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
+    /**
+     * Configure
+     */
     protected function configure()
     {
         $this->setName('glavweb:uploader:clear-orphans');
@@ -28,7 +43,7 @@ class ClearOrphansCommand implements ContainerAwareInterface
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $uploaderManager = $this->getContainer()->get('glavweb_uploader.uploader_manager');
+        $uploaderManager = $this->container->get('glavweb_uploader.uploader_manager');
         $uploaderManager->clearOrphanage();
     }
 }

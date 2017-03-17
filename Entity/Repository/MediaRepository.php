@@ -1,24 +1,58 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Entity\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
 /**
  * Class MediaRepository
- * @package Glavweb\UploaderBundle\Entity\Repository
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class MediaRepository extends EntityRepository
 {
+    /**
+     * @param string $securedId
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findOneBySecuredId($securedId)
+    {
+        $pos = strpos($securedId, '-');
+
+        if (!$pos) {
+            return null;
+        }
+
+        $id    = substr($securedId, 0, $pos);
+        $token = substr($securedId, $pos + 1);
+
+        $qb = $this->createQueryBuilder('t')
+            ->where('t.id = :id AND t.token = :token')
+            ->setParameter('id', $id)
+            ->setParameter('token', $token)
+        ;
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
     /**
      * @param array $inParameters
      * @return array
      */
     public function findIn(array $inParameters)
     {
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('t')
-            ->from('GlavwebUploaderBundle:Media', 't')
+        $qb = $this->createQueryBuilder('t')
             ->where('t.id IN (:in_parameter)')
             ->setParameter('in_parameter', $inParameters)
         ;
@@ -35,9 +69,7 @@ class MediaRepository extends EntityRepository
         $datetime = new \DateTime('now');
         $datetime->modify(sprintf('- %s seconds', $lifetime));
 
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('t')
-            ->from('GlavwebUploaderBundle:Media', 't')
+        $qb = $this->createQueryBuilder('t')
             ->where('t.isOrphan = true')
             ->andWhere('t.createdAt <= :datetime')
             ->setParameter('datetime', $datetime)
@@ -53,9 +85,7 @@ class MediaRepository extends EntityRepository
      */
     public function findMarkRemoveByContextAndRequestId($context, $requestId)
     {
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('t')
-            ->from('GlavwebUploaderBundle:Media', 't')
+        $qb = $this->createQueryBuilder('t')
             ->where('t.markRemove = true')
             ->andWhere('t.context = :context')
             ->andWhere('t.requestId = :requestId')
@@ -73,9 +103,7 @@ class MediaRepository extends EntityRepository
      */
     public function findByContextAndRequestId($context, $requestId)
     {
-        $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('t')
-            ->from('GlavwebUploaderBundle:Media', 't')
+        $qb = $this->createQueryBuilder('t')
             ->where('t.context = :context')
             ->andWhere('t.requestId = :requestId')
             ->setParameter('context', $context)

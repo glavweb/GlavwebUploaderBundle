@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Driver;
 
 use Doctrine\Common\Annotations\Reader as AnnotationReader;
@@ -7,21 +16,34 @@ use Glavweb\UploaderBundle\Exception\ClassNotUploadableException;
 use Glavweb\UploaderBundle\Exception\ValueEmptyException;
 
 /**
- * Annotation driver
+ * Class AnnotationDriver
  *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class AnnotationDriver
 {
-    const UPLOADABLE_ANNOTATION         = 'Glavweb\UploaderBundle\Mapping\Annotation\Uploadable';
-    const UPLOADABLE_FIELD_ANNOTATION   = 'Glavweb\UploaderBundle\Mapping\Annotation\UploadableField';
+    const UPLOADABLE_ANNOTATION       = 'Glavweb\UploaderBundle\Mapping\Annotation\Uploadable';
+    const UPLOADABLE_FIELD_ANNOTATION = 'Glavweb\UploaderBundle\Mapping\Annotation\UploadableField';
 
+    /**
+     * @var AnnotationReader
+     */
     protected $reader;
 
+    /**
+     * @param AnnotationReader $reader
+     */
     public function __construct(AnnotationReader $reader)
     {
         $this->reader = $reader;
     }
 
+    /**
+     * @param \ReflectionClass $class
+     * @return array
+     * @throws ClassNotUploadableException
+     */
     public function loadDataForClass(\ReflectionClass $class)
     {
         if (!$this->isUploadable($class)) {
@@ -37,24 +59,31 @@ class AnnotationDriver
             }
 
             $fieldData = array(
-                'mapping'         => $uploadableField->getMapping(),
-                'nameAddFunction' => $uploadableField->getNameAddFunction(),
-                'nameGetFunction' => $uploadableField->getNameGetFunction()
+                'mapping' => $uploadableField->getMapping()
             );
 
-//            $metadata->fields[$property->getName()] = $fieldData;
             $data[$property->getName()] = $fieldData;
         }
 
-//        return $metadata;
         return $data;
     }
 
+    /**
+     * @param \ReflectionClass $class
+     * @return bool
+     */
     protected function isUploadable(\ReflectionClass $class)
     {
         return $this->reader->getClassAnnotation($class, self::UPLOADABLE_ANNOTATION) !== null;
     }
 
+    /**
+     * @param \ReflectionClass $class
+     * @param $fieldName
+     * @return array|bool
+     * @throws ClassNotUploadableException
+     * @throws ValueEmptyException
+     */
     public function getDataByFieldName(\ReflectionClass $class, $fieldName)
     {
         if (!$this->isUploadable($class)) {
@@ -77,10 +106,8 @@ class AnnotationDriver
             return false;
         }
 
-        return array(
-            'mapping'         => $uploadableField->getMapping(),
-            'nameAddFunction' => $uploadableField->getNameAddFunction(),
-            'nameGetFunction' => $uploadableField->getNameGetFunction()
-        );
+        return [
+            'mapping' => $uploadableField->getMapping()
+        ];
     }
 }

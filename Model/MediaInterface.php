@@ -1,10 +1,21 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Model;
 
 /**
- * Class MediaInterface
- * @package Glavweb\UploaderBundle\Model
+ * Interface MediaInterface
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 interface MediaInterface
 {
@@ -19,7 +30,7 @@ interface MediaInterface
      * Set context
      *
      * @param string $context
-     * @return Media
+     * @return MediaInterface
      */
     public function setContext($context);
 
@@ -34,7 +45,7 @@ interface MediaInterface
      * Set providerName
      *
      * @param string $providerName
-     * @return Media
+     * @return MediaInterface
      */
     public function setProviderName($providerName);
 
@@ -49,7 +60,7 @@ interface MediaInterface
      * Set providerReference
      *
      * @param string $providerReference
-     * @return Media
+     * @return MediaInterface
      */
     public function setProviderReference($providerReference);
 
@@ -64,7 +75,7 @@ interface MediaInterface
      * Set contentPath
      *
      * @param string $contentPath
-     * @return Media
+     * @return MediaInterface
      */
     public function setContentPath($contentPath);
 
@@ -79,7 +90,7 @@ interface MediaInterface
      * Set thumbnailPath
      *
      * @param string $thumbnailPath
-     * @return Media
+     * @return MediaInterface
      */
     public function setThumbnailPath($thumbnailPath);
 
@@ -94,7 +105,7 @@ interface MediaInterface
      * Set name
      *
      * @param string $name
-     * @return Media
+     * @return MediaInterface
      */
     public function setName($name);
 
@@ -109,7 +120,7 @@ interface MediaInterface
      * Set description
      *
      * @param string $description
-     * @return Media
+     * @return MediaInterface
      */
     public function setDescription($description);
 
@@ -124,7 +135,7 @@ interface MediaInterface
      * Set width
      *
      * @param integer $width
-     * @return Media
+     * @return MediaInterface
      */
     public function setWidth($width);
 
@@ -139,7 +150,7 @@ interface MediaInterface
      * Set height
      *
      * @param integer $height
-     * @return Media
+     * @return MediaInterface
      */
     public function setHeight($height);
 
@@ -154,7 +165,7 @@ interface MediaInterface
      * Set contentType
      *
      * @param string $contentType
-     * @return Media
+     * @return MediaInterface
      */
     public function setContentType($contentType);
 
@@ -169,7 +180,7 @@ interface MediaInterface
      * Set contentSize
      *
      * @param integer $contentSize
-     * @return Media
+     * @return MediaInterface
      */
     public function setContentSize($contentSize);
 
@@ -184,7 +195,7 @@ interface MediaInterface
      * Set isOrphan
      *
      * @param boolean $isOrphan
-     * @return Media
+     * @return MediaInterface
      */
     public function setIsOrphan($isOrphan);
 
@@ -199,7 +210,7 @@ interface MediaInterface
      * Set requestId
      *
      * @param string $requestId
-     * @return Media
+     * @return MediaInterface
      */
     public function setRequestId($requestId);
 
@@ -211,10 +222,40 @@ interface MediaInterface
     public function getRequestId();
 
     /**
+     * Set token
+     *
+     * @param string $token
+     * @return MediaInterface
+     */
+    public function setToken($token);
+
+    /**
+     * Get token
+     *
+     * @return string
+     */
+    public function getToken();
+
+    /**
+     * Set position
+     *
+     * @param int $position
+     * @return MediaInterface
+     */
+    public function setPosition($position);
+
+    /**
+     * Get position
+     *
+     * @return int
+     */
+    public function getPosition();
+
+    /**
      * Set updatedAt
      *
      * @param \DateTime $updatedAt
-     * @return Media
+     * @return MediaInterface
      */
     public function setUpdatedAt($updatedAt);
 
@@ -229,7 +270,7 @@ interface MediaInterface
      * Set createdAt
      *
      * @param \DateTime $createdAt
-     * @return Media
+     * @return MediaInterface
      */
     public function setCreatedAt($createdAt);
 

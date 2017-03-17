@@ -1,33 +1,68 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * MediaMarkRemove
+ * Class MediaMarkRemove
+ *
+ * @ORM\Table(name="glavweb_media_mark_remove")
+ * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class MediaMarkRemove
 {
     /**
-     * @var integer
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="request_id", type="string")
      */
     private $requestId;
 
     /**
      * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
     /**
      * @var \Glavweb\UploaderBundle\Entity\Media
+     *
+     * @ORM\ManyToOne(targetEntity="Glavweb\UploaderBundle\Entity\Media", inversedBy="mediaMarkRemoves", cascade={"persist"})
+     * @ORM\JoinColumn(name="media_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $media;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function prePersist()
+    {
+        $this->setCreatedAt(new \DateTime());
+    }
 
     /**
      * Get id
@@ -91,7 +126,7 @@ class MediaMarkRemove
      * @param \Glavweb\UploaderBundle\Entity\Media $media
      * @return MediaMarkRemove
      */
-    public function setMedia(\Glavweb\UploaderBundle\Entity\Media $media)
+    public function setMedia(Media $media)
     {
         $this->media = $media;
 
@@ -106,13 +141,5 @@ class MediaMarkRemove
     public function getMedia()
     {
         return $this->media;
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function prePersist()
-    {
-        $this->setCreatedAt(new \DateTime());
     }
 }

@@ -78,5 +78,10 @@
         <service id="glavweb_uploader.data_driver.annotation" class="Glavweb\UploaderBundle\Driver\AnnotationDriver">
             <argument type="service" id="annotation_reader" />
         </service>
+
+        <service id="glavweb_uploader.util.media_structure" class="Glavweb\UploaderBundle\Util\MediaStructure">
+            <argument type="service" id="glavweb_uploader.media_helper" />
+        </service>
+
     </services>
 </container>

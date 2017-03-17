@@ -1,17 +1,27 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Storage;
 
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Finder\Finder;
 
 /**
  * Class FilesystemStorage
- * @package Glavweb\UploaderBundle\Storage
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class FilesystemStorage implements StorageInterface
 {
@@ -30,12 +40,13 @@ class FilesystemStorage implements StorageInterface
 
     /**
      * @param FileInterface $file
-     * @param string        $name
      * @param string        $directory
+     * @param string        $name
      * @return FileInterface
      */
     public function upload(FileInterface $file, $directory, $name = null)
     {
+        /** @var File $file */
         if ($name === null) {
             $name = $file->getBasename();
         }
@@ -46,6 +57,7 @@ class FilesystemStorage implements StorageInterface
 
         $file = $file->move($targetDir, $targetName);
         $file = new FilesystemFile($file);
+
         return $file;
     }
 
@@ -166,6 +178,7 @@ class FilesystemStorage implements StorageInterface
 
         $files = array();
         foreach ($finder as $file) {
+            /** @var File $file */
             $files[] = new FilesystemFile(new File($file->getPathname()));
         }
         return $files;

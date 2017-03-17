@@ -1,10 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Twig\Extension;
 
 use Glavweb\UploaderBundle\Manager\UploaderManager;
 use Glavweb\UploaderBundle\Model\MediaInterface;
-use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Glavweb\UploaderBundle\Helper\MediaHelper;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -74,13 +82,13 @@ class UploaderExtension extends \Twig_Extension
     }
 
     /**
-     * @param array $mediaArray
+     * @param MediaInterface[] $medias
      * @return string
      */
-    public function renderFiles(array $mediaArray)
+    public function renderFiles(array $medias)
     {
         $request = $this->request;
-        $mediaArray = array_map(function($media) {
+        $medias = array_map(function(MediaInterface $media) {
             $context = $media->getContext();
 
             return array(
@@ -88,11 +96,11 @@ class UploaderExtension extends \Twig_Extension
                 'path' => $this->mediaHelper->getUploadDirectoryUrl($context)  . '/' . $media->getThumbnailPath(),
                 'name' => $media->getName()
             );
-        }, $mediaArray);
+        }, $medias);
 
         $output = '';
         $baseUrl = $request->getScheme() . '://' . $request->getHttpHost() . $request->getBasePath();
-        foreach ($mediaArray as $media) {
+        foreach ($medias as $media) {
             $output .=' <div><a class="uploaded-file" target="_blank" rel="group_uploaded_file" href="' . $baseUrl . $media['path'] . '">' . $media['name'] . '</a></div>';
         }
 

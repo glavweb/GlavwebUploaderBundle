@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Provider;
 
 use Glavweb\UploaderBundle\File\FileInterface;
@@ -7,24 +16,13 @@ use Glavweb\UploaderBundle\Helper\MediaHelper;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 
 /**
- * Class FileProvider
- * @package Glavweb\UploaderBundle\Provider
+ * Class ImageProvider
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 class ImageProvider extends FileProvider
 {
-    /**
-     * @var \Glavweb\UploaderBundle\Helper\MediaHelper
-     */
-    protected $mediaHelper;
-
-    /**
-     * @param MediaHelper $mediaHelper
-     */
-    public function __construct(MediaHelper $mediaHelper)
-    {
-        $this->mediaHelper   = $mediaHelper;
-    }
-
     /**
      * @return string
      */
@@ -42,10 +40,11 @@ class ImageProvider extends FileProvider
         if (!$link instanceof FileInterface) {
             throw new \RuntimeException('$link must be FileInterface.');
         }
+
         $file = $link;
         $this->file = $file;
 
-        list($width, $height) = @getimagesize($file->getPath());
+        list($width, $height) = @getimagesize($file->getPathname());
 
         $this->setName($file->getClientOriginalName());
         $this->setProviderReference(null);

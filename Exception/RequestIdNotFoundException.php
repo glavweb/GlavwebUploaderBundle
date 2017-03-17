@@ -12,10 +12,10 @@
 namespace Glavweb\UploaderBundle\Exception;
 
 /**
- * Class RequestEmptyException
+ * Class RequestIdNotFoundException
  *
  * @package Glavweb\UploaderBundle
  * @author Andrey Nilov <nilov@glavweb.ru>
  */
-class RequestEmptyException extends Exception
+class RequestIdNotFoundException extends Exception
 {}

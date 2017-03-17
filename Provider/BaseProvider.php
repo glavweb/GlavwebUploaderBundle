@@ -1,37 +1,68 @@
 <?php
 
+/*
+ * This file is part of the Glavweb UploaderBundle package.
+ *
+ * (c) Andrey Nilov <nilov@glavweb.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Glavweb\UploaderBundle\Provider;
-use Glavweb\UploaderBundle\Model\MediaInterface;
 
 /**
  * Class BaseProvider
- * @package Glavweb\UploaderBundle\Provider
+ *
+ * @package Glavweb\UploaderBundle
+ * @author Andrey Nilov <nilov@glavweb.ru>
  */
 abstract class BaseProvider implements ProviderInterface
 {
+    /**
+     * @var bool
+     */
     protected $isParsed = false;
-    protected $name;
-    protected $description;
-    protected $providerReference;
-    protected $width;
-    protected $height;
-    protected $contentType;
-    protected $contentSize;
-    protected $thumbnailUrl;
 
-    /*
-    public function loadByMedia(MediaInterface $media)
-    {
-        $this->setName($media->getName());
-        $this->setProviderReference($media->getProviderReference());
-        $this->setContentSize($media->getContentSize());
-        $this->setContentType($media->getContentType());
-        $this->setDescription($media->getDescription());
-        $this->setThumbnailUrl(null);
-        $this->setHeight($media->getHeight());
-        $this->setWidth($media->getWidth());
-    }
-    */
+    /**
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var string
+     */
+    protected $description;
+
+    /**
+     * @var string
+     */
+    protected $providerReference;
+
+    /**
+     * @var int
+     */
+    protected $width;
+
+    /**
+     * @var int
+     */
+    protected $height;
+
+    /**
+     * @var string
+     */
+    protected $contentType;
+
+    /**
+     * @var int
+     */
+    protected $contentSize;
+
+    /**
+     * @var string
+     */
+    protected $thumbnailUrl;
 
     /**
      * @return bool
@@ -42,7 +73,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $contentSize
+     * @param int $contentSize
      */
     public function setContentSize($contentSize)
     {
@@ -50,7 +81,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getContentSize()
     {
@@ -58,7 +89,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $contentType
+     * @param string $contentType
      */
     public function setContentType($contentType)
     {
@@ -66,7 +97,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getContentType()
     {
@@ -74,7 +105,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $description
+     * @param string $description
      */
     public function setDescription($description)
     {
@@ -82,7 +113,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getDescription()
     {
@@ -90,7 +121,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $height
+     * @param int $height
      */
     public function setHeight($height)
     {
@@ -98,7 +129,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getHeight()
     {
@@ -106,7 +137,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      */
     public function setName($name)
     {
@@ -114,7 +145,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getName()
     {
@@ -122,7 +153,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $providerReference
+     * @param string $providerReference
      */
     public function setProviderReference($providerReference)
     {
@@ -130,7 +161,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getProviderReference()
     {
@@ -138,7 +169,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $width
+     * @param int $width
      */
     public function setWidth($width)
     {
@@ -146,7 +177,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getWidth()
     {
@@ -154,7 +185,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @param mixed $thumbnailUrl
+     * @param string $thumbnailUrl
      */
     public function setThumbnailUrl($thumbnailUrl)
     {
@@ -162,7 +193,7 @@ abstract class BaseProvider implements ProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getThumbnailUrl()
     {
