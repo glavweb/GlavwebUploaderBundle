@@ -54,15 +54,16 @@ class MediaStructure
     }
 
     /**
-     * @param array  $medias
+     * @param array $medias
      * @param string $thumbnailFilter
-     * @param bool   $securedId
+     * @param bool $securedId
+     * @param bool $isAbsolute
      * @return array
      */
-    public function getStructure(array $medias, $thumbnailFilter = null, $securedId = false)
+    public function getStructure(array $medias, $thumbnailFilter = null, $securedId = false, $isAbsolute = false)
     {
-        $structure = array_map(function (Media $media) use ($thumbnailFilter, $securedId) {
-            return $this->getMediaStructure($media, $thumbnailFilter, $securedId);
+        $structure = array_map(function (Media $media) use ($thumbnailFilter, $securedId, $isAbsolute) {
+            return $this->getMediaStructure($media, $thumbnailFilter, $securedId, $isAbsolute);
         }, $medias);
 
         return $structure;
@@ -70,22 +71,26 @@ class MediaStructure
 
     /**
      * @param MediaInterface $media
-     * @param string         $thumbnailFilter
-     * @param bool           $securedId
+     * @param string $thumbnailFilter
+     * @param bool $securedId
+     * @param bool $isAbsolute
      * @return array
      * @throws Exception
      */
-    public function getMediaStructure(MediaInterface $media, $thumbnailFilter = null, $securedId = false)
+    public function getMediaStructure(MediaInterface $media, $thumbnailFilter = null, $securedId = false, $isAbsolute = false)
     {
-        $thumbnailPath = $this->mediaHelper->getThumbnailPath($media);
-        $contentPath   = $this->mediaHelper->getContentPath($media);
+        $contentPath   = $this->mediaHelper->getContentPath($media, $isAbsolute);
 
         if ($thumbnailFilter) {
             if (!$this->imagineHelper instanceof ImagineHelper) {
                 throw new Exception('ImagineHelper is not defined. You need use Liip\ImagineBundle.');
             }
 
+            $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, false);
             $thumbnailPath = $this->imagineHelper->filter($thumbnailPath, $thumbnailFilter);
+
+        } else {
+            $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, $isAbsolute);
         }
 
         return [
