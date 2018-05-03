@@ -81,16 +81,19 @@ class MediaStructure
     {
         $contentPath   = $this->mediaHelper->getContentPath($media, $isAbsolute);
 
-        if ($thumbnailFilter) {
-            if (!$this->imagineHelper instanceof ImagineHelper) {
-                throw new Exception('ImagineHelper is not defined. You need use Liip\ImagineBundle.');
+        $thumbnailPath = null;
+        if ($media->getThumbnailPath()) {
+            if ($thumbnailFilter) {
+                if (!$this->imagineHelper instanceof ImagineHelper) {
+                    throw new Exception('ImagineHelper is not defined. You need use Liip\ImagineBundle.');
+                }
+
+                $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, false);
+                $thumbnailPath = $this->imagineHelper->filter($thumbnailPath, $thumbnailFilter);
+
+            } else {
+                $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, $isAbsolute);
             }
-
-            $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, false);
-            $thumbnailPath = $this->imagineHelper->filter($thumbnailPath, $thumbnailFilter);
-
-        } else {
-            $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, $isAbsolute);
         }
 
         return [
