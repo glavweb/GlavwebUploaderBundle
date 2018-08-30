@@ -12,7 +12,6 @@
 namespace Glavweb\UploaderBundle\Provider;
 
 use Glavweb\UploaderBundle\File\FileInterface;
-use Glavweb\UploaderBundle\Helper\MediaHelper;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 
 /**

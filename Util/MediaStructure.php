@@ -15,7 +15,7 @@ use Glavweb\UploaderBundle\Entity\Media;
 use Glavweb\UploaderBundle\Exception\Exception;
 use Glavweb\UploaderBundle\Helper\MediaHelper;
 use Glavweb\UploaderBundle\Model\MediaInterface;
-use Liip\ImagineBundle\Templating\Helper\ImagineHelper;
+use Liip\ImagineBundle\Templating\Helper\FilterHelper;
 
 /**
  * Class MediaStructure
@@ -31,7 +31,7 @@ class MediaStructure
     private $mediaHelper;
 
     /**
-     * @var ImagineHelper
+     * @var FilterHelper
      */
     private $imagineHelper;
 
@@ -46,7 +46,7 @@ class MediaStructure
     }
 
     /**
-     * @param ImagineHelper $imagineHelper
+     * @param FilterHelper $imagineHelper
      */
     public function setImagineHelper($imagineHelper)
     {
@@ -84,8 +84,8 @@ class MediaStructure
         $thumbnailPath = null;
         if ($media->getThumbnailPath()) {
             if ($thumbnailFilter) {
-                if (!$this->imagineHelper instanceof ImagineHelper) {
-                    throw new Exception('ImagineHelper is not defined. You need use Liip\ImagineBundle.');
+                if (!$this->imagineHelper instanceof FilterHelper) {
+                    throw new Exception('FilterHelper is not defined. You need use Liip\ImagineBundle.');
                 }
 
                 $thumbnailPath = $this->mediaHelper->getThumbnailPath($media, false);

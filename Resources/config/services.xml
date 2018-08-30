@@ -14,7 +14,7 @@
     <services>
         <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" />
 
-        <service id="glavweb_uploader.uploader_manager" class="Glavweb\UploaderBundle\Manager\UploaderManager">
+        <service id="glavweb_uploader.uploader_manager" class="Glavweb\UploaderBundle\Manager\UploaderManager" public="true">
             <argument>%glavweb_uploader.config%</argument>
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -23,11 +23,11 @@
             </call>
         </service>
 
-        <service id="glavweb_uploader.model_manager.orm" class="Glavweb\UploaderBundle\Model\OrmModelManager">
+        <service id="glavweb_uploader.model_manager.orm" class="Glavweb\UploaderBundle\Model\OrmModelManager" public="true">
             <argument type="service" id="doctrine" />
         </service>
 
-        <service id="glavweb_uploader.storage.filesystem" class="Glavweb\UploaderBundle\Storage\FilesystemStorage">
+        <service id="glavweb_uploader.storage.filesystem" class="Glavweb\UploaderBundle\Storage\FilesystemStorage" public="true">
             <argument>%kernel.cache_dir%</argument>
         </service>
 
@@ -36,7 +36,7 @@
             <tag name="doctrine.orm.entity_listener" />
         </service>
 
-        <service id="glavweb_uploader.media_helper" class="Glavweb\UploaderBundle\Helper\MediaHelper">
+        <service id="glavweb_uploader.media_helper" class="Glavweb\UploaderBundle\Helper\MediaHelper" public="true">
             <argument>%glavweb_uploader.config%</argument>
             <argument type="service" id="request_stack" />
         </service>
@@ -49,18 +49,18 @@
         </service>
 
         <!-- providers -->
-        <service id="glavweb_uploader.provider.file"    class="%glavweb_uploader.provider.file.class%">
+        <service id="glavweb_uploader.provider.file" class="%glavweb_uploader.provider.file.class%" public="true">
             <argument type="service" id="glavweb_uploader.media_helper" />
         </service>
 
-        <service id="glavweb_uploader.provider.image"   class="%glavweb_uploader.provider.image.class%">
+        <service id="glavweb_uploader.provider.image"   class="%glavweb_uploader.provider.image.class%" public="true">
             <argument type="service" id="glavweb_uploader.media_helper" />
         </service>
 
-        <service id="glavweb_uploader.provider.youtube" class="%glavweb_uploader.provider.youtube.class%" />
+        <service id="glavweb_uploader.provider.youtube" class="%glavweb_uploader.provider.youtube.class%" public="true" />
 
         <!-- namer -->
-        <service id="glavweb_uploader.namer.uniqid" class="%glavweb_uploader.namer.uniqid.class%" />
+        <service id="glavweb_uploader.namer.uniqid" class="%glavweb_uploader.namer.uniqid.class%" public="true" />
 
         <!-- validators -->
         <service id="glavweb_uploader.validation_listener.max_size" class="Glavweb\UploaderBundle\EventListener\MaxSizeValidationListener">
@@ -75,11 +75,11 @@
             <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>
 
-        <service id="glavweb_uploader.data_driver.annotation" class="Glavweb\UploaderBundle\Driver\AnnotationDriver">
+        <service id="glavweb_uploader.data_driver.annotation" class="Glavweb\UploaderBundle\Driver\AnnotationDriver" public="true">
             <argument type="service" id="annotation_reader" />
         </service>
 
-        <service id="glavweb_uploader.util.media_structure" class="Glavweb\UploaderBundle\Util\MediaStructure">
+        <service id="glavweb_uploader.util.media_structure" class="Glavweb\UploaderBundle\Util\MediaStructure" public="true">
             <argument type="service" id="glavweb_uploader.media_helper" />
         </service>
 

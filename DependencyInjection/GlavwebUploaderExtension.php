@@ -11,7 +11,7 @@
 
 namespace Glavweb\UploaderBundle\DependencyInjection;
 
-use Liip\ImagineBundle\Templating\Helper\ImagineHelper;
+use Liip\ImagineBundle\Templating\Helper\FilterHelper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -41,9 +41,9 @@ class GlavwebUploaderExtension extends Extension
 
         $container->setParameter('glavweb_uploader.config', $config);
 
-        if (class_exists(ImagineHelper::class)) {
+        if (class_exists(FilterHelper::class)) {
             $container->getDefinition('glavweb_uploader.util.media_structure')->addMethodCall('setImagineHelper', [
-                new Reference('liip_imagine.templating.helper')
+                new Reference('liip_imagine.templating.filter_helper')
             ]);
         }
     }
