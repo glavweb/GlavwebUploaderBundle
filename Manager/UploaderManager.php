@@ -12,6 +12,8 @@
 namespace Glavweb\UploaderBundle\Manager;
 
 use Glavweb\UploaderBundle\Driver\AnnotationDriver;
+use Glavweb\UploaderBundle\Entity\Media;
+use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\Exception\ProviderNotFoundException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Model\MediaInterface;
@@ -421,5 +423,35 @@ class UploaderManager implements ContainerAwareInterface
         if (in_array($extension, $this->blackListExtensions)) {
             throw new \RuntimeException('Extension "' . $extension . '" not supported.');
         }
+    }
+
+    /**
+     * @param Media $media
+     * @param array $cropData
+     * @throws CropImageException
+     */
+    public function cropImage(Media $media, array $cropData): void
+    {
+        $storage     = $this->getStorage();
+        $context     = $media->getContext();
+        $contentPath = $media->getContentPath();
+        $directory   = $this->getContextConfig($context, 'upload_directory');
+
+        if ($media->getProviderName() !== 'glavweb_uploader.provider.image') {
+            throw new CropImageException('The provider name must be "glavweb_uploader.provider.image".');
+        }
+
+        if (!$storage->isFile($directory, $contentPath)) {
+            throw new CropImageException('File is not found.');
+        }
+
+        $file = $storage->getFile($directory, $contentPath);
+
+        // update file name
+        $newFilename = $this->getStorage()->cropImage($file, $cropData);
+        $media->setContentPath(basename($newFilename));
+        $media->setThumbnailPath(basename($newFilename));
+
+        $this->getModelManager()->updateMedia($media);
     }
 }

@@ -196,12 +196,19 @@ class UploadController extends Controller
         $requestId   = $request->get('request_id');
         $name        = $request->get('name');
         $description = $request->get('description');
+        $cropData    = $request->get('crop_data');
+        $softEdit    = $request->get('soft_edit', false);
 
-        $modelManager = $this->get('glavweb_uploader.uploader_manager')->getModelManager();
+        if ($cropData) {
+            $cropData = json_decode($cropData, true);
+        }
+
+        $uploaderManager = $this->get('glavweb_uploader.uploader_manager');
+        $modelManager = $uploaderManager->getModelManager();
         $media = $modelManager->findOneBySecuredId($id);
 
         if ($media && $requestId && ($name || $description)) {
-            if ($media->getIsOrphan()) {
+            if ($media->getIsOrphan() || !$softEdit) {
                 if ($media->getRequestId() == $requestId) {
                     $success = $modelManager->editMedia($media, $name, $description);
                 }
@@ -211,7 +218,17 @@ class UploadController extends Controller
             }
         }
 
-        return new JsonResponse(['success' => $success], $success ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST);
+        if ($media) {
+            if ($cropData) {
+                $uploaderManager->cropImage($media, $cropData);
+            }
+            $mediaStructure = $this->get('glavweb_uploader.util.media_structure')->getMediaStructure($media);
+        }
+
+        return new JsonResponse([
+            'success' => $success,
+            'media'   => $mediaStructure
+        ], $success ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST);
     }
 
     /**

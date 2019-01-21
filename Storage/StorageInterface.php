@@ -11,8 +11,10 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
+use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * Interface StorageInterface
@@ -76,4 +78,12 @@ interface StorageInterface
      * @param FileInterface $file
      */
     public function removeFile(FileInterface $file);
+
+    /**
+     * @param FilesystemFile $file
+     * @param array $cropData
+     * @return string
+     * @throws CropImageException
+     */
+    public function cropImage(FilesystemFile $file, array $cropData): string;
 }

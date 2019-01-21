@@ -11,8 +11,10 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
+use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
+use Glavweb\UploaderBundle\Util\CropImage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Finder\Finder;
@@ -239,5 +241,47 @@ class FilesystemStorage implements StorageInterface
     {
         $filesystem = new Filesystem();
         $filesystem->remove($file);
+    }
+
+    /**
+     * @param FilesystemFile $file
+     * @param array $cropData
+     * @return string
+     * @throws CropImageException
+     */
+    public function cropImage(FilesystemFile $file, array $cropData): string
+    {
+        $pathname = $file->getPathname();
+        $cropResult = CropImage::crop($pathname, $pathname, $cropData);
+
+        $updatedPathname = $pathname;
+        if ($cropResult) {
+            $updatedPathname = $this->saveFileWithNewVersion($file);
+        }
+
+        return $updatedPathname;
+    }
+
+    /**
+     * @param FilesystemFile $file
+     * @return string
+     */
+    private function saveFileWithNewVersion(FilesystemFile $file): string
+    {
+        $pathParts = pathinfo($file->getPathname());
+        $directory = $pathParts['dirname'];
+
+        $filenameFarts = explode('_', $pathParts['filename']);
+        if (count($filenameFarts) > 1) {
+            $filenameFarts[1] += 1;
+
+        } else {
+            $filenameFarts[1] = '1';
+        }
+        $fileName = implode('_', $filenameFarts) . '.' . $pathParts['extension'];
+
+        $newFile = $file->move($directory, $fileName);
+
+        return $newFile->getPathname();
     }
 }
