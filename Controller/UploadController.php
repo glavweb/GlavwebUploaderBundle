@@ -208,13 +208,18 @@ class UploadController extends Controller
         $media = $modelManager->findOneBySecuredId($id);
 
         if ($media && $requestId && ($name || $description)) {
-            if ($media->getIsOrphan() || !$softEdit) {
-                if ($media->getRequestId() == $requestId) {
-                    $success = $modelManager->editMedia($media, $name, $description);
-                }
+            if ($softEdit) {
+                $success = $modelManager->markEdit($media, $requestId, $name, $description);
 
             } else {
-                $success = $modelManager->markEdit($media, $requestId, $name, $description);
+                if ($media->getIsOrphan()) {
+                    if ($media->getRequestId() == $requestId) {
+                        $success = $modelManager->editMedia($media, $name, $description);
+                    }
+
+                } else {
+                    $success = $modelManager->editMedia($media, $name, $description);
+                }
             }
         }
 
