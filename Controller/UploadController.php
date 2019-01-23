@@ -227,7 +227,7 @@ class UploadController extends Controller
             if ($cropData) {
                 $uploaderManager->cropImage($media, $cropData);
             }
-            $mediaStructure = $this->get('glavweb_uploader.util.media_structure')->getMediaStructure($media);
+            $mediaStructure = $this->get('glavweb_uploader.util.media_structure')->getMediaStructure($media, null, true);
         }
 
         return new JsonResponse([
