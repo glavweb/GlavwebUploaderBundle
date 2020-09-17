@@ -15,12 +15,15 @@ use Glavweb\UploaderBundle\Manager\UploaderManager;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Glavweb\UploaderBundle\Helper\MediaHelper;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 /**
  * Class UploaderExtension
  * @package Glavweb\UploaderBundle\Twig\Extension
  */
-class UploaderExtension extends \Twig_Extension
+class UploaderExtension extends AbstractExtension
 {
     /**
      * @var null|\Symfony\Component\HttpFoundation\Request
@@ -65,8 +68,8 @@ class UploaderExtension extends \Twig_Extension
     public function getFilters()
     {
         return array(
-            new \Twig_SimpleFilter('glavweb_uploader_thumbnail', array($this, 'thumbnail')),
-            new \Twig_SimpleFilter('glavweb_uploader_content_path', array($this, 'contentPath'))
+            new TwigFilter('glavweb_uploader_thumbnail', [$this, 'thumbnail']),
+            new TwigFilter('glavweb_uploader_content_path', [$this, 'contentPath'])
         );
     }
 
@@ -76,8 +79,8 @@ class UploaderExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('glavweb_uploader_render_files', array($this, 'renderFiles')),
-            new \Twig_SimpleFunction('glavweb_uploader_display', array($this, 'display'), array('is_safe' => array('html')))
+            new TwigFunction('glavweb_uploader_render_files', [$this, 'renderFiles']),
+            new TwigFunction('glavweb_uploader_display', [$this, 'display'], ['is_safe' => ['html']])
         );
     }
 

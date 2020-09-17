@@ -14,7 +14,8 @@
     ],
     "require": {
         "symfony/http-foundation": "^2.7|^3.0|^4.0",
-        "symfony/form": "^2.7|^3.0|^4.0"
+        "symfony/form": "^2.7|^3.0|^4.0",
+        "twig/twig": "^2.12.1"
     },
     "autoload": {
         "psr-4": { "Glavweb\\UploaderBundle\\": "" }
