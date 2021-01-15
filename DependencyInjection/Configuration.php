@@ -42,6 +42,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->scalarNode('model_manager')->defaultValue('glavweb_uploader.model_manager.orm')->end()
+                ->scalarNode('base_url')->defaultValue('')->end()
                 ->scalarNode('storage')->defaultValue('glavweb_uploader.storage.filesystem')->end()
                 ->arrayNode('mappings')
                     ->useAttributeAsKey('id')

@@ -39,6 +39,6 @@ class UniqidNamer implements NamerInterface
         );
         $extension = strtr($extension, $replace);
 
-        return sprintf('%s.%s', uniqid(), $extension);
+        return sprintf('%s.%s', uniqid('', false), $extension);
     }
 }

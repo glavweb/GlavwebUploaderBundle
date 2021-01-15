@@ -15,9 +15,11 @@ use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\Util\CropImage;
+use Glavweb\UploaderBundle\Util\FileUtils;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Finder\Finder;
+use function dirname;
 
 /**
  * Class FilesystemStorage
@@ -27,18 +29,6 @@ use Symfony\Component\Finder\Finder;
  */
 class FilesystemStorage implements StorageInterface
 {
-    /**
-     * @var string
-     */
-    protected $cacheDir;
-
-    /**
-     * @param string $cacheDir
-     */
-    public function __construct($cacheDir)
-    {
-        $this->cacheDir = realpath($cacheDir);
-    }
 
     /**
      * @param FileInterface $file
@@ -69,66 +59,9 @@ class FilesystemStorage implements StorageInterface
      */
     public function uploadTmpFileByLink($link)
     {
-        if ($this->isUrl($link)) {
-            $fileContents = $this->getContentsByLink($link);
+        $file = FileUtils::getTempFileByUrl($link);
 
-        } else {
-            $fileContents = $this->getContentsFromBase64($link);
-        }
-
-        if (!$fileContents) {
-            return false;
-        }
-
-        $tempDir = $this->cacheDir . DIRECTORY_SEPARATOR . 'glavweb_uploader';
-        $tempPath = $tempDir . DIRECTORY_SEPARATOR . uniqid() . '.tmp';
-
-        if (!is_dir($tempDir)) {
-            mkdir($tempDir, 0777, true);
-        }
-
-        $fileObject = new \SplFileObject($tempPath, 'w');
-        $fileObject->fwrite($fileContents);
-
-        return new FilesystemFile(new File($tempPath));
-    }
-
-    /**
-     * @param string $link
-     * @return string|false
-     */
-    protected function getContentsByLink($link)
-    {
-        if (!$this->isUrl($link)) {
-            return false;
-        }
-
-        $handle = fopen($link, 'rb');
-        $fileContents = stream_get_contents($handle);
-        fclose($handle);
-
-        return $fileContents;
-    }
-
-    /**
-     * @param string $base64
-     * @return string
-     */
-    private function getContentsFromBase64($base64)
-    {
-        return base64_decode($base64);
-    }
-
-    /**
-     * @param $url
-     * @return bool
-     */
-    protected function isUrl($url)
-    {
-        $url = filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
-        $urlDetails = parse_url($url);
-
-        return isset($urlDetails['scheme']) && in_array($urlDetails['scheme'], array('http', 'https'));
+        return new FilesystemFile($file);
     }
 
     /**
@@ -244,44 +177,21 @@ class FilesystemStorage implements StorageInterface
     }
 
     /**
-     * @param FilesystemFile $file
+     * @param FileInterface $file
      * @param array $cropData
      * @return string
      * @throws CropImageException
      */
-    public function cropImage(FilesystemFile $file, array $cropData): string
+    public function cropImage(FileInterface $file, array $cropData)
     {
         $pathname = $file->getPathname();
         $cropResult = CropImage::crop($pathname, $pathname, $cropData);
 
         $updatedPathname = $pathname;
         if ($cropResult) {
-            $updatedPathname = $this->saveFileWithNewVersion($file);
+            $updatedPathname = FileUtils::saveFileWithNewVersion($file);
         }
 
         return $updatedPathname;
-    }
-
-    /**
-     * @param FilesystemFile $file
-     * @return string
-     */
-    private function saveFileWithNewVersion(FilesystemFile $file): string
-    {
-        $pathParts = pathinfo($file->getPathname());
-        $directory = $pathParts['dirname'];
-
-        $filenameFarts = explode('_', $pathParts['filename']);
-        if (count($filenameFarts) > 1) {
-            $filenameFarts[1] += 1;
-
-        } else {
-            $filenameFarts[1] = '1';
-        }
-        $fileName = implode('_', $filenameFarts) . '.' . $pathParts['extension'];
-
-        $newFile = $file->move($directory, $fileName);
-
-        return $newFile->getPathname();
     }
 }

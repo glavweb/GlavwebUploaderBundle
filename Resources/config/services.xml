@@ -28,7 +28,6 @@
         </service>
 
         <service id="glavweb_uploader.storage.filesystem" class="Glavweb\UploaderBundle\Storage\FilesystemStorage" public="true">
-            <argument>%kernel.cache_dir%</argument>
         </service>
 
         <service id="glavweb_uploader.media_listener" class="Glavweb\UploaderBundle\Entity\Listener\MediaListener">

@@ -17,6 +17,7 @@ use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\Exception\ProviderNotFoundException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Model\MediaInterface;
+use Glavweb\UploaderBundle\Provider\ImageProvider;
 use Glavweb\UploaderBundle\Provider\ProviderFileInterface;
 use Glavweb\UploaderBundle\Provider\ProviderInterface;
 use Glavweb\UploaderBundle\Provider\ProviderTypes;
@@ -149,7 +150,7 @@ class UploaderManager implements ContainerAwareInterface
             $uploadedFile = $this->uploadFile($provider->getFile(), $context);
 
             $contentPath = basename($uploadedFile->getPathname());
-            if (@getimagesize($uploadedFile->getPathname())) {
+            if ($provider instanceof ImageProvider) {
                 $thumbnailPath = $contentPath;
             }
 
@@ -430,7 +431,7 @@ class UploaderManager implements ContainerAwareInterface
      * @param array $cropData
      * @throws CropImageException
      */
-    public function cropImage(Media $media, array $cropData): void
+    public function cropImage(Media $media, array $cropData)
     {
         $storage     = $this->getStorage();
         $context     = $media->getContext();

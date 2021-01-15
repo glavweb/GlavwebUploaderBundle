@@ -65,6 +65,9 @@ class MediaHelper
      */
     public function getAbsoluteUri($uri)
     {
+        if (isset($this->config['base_url'])) {
+            return $this->config['base_url'] . $uri;
+        }
         // already absolute?
         if (0 === strpos($uri, 'http://') || 0 === strpos($uri, 'https://')) {
             return $uri;

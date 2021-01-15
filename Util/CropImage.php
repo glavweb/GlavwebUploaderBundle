@@ -27,7 +27,7 @@ class CropImage
      * @param array $cropData
      * @throws CropImageException
      */
-    public static function crop(string $sourcePath, string $targetPath, array $cropData): bool
+    public static function crop($sourcePath, $targetPath, array $cropData)
     {
         // crop
         $sourceImage = self::getImage($sourcePath);
@@ -100,7 +100,7 @@ class CropImage
      * @param string $targetPath
      * @throws CropImageException
      */
-    private static function saveImage($targetImage, string $targetPath): void
+    private static function saveImage($targetImage, $targetPath)
     {
         $imageType = exif_imagetype($targetPath);
 
