@@ -19,7 +19,6 @@ use Glavweb\UploaderBundle\Util\FileUtils;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Finder\Finder;
-use function dirname;
 
 /**
  * Class FilesystemStorage
@@ -182,7 +181,7 @@ class FilesystemStorage implements StorageInterface
      * @return string
      * @throws CropImageException
      */
-    public function cropImage(FileInterface $file, array $cropData)
+    public function cropImage(FileInterface $file, array $cropData): string
     {
         $pathname = $file->getPathname();
         $cropResult = CropImage::crop($pathname, $pathname, $cropData);

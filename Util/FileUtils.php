@@ -1,26 +1,11 @@
 <?php
 
-
 namespace Glavweb\UploaderBundle\Util;
-
 
 use Glavweb\UploaderBundle\Exception\Base64DecodingException;
 use Glavweb\UploaderBundle\Exception\FileNotFoundException;
 use Glavweb\UploaderBundle\File\FileInterface;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\File\File;
-use function base64_decode;
-use function count;
-use function explode;
-use function fclose;
-use function fopen;
-use function fwrite;
-use function implode;
-use function is_resource;
-use function pathinfo;
-use function stream_copy_to_stream;
-use function stream_get_meta_data;
-use function tmpfile;
 
 /**
  * Class FileUtils
@@ -76,7 +61,7 @@ class FileUtils
                 $target = tmpfile();
 
                 if (!stream_copy_to_stream($source, $target)) {
-                    throw new RuntimeException('Stream copy failed');
+                    throw new \RuntimeException('Stream copy failed');
                 }
             } else {
                 $fileContents = base64_decode($link);
@@ -87,7 +72,7 @@ class FileUtils
                 $target = tmpfile();
 
                 if (!fwrite($target, $fileContents)) {
-                    throw new RuntimeException('Unable to write content into temporal file');
+                    throw new \RuntimeException('Unable to write content into temporal file');
                 }
             }
 

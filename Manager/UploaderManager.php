@@ -431,7 +431,7 @@ class UploaderManager implements ContainerAwareInterface
      * @param array $cropData
      * @throws CropImageException
      */
-    public function cropImage(Media $media, array $cropData)
+    public function cropImage(Media $media, array $cropData): void
     {
         $storage     = $this->getStorage();
         $context     = $media->getContext();

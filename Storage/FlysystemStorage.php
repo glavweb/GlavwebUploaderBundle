@@ -11,8 +11,6 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
-use DateTime;
-use Exception;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\File\FlysystemFile;
@@ -101,7 +99,7 @@ class FlysystemStorage implements StorageInterface
             }
 
             return $return;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return [];
         }
     }
@@ -113,7 +111,7 @@ class FlysystemStorage implements StorageInterface
     {
         /** @var FlysystemFile $file */
         foreach ($this->getFilesByDirectory($directory) as $file) {
-            $nowTimestamp  = (new DateTime())->getTimestamp();
+            $nowTimestamp  = (new \DateTime())->getTimestamp();
             $fileTimestamp = $file->getLastModifiedAt()->getTimestamp();
 
             if (($nowTimestamp - $fileTimestamp) > $lifetime) {
@@ -136,7 +134,7 @@ class FlysystemStorage implements StorageInterface
     /**
      * @inheritDoc
      */
-    public function cropImage(FileInterface $file, array $cropData)
+    public function cropImage(FileInterface $file, array $cropData): string
     {
         $pathname = $file->getPathname();
         $cropResult = CropImage::crop($pathname, $pathname, $cropData);

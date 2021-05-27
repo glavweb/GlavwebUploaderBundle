@@ -4,7 +4,6 @@
 namespace Glavweb\UploaderBundle\File;
 
 
-use DateTime;
 use Glavweb\UploaderBundle\Storage\FlysystemStorage;
 use League\Flysystem\FileNotFoundException;
 use Symfony\Component\Mime\MimeTypes;
@@ -44,7 +43,7 @@ class FlysystemFile implements FileInterface
     private $mimeType;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      */
     private $lastModifiedAt;
 
@@ -97,13 +96,13 @@ class FlysystemFile implements FileInterface
     }
 
     /**
-     * @return DateTime|null
+     * @return \DateTime|null
      * @throws FileNotFoundException
      */
     public function getLastModifiedAt()
     {
         if (!$this->lastModifiedAt) {
-            $this->lastModifiedAt = (new DateTime())->setTimestamp($this->storage->getTimestamp($this));
+            $this->lastModifiedAt = (new \DateTime())->setTimestamp($this->storage->getTimestamp($this));
         }
 
         return $this->lastModifiedAt;
@@ -111,7 +110,7 @@ class FlysystemFile implements FileInterface
 
 
     /**
-     * @param DateTime|null $lastModifiedAt
+     * @param \DateTime|null $lastModifiedAt
      * @return FlysystemFile
      */
     public function setLastModifiedAt($lastModifiedAt)
@@ -234,7 +233,7 @@ class FlysystemFile implements FileInterface
         }
 
         if (isset($data['timestamp'])) {
-            $lastModifiedAt = new DateTime();
+            $lastModifiedAt = new \DateTime();
             $lastModifiedAt->setTimestamp($data['timestamp']);
 
             $this->setLastModifiedAt($lastModifiedAt);

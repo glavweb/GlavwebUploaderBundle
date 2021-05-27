@@ -83,5 +83,5 @@ interface StorageInterface
      * @return string
      * @throws CropImageException
      */
-    public function cropImage(FileInterface $file, array $cropData);
+    public function cropImage(FileInterface $file, array $cropData): string;
 }

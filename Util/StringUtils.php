@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Glavweb\UploaderBundle\Util;
-
 
 /**
  * Class StringUtils
