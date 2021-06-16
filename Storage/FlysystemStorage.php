@@ -11,6 +11,7 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
+use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\File\FlysystemFile;
@@ -59,10 +60,18 @@ class FlysystemStorage implements StorageInterface
 
         $path = sprintf('%s/%s', $directory, $name);
 
-        $this->filesystem->put($path, file_get_contents($file->getPathname()), [
-            'visibility' => AdapterInterface::VISIBILITY_PUBLIC,
-            'mimetype'   => $file->getMimeType()
-        ]);
+        try {
+            $source = fopen($file->getPathname(), 'rb');
+
+            $this->filesystem->putStream($path, $source, [
+                'visibility' => AdapterInterface::VISIBILITY_PUBLIC,
+                'mimetype'   => $file->getMimeType()
+            ]);
+        } finally {
+            if (isset($source) && is_resource($source)) {
+                fclose($source);
+            }
+        }
 
         $originalName = $file->getClientOriginalName();
         $size = $file->getSize();
@@ -133,18 +142,38 @@ class FlysystemStorage implements StorageInterface
 
     /**
      * @inheritDoc
+     * @throws FileNotFoundException
      */
     public function cropImage(FileInterface $file, array $cropData): string
     {
-        $pathname = $file->getPathname();
-        $cropResult = CropImage::crop($pathname, $pathname, $cropData);
+        try {
+            $pathname   = $file->getPathname();
+            $sourceFile = $this->filesystem->readStream($pathname);
+            $tempFile   = tmpfile();
 
-        $updatedPathname = $pathname;
-        if ($cropResult) {
-            $updatedPathname = FileUtils::saveFileWithNewVersion($file);
+            stream_copy_to_stream($sourceFile, $tempFile);
+
+            $tempFilePathname = stream_get_meta_data($tempFile)['uri'];
+
+            $cropResult = CropImage::crop($tempFilePathname, $tempFilePathname, $cropData);
+
+            $this->filesystem->updateStream($pathname, $tempFile);
+
+            $updatedPathname = $pathname;
+            if ($cropResult) {
+                $updatedPathname = FileUtils::saveFileWithNewVersion($file);
+            }
+
+            return $updatedPathname;
+
+        } finally {
+            if (isset($sourceFile) && is_resource($sourceFile)) {
+                fclose($sourceFile);
+            }
+            if (isset($tempFile) && is_resource($tempFile)) {
+                fclose($tempFile);
+            }
         }
-
-        return $updatedPathname;
     }
 
     /**

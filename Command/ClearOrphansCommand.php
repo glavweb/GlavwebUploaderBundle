@@ -25,6 +25,8 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
  */
 class ClearOrphansCommand extends Command implements ContainerAwareInterface
 {
+    protected static $defaultName = 'glavweb:uploader:clear-orphans';
+
     use ContainerAwareTrait;
 
     /**
@@ -32,7 +34,6 @@ class ClearOrphansCommand extends Command implements ContainerAwareInterface
      */
     protected function configure()
     {
-        $this->setName('glavweb:uploader:clear-orphans');
         $this->setDescription('Clear orphaned uploads according to the "lifetime" you defined in your configuration.');
     }
 

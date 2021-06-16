@@ -11,6 +11,7 @@
 
 namespace Glavweb\UploaderBundle\Helper;
 
+use Glavweb\UploaderBundle\Manager\UploaderManager;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -33,13 +34,19 @@ class MediaHelper
     protected $request;
 
     /**
+     * @var UploaderManager
+     */
+    private $uploaderManager;
+
+    /**
      * @param array $config
      * @param RequestStack $requestStack
      */
-    public function __construct(array $config, RequestStack $requestStack)
+    public function __construct(array $config, RequestStack $requestStack, UploaderManager $uploaderManager)
     {
-        $this->config  = $config;
-        $this->request = $requestStack->getCurrentRequest();
+        $this->config          = $config;
+        $this->request         = $requestStack->getCurrentRequest();
+        $this->uploaderManager = $uploaderManager;
     }
 
     /**
@@ -49,7 +56,7 @@ class MediaHelper
      */
     public function getUploadDirectoryUrl($context, $isAbsolute = false)
     {
-        $uploadDirectoryUrl = '/' . $this->getContextConfig($context, 'upload_directory_url');
+        $uploadDirectoryUrl = '/' . $this->uploaderManager->getContextConfig($context, 'upload_directory_url');
         if ($isAbsolute) {
             return $this->getAbsoluteUri($uploadDirectoryUrl);
         }
@@ -98,25 +105,6 @@ class MediaHelper
         }
 
         return preg_replace('#^(.*?//[^/]+)\/.*$#', '$1', $currentUri) . $uri;
-    }
-
-    /**
-     * @param string $context
-     * @param string $option
-     * @return mixed
-     * @throws \RuntimeException
-     */
-    protected function getContextConfig($context, $option = null)
-    {
-        if (!isset($this->config['mappings'][$context])) {
-            throw new \RuntimeException('Context "' . $context . '" not defined.');
-        }
-        $contextConfig = $this->config['mappings'][$context];
-
-        if ($option) {
-            return $contextConfig[$option];
-        }
-        return $contextConfig;
     }
 
     /**

@@ -12,7 +12,7 @@
     </parameters>
 
     <services>
-        <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" />
+        <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" public="true"/>
 
         <service id="glavweb_uploader.uploader_manager" class="Glavweb\UploaderBundle\Manager\UploaderManager" public="true">
             <argument>%glavweb_uploader.config%</argument>
@@ -38,6 +38,7 @@
         <service id="glavweb_uploader.media_helper" class="Glavweb\UploaderBundle\Helper\MediaHelper" public="true">
             <argument>%glavweb_uploader.config%</argument>
             <argument type="service" id="request_stack" />
+            <argument type="service" id="glavweb_uploader.uploader_manager" />
         </service>
 
         <service id="glavweb_uploader.twig.uploader_extension" class="Glavweb\UploaderBundle\Twig\Extension\UploaderExtension">
@@ -82,5 +83,8 @@
             <argument type="service" id="glavweb_uploader.media_helper" />
         </service>
 
+        <service id="glavweb_uploader.command.clear_orphans_command" class="Glavweb\UploaderBundle\Command\ClearOrphansCommand">
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

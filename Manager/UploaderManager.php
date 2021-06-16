@@ -23,6 +23,10 @@ use Glavweb\UploaderBundle\Provider\ProviderInterface;
 use Glavweb\UploaderBundle\Provider\ProviderTypes;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class UploaderManager
@@ -67,11 +71,22 @@ class UploaderManager implements ContainerAwareInterface
     private $requestStack;
 
     /**
+     * @var array
+     */
+    private $config;
+
+    /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    /**
      * @param array $config
      */
     public function __construct(array $config)
     {
-        $this->config = $config;
+        $this->config     = $config;
+        $this->filesystem = new Filesystem();
     }
 
     /**
@@ -358,6 +373,25 @@ class UploaderManager implements ContainerAwareInterface
     public function clearOrphanage()
     {
         $this->getModelManager()->removeOrphans($this->config['orphanage']['lifetime']);
+
+        $oldFilesFinder = new Finder();
+        $oldFilesFinder->in($this->getChunkedUploadDirectoryPath())
+            ->files()
+            ->date("before 1 hour ago");
+
+        $this->filesystem->remove(iterator_to_array($oldFilesFinder));
+
+        $emptyDirFinder = new Finder();
+        $emptyDirFinder->in($this->getChunkedUploadDirectoryPath())
+            ->directories()
+            ->filter(function (\SplFileInfo $dirInfo) {
+                $dirFinder = new Finder();
+                $dirFinder->in($dirInfo->getRealPath())->files();
+
+                return !$dirFinder->count();
+            });
+
+        $this->filesystem->remove(iterator_to_array($emptyDirFinder));
     }
 
     /**
@@ -394,7 +428,7 @@ class UploaderManager implements ContainerAwareInterface
      * @return mixed
      * @throws \RuntimeException
      */
-    protected function getContextConfig($context, $option = null)
+    public function getContextConfig($context, $option = null)
     {
         if (!isset($this->config['mappings'][$context])) {
             throw new \RuntimeException('Context "' . $context . '" not defined.');
@@ -402,11 +436,35 @@ class UploaderManager implements ContainerAwareInterface
 
         $contextConfig = $this->config['mappings'][$context];
 
+        if (isset($this->config['mappings_defaults'])) {
+            $defaults = $this->config['mappings_defaults'];
+
+            foreach ($contextConfig as $key => $value) {
+                if ((is_array($value) && empty($value)) || $value === null) {
+                    $contextConfig[$key] = $defaults[$key];
+                }
+            }
+
+            foreach ($defaults as $defaultKey => $defaultValue) {
+                if (!isset($contextConfig[$defaultKey])) {
+                    $contextConfig[$defaultKey] = $defaultValue;
+                }
+            }
+        }
+
         if ($option) {
             return $contextConfig[$option];
         }
 
         return $contextConfig;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     /**
@@ -454,5 +512,152 @@ class UploaderManager implements ContainerAwareInterface
         $media->setThumbnailPath(basename($newFilename));
 
         $this->getModelManager()->updateMedia($media);
+    }
+
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public function isChunkUpload(Request $request): bool
+    {
+        return (bool) $request->get($this->config['chunk_upload']['total_count_request_parameter']);
+    }
+
+    /**
+     * @param Request $request
+     * @param File $file
+     * @return File|null
+     * @throws \Exception
+     */
+    public function handleChunkUpload(Request $request, File $file): ?File
+    {
+        $config     = $this->config['chunk_upload'];
+        $fileId     = $request->get($config['file_id_request_parameter']);
+        $chunkIndex = $request->get($config['current_index_request_parameter']);
+        $chunkTotal = $request->get($config['total_count_request_parameter']);
+
+        $this->addFileChunk($file, $fileId, $chunkIndex);
+
+        if ($this->hasAllFileChunks($fileId, $chunkTotal)) {
+            return $this->concatFileChunks($fileId);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param File $file
+     * @param string $fileId
+     * @param int $chunkIndex
+     * @param int $chunkTotal
+     */
+    public function addFileChunk(File $file, string $fileId, int $chunkIndex): void
+    {
+        $chunksDirectoryPath = $this->getChunksDirectoryPath($fileId);
+        $targetPath          = $chunksDirectoryPath . DIRECTORY_SEPARATOR . $chunkIndex;
+
+        $this->filesystem->mkdir($chunksDirectoryPath);
+        $this->filesystem->rename($file->getRealPath(), $targetPath);
+    }
+
+    /**
+     * @param string $fileId
+     * @param int $chunkTotal
+     * @return bool
+     */
+    public function hasAllFileChunks(string $fileId, int $chunkTotal): bool
+    {
+        $finder = new Finder();
+
+        $chunksDirectoryPath = $this->getChunksDirectoryPath($fileId);
+
+        $finder->in($chunksDirectoryPath)->files();
+
+        if ($finder->count() === $chunkTotal) {
+            foreach ($finder as $chunk) {
+                if (!is_readable($chunk->getRealPath())) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $fileId
+     * @return File
+     * @throws \Exception
+     */
+    public function concatFileChunks(string $fileId): File
+    {
+        $finder = new Finder();
+
+        $chunksDirectoryPath = $this->getChunksDirectoryPath($fileId);
+        $fileDirectoryPath   = $this->getConcatenatedFileDirectoryPath();
+        $filePath            = $fileDirectoryPath . DIRECTORY_SEPARATOR . $fileId;
+
+        $finder->in($chunksDirectoryPath)->files()->sortByName(true);
+
+        $this->filesystem->mkdir($fileDirectoryPath);
+
+        try {
+            $target = fopen($filePath, 'ab');
+
+            foreach ($finder as $chunk) {
+                try {
+                    $source = fopen($chunk->getRealPath(), 'rb');
+                    stream_copy_to_stream($source, $target);
+
+                    $this->filesystem->remove($chunk->getRealPath());
+                } finally {
+                    if (isset($source) && is_resource($source)) {
+                        fclose($source);
+                    }
+                }
+            }
+
+        } catch (\Exception $e) {
+            $this->filesystem->remove($filePath);
+
+            throw $e;
+        } finally {
+            if (isset($target) && is_resource($target)) {
+                fclose($target);
+            }
+
+            $this->filesystem->remove($chunksDirectoryPath);
+        }
+
+        return new File($filePath);
+    }
+
+    /**
+     * @return string
+     */
+    private function getConcatenatedFileDirectoryPath(): string
+    {
+        return $this->getChunkedUploadDirectoryPath() . DIRECTORY_SEPARATOR . 'files';
+    }
+
+    /**
+     * @param string $fileId
+     * @return string
+     */
+    private function getChunksDirectoryPath(string $fileId): string
+    {
+        $ds = DIRECTORY_SEPARATOR;
+
+        return $this->getChunkedUploadDirectoryPath() . $ds . 'chunks' . $ds . $fileId;
+    }
+
+    /**
+     * @return string
+     */
+    private function getChunkedUploadDirectoryPath(): string
+    {
+        return  $this->config['temp_directory'] . DIRECTORY_SEPARATOR . 'chunked-upload';
     }
 }

@@ -24,13 +24,14 @@ class FilesystemFile extends UploadedFile implements FileInterface
 {
     /**
      * @param File $file
+     * @param string|null $originalName
      */
-    public function __construct(File $file)
+    public function __construct(File $file, string $originalName = null)
     {
         if ($file instanceof UploadedFile) {
             parent::__construct(
                 $file->getPathname(),
-                $file->getClientOriginalName(),
+                $originalName ?? $file->getClientOriginalName(),
                 $file->getClientMimeType(),
                 $file->getClientSize(),
                 $file->getError(),
@@ -40,7 +41,7 @@ class FilesystemFile extends UploadedFile implements FileInterface
         } else {
             parent::__construct(
                 $file->getPathname(),
-                $file->getBasename(),
+                $originalName ?? $file->getBasename(),
                 $file->getMimeType(),
                 $file->getSize(),
                 0,
