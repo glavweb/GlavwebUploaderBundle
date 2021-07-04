@@ -77,7 +77,7 @@ class MediaStructure
      * @return array
      * @throws Exception
      */
-    public function getMediaStructure(MediaInterface $media, $thumbnailFilter = null, $securedId = false, $isAbsolute = false)
+    public function getMediaStructure(MediaInterface $media, $thumbnailFilter = null, $securedId = false, $isAbsolute = true)
     {
         $contentPath   = $this->mediaHelper->getContentPath($media, $isAbsolute);
 

@@ -20,6 +20,7 @@ use Glavweb\UploaderBundle\Exception\ProviderNotFoundException;
 use Glavweb\UploaderBundle\Exception\RequestIdNotFoundException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
+use Glavweb\UploaderBundle\Manager\UploaderManager;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Glavweb\UploaderBundle\Response\Response as UploaderResponse;
 use Glavweb\UploaderBundle\Response\ResponseInterface;
@@ -28,6 +29,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -270,18 +272,34 @@ class UploadController extends Controller
      *
      *  Note: The return value differs when
      *
-     * @param File              $file     The file to upload
+     * @param File $file The file to upload
      * @param ResponseInterface $response A response object.
-     * @param Request           $request  The request object.
-     * @param string            $context  The context
+     * @param Request $request The request object.
+     * @param string $context The context
      * @throws ProviderNotFoundException
      * @throws RequestIdNotFoundException
      * @throws \Glavweb\UploaderBundle\Exception\Exception
+     * @throws \Exception
      */
     protected function doUpload(File $file, ResponseInterface $response, Request $request, $context)
     {
+        /** @var UploaderManager $uploaderManager */
         $uploaderManager = $this->container->get('glavweb_uploader.uploader_manager');
         $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
+        $config          = $this->getConfig();
+
+        if (isset($config['chunk_upload']) && $uploaderManager->isChunkUpload($request)) {
+            $concatenatedFile = $uploaderManager->handleChunkUpload($request, $file);
+
+            if ($concatenatedFile) {
+                $originalFileName = $file instanceof UploadedFile ? $file->getClientOriginalName() : null;
+
+                $file = new FilesystemFile($concatenatedFile, $originalFileName);
+
+            } else {
+                return;
+            }
+        }
 
         $requestId       = $request->get('request_id');
         $thumbnailFilter = $request->get('thumbnail_filter');
@@ -452,14 +470,6 @@ class UploadController extends Controller
         }
 
         return $this->config;
-    }
-
-    /**
-     * @param array $config
-     */
-    public function setConfig($config)
-    {
-        $this->config = $config;
     }
 
     /**
