@@ -436,22 +436,6 @@ class UploaderManager implements ContainerAwareInterface
 
         $contextConfig = $this->config['mappings'][$context];
 
-        if (isset($this->config['mappings_defaults'])) {
-            $defaults = $this->config['mappings_defaults'];
-
-            foreach ($contextConfig as $key => $value) {
-                if ((is_array($value) && empty($value)) || $value === null) {
-                    $contextConfig[$key] = $defaults[$key];
-                }
-            }
-
-            foreach ($defaults as $defaultKey => $defaultValue) {
-                if (!isset($contextConfig[$defaultKey])) {
-                    $contextConfig[$defaultKey] = $defaultValue;
-                }
-            }
-        }
-
         if ($option) {
             return $contextConfig[$option];
         }

@@ -36,6 +36,10 @@ class GlavwebUploaderExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        if (!empty($config['mappings_defaults'])) {
+            $config = $this->applyMappingsDefaults($config);
+        }
+
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
@@ -47,4 +51,31 @@ class GlavwebUploaderExtension extends Extension
             ]);
         }
     }
+
+    /**
+     * @param array $config
+     * @return array
+     */
+    public function applyMappingsDefaults($config)
+    {
+        $defaults = $config['mappings_defaults'];
+
+        foreach ($config['mappings'] as &$contextConfig) {
+
+            foreach ($contextConfig as $key => $value) {
+                if ((is_array($value) && empty($value)) || $value === null) {
+                    $contextConfig[$key] = $defaults[$key];
+                }
+            }
+
+            foreach ($defaults as $defaultKey => $defaultValue) {
+                if (!isset($contextConfig[$defaultKey])) {
+                    $contextConfig[$defaultKey] = $defaultValue;
+                }
+            }
+        }
+
+        return $config;
+    }
+
 }

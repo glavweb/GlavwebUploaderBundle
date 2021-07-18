@@ -313,10 +313,10 @@ class UploadController extends Controller
         }
 
         // validate
-        $this->validate($file, $request, $context);
+        $this->validate($uploaderManager, $file, $request, $context);
 
         // pre upload dispatch
-        $this->dispatchPreUploadEvent($file, $response, $request, $context);
+        $this->dispatchPreUploadEvent($uploaderManager, $file, $response, $request, $context);
 
         $uploadResult = $uploaderManager->upload($file, $context, $requestId);
         $uploadedFile = $uploadResult['uploadedFile'];
@@ -330,7 +330,7 @@ class UploadController extends Controller
         }
 
         // post upload dispatch
-        $this->dispatchPostEvents($uploadedFile, $media, $response, $request, $context);
+        $this->dispatchPostEvents($uploaderManager, $uploadedFile, $media, $response, $request, $context);
     }
 
     /**
@@ -369,14 +369,19 @@ class UploadController extends Controller
     /**
      *  This function is a helper function which dispatches pre upload event
      *
-     * @param FileInterface     $uploadedFile
+     * @param UploaderManager $uploaderManager
+     * @param FileInterface $uploadedFile
      * @param ResponseInterface $response
-     * @param Request           $request
-     * @param string            $context
+     * @param Request $request
+     * @param string $context
      */
-    protected function dispatchPreUploadEvent(FileInterface $uploadedFile, ResponseInterface $response, Request $request, $context)
+    protected function dispatchPreUploadEvent(UploaderManager $uploaderManager,
+                                              FileInterface $uploadedFile,
+                                              ResponseInterface $response,
+                                              Request $request,
+                                              $context)
     {
-        $configContext = $this->getConfigByContext($context);
+        $configContext = $uploaderManager->getContextConfig($context);
         $dispatcher    = $this->container->get('event_dispatcher');
 
         // dispatch pre upload event (both the specific and the general)
@@ -389,15 +394,21 @@ class UploadController extends Controller
      *  This function is a helper function which dispatches post upload
      *  and post persist events.
      *
-     * @param FileInterface      $uploadedFile
-     * @param MediaInterface $media
-     * @param ResponseInterface  $response
-     * @param Request            $request
-     * @param $context
+     * @param UploaderManager   $uploaderManager
+     * @param FileInterface     $uploadedFile
+     * @param MediaInterface    $media
+     * @param ResponseInterface $response
+     * @param Request           $request
+     * @param                   $context
      */
-    protected function dispatchPostEvents(FileInterface $uploadedFile, MediaInterface $media, ResponseInterface $response, Request $request, $context)
+    protected function dispatchPostEvents(UploaderManager $uploaderManager,
+                                          FileInterface $uploadedFile,
+                                          MediaInterface $media,
+                                          ResponseInterface $response,
+                                          Request $request,
+                                          $context)
     {
-        $configContext = $this->getConfigByContext($context);
+        $configContext = $uploaderManager->getContextConfig($context);
         $dispatcher    = $this->container->get('event_dispatcher');
 
         // dispatch post upload event (both the specific and the general)
@@ -407,13 +418,14 @@ class UploadController extends Controller
     }
 
     /**
-     * @param FileInterface $file
-     * @param Request $request
-     * @param $context
+     * @param UploaderManager $uploaderManager
+     * @param FileInterface   $file
+     * @param Request         $request
+     * @param                 $context
      */
-    protected function validate(FileInterface $file, Request $request, $context)
+    protected function validate(UploaderManager $uploaderManager, FileInterface $file, Request $request, $context)
     {
-        $configContext = $this->getConfigByContext($context);
+        $configContext = $uploaderManager->getContextConfig($context);
         $dispatcher    = $this->container->get('event_dispatcher');
 
         // dispatch validation event (both the specific and the general)
@@ -447,17 +459,6 @@ class UploadController extends Controller
         }
 
         return $response;
-    }
-
-    /**
-     * @param string $context
-     * @return array
-     */
-    protected function getConfigByContext($context)
-    {
-        $config = $this->getConfig();
-
-        return $config['mappings'][$context];
     }
 
     /**
