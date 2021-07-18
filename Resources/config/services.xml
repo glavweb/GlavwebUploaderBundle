@@ -12,7 +12,9 @@
     </parameters>
 
     <services>
-        <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" public="true"/>
+        <service id="glavweb_uploader.error_handler.standard" class="Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler" public="true">
+            <argument type="service" id="translator" />
+        </service>
 
         <service id="glavweb_uploader.uploader_manager" class="Glavweb\UploaderBundle\Manager\UploaderManager" public="true">
             <argument>%glavweb_uploader.config%</argument>

@@ -1,0 +1,3 @@
+error:
+    invalid_type: You can't upload files of this type
+    maxsize: 'File is too big ({filesize} MB). Max filesize: {maxFilesize} MB'

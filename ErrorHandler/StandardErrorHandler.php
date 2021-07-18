@@ -12,22 +12,42 @@
 namespace Glavweb\UploaderBundle\ErrorHandler;
 
 use Glavweb\UploaderBundle\Response\Response;
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Class StandardErrorHandler
  *
  * @package Glavweb\UploaderBundle
- * @author Andrey Nilov <nilov@glavweb.ru>
+ * @author  Andrey Nilov <nilov@glavweb.ru>
  */
 class StandardErrorHandler implements ErrorHandlerInterface
 {
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * StandardErrorHandler constructor.
+     */
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
     /**
      * @param Response   $response
      * @param \Exception $exception
      */
     public function addException(Response $response, \Exception $exception)
     {
-        $message = $exception->getMessage();
+        if ($exception instanceof TranslatableInterface) {
+            $message = $exception->trans($this->translator);
+        } else {
+            $message = $exception->getMessage();
+        }
+
         $response['error'] = $message;
     }
 }

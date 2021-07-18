@@ -30,8 +30,11 @@ class MaxSizeValidationListener
         $config = $event->getConfig();
         $file   = $event->getFile();
 
-        if ($file->getSize() > $config['max_size']*(1024*1024)) {
-            throw new ValidationException('error.maxsize');
+        if ($file->getSize() > $config['max_size'] * (1024 * 1024)) {
+            $fileSizeInMegaBytes = round($file->getSize() / (1024 * 1024));
+            throw new ValidationException(
+                'error.maxsize', ['filesize' => $fileSizeInMegaBytes, 'maxFilesize' => $config['max_size']]
+            );
         }
     }
 }

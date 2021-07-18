@@ -12,6 +12,9 @@
 namespace Glavweb\UploaderBundle\Exception;
 
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 /**
  * Class ValidationException
@@ -19,12 +22,33 @@ use Symfony\Component\HttpFoundation\File\Exception\UploadException;
  * @package Glavweb\UploaderBundle
  * @author Andrey Nilov <nilov@glavweb.ru>
  */
-class ValidationException extends UploadException
+class ValidationException extends UploadException implements TranslatableInterface
 {
+    /**
+     * @var array
+     */
+    protected $details;
+
     /**
      * @var string
      */
     protected $errorMessage;
+
+    /**
+     * ValidationException constructor.
+     *
+     * @param string         $message
+     * @param array          $details
+     * @param int            $code
+     * @param Throwable|null $previous
+     */
+    public function __construct($message = "", $details = [], $code = 0, Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+
+        $this->details = $details;
+    }
+
 
     /**
      * @param string $message
@@ -48,5 +72,10 @@ class ValidationException extends UploadException
         }
 
         return $this->errorMessage;
+    }
+
+    public function trans(TranslatorInterface $translator, string $locale = null): string
+    {
+        return $translator->trans($this->getMessage(), $this->details, null, $locale);
     }
 }
