@@ -11,7 +11,6 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
-use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\File\FlysystemFile;

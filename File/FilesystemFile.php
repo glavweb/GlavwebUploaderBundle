@@ -33,7 +33,6 @@ class FilesystemFile extends UploadedFile implements FileInterface
                 $file->getPathname(),
                 $originalName ?? $file->getClientOriginalName(),
                 $file->getClientMimeType(),
-                $file->getClientSize(),
                 $file->getError(),
                 true
             );
@@ -43,7 +42,6 @@ class FilesystemFile extends UploadedFile implements FileInterface
                 $file->getPathname(),
                 $originalName ?? $file->getBasename(),
                 $file->getMimeType(),
-                $file->getSize(),
                 0,
                 true
             );

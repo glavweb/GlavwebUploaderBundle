@@ -13,7 +13,7 @@ namespace Glavweb\UploaderBundle\Event;
 
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\Model\MediaInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Glavweb\UploaderBundle\Response\ResponseInterface;
 

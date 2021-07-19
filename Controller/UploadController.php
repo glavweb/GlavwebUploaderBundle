@@ -25,8 +25,8 @@ use Glavweb\UploaderBundle\Model\MediaInterface;
 use Glavweb\UploaderBundle\Response\Response as UploaderResponse;
 use Glavweb\UploaderBundle\Response\ResponseInterface;
 use Glavweb\UploaderBundle\UploadEvents;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -41,7 +41,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @package Glavweb\UploaderBundle
  * @author Andrey Nilov <nilov@glavweb.ru>
  */
-class UploadController extends Controller
+class UploadController extends AbstractController
 {
     /**
      * @var array
@@ -114,7 +114,7 @@ class UploadController extends Controller
      */
     public function progressAction(Request $request)
     {
-        $session = $this->container->get('session');
+        $session = $this->get('session');
 
         $prefix = ini_get('session.upload_progress.prefix');
         $name   = ini_get('session.upload_progress.name');
@@ -135,7 +135,7 @@ class UploadController extends Controller
      */
     public function cancelAction(Request $request)
     {
-        $session = $this->container->get('session');
+        $session = $this->get('session');
 
         $prefix = ini_get('session.upload_progress.prefix');
         $name   = ini_get('session.upload_progress.name');
@@ -284,7 +284,7 @@ class UploadController extends Controller
     protected function doUpload(File $file, ResponseInterface $response, Request $request, $context)
     {
         /** @var UploaderManager $uploaderManager */
-        $uploaderManager = $this->container->get('glavweb_uploader.uploader_manager');
+        $uploaderManager = $this->get('glavweb_uploader.uploader_manager');
         $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
         $config          = $this->getConfig();
 
@@ -382,7 +382,7 @@ class UploadController extends Controller
                                               $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
-        $dispatcher    = $this->container->get('event_dispatcher');
+        $dispatcher    = $this->get('event_dispatcher');
 
         // dispatch pre upload event (both the specific and the general)
         $event = new PreUploadEvent($uploadedFile, $response, $request, $context, $configContext);
@@ -409,7 +409,7 @@ class UploadController extends Controller
                                           $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
-        $dispatcher    = $this->container->get('event_dispatcher');
+        $dispatcher    = $this->get('event_dispatcher');
 
         // dispatch post upload event (both the specific and the general)
         $event = new PostUploadEvent($uploadedFile, $media, $response, $request, $context, $configContext);
@@ -426,7 +426,7 @@ class UploadController extends Controller
     protected function validate(UploaderManager $uploaderManager, FileInterface $file, Request $request, $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
-        $dispatcher    = $this->container->get('event_dispatcher');
+        $dispatcher    = $this->get('event_dispatcher');
 
         // dispatch validation event (both the specific and the general)
         $event = new ValidationEvent($file, $request, $configContext, $context);

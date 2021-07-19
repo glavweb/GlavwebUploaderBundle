@@ -11,12 +11,10 @@
 
 namespace Glavweb\UploaderBundle\DependencyInjection;
 
-use Liip\ImagineBundle\Templating\Helper\FilterHelper;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * This is the class that loads and manages your bundle configuration
@@ -44,12 +42,6 @@ class GlavwebUploaderExtension extends Extension
         $loader->load('services.xml');
 
         $container->setParameter('glavweb_uploader.config', $config);
-
-        if (class_exists(FilterHelper::class)) {
-            $container->getDefinition('glavweb_uploader.util.media_structure')->addMethodCall('setImagineHelper', [
-                new Reference('liip_imagine.templating.filter_helper')
-            ]);
-        }
     }
 
     /**
@@ -59,8 +51,9 @@ class GlavwebUploaderExtension extends Extension
     public function applyMappingsDefaults($config)
     {
         $defaults = $config['mappings_defaults'];
+        $mappings = $config['mappings'];
 
-        foreach ($config['mappings'] as &$contextConfig) {
+        foreach ($mappings as &$contextConfig) {
 
             foreach ($contextConfig as $key => $value) {
                 if ((is_array($value) && empty($value)) || $value === null) {

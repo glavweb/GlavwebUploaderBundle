@@ -29,8 +29,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('glavweb_uploader');
+        $treeBuilder = new TreeBuilder('glavweb_uploader');
+        $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->children()
@@ -80,8 +80,6 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('mappings')
                     ->useAttributeAsKey('id')
-                    ->isRequired()
-                    ->requiresAtLeastOneElement()
                     ->prototype('array')
                         ->children()
                             ->arrayNode('providers')

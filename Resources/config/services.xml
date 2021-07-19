@@ -83,6 +83,7 @@
 
         <service id="glavweb_uploader.util.media_structure" class="Glavweb\UploaderBundle\Util\MediaStructure" public="true">
             <argument type="service" id="glavweb_uploader.media_helper" />
+            <argument type="service" id="liip_imagine.cache.manager" />
         </service>
 
         <service id="glavweb_uploader.command.clear_orphans_command" class="Glavweb\UploaderBundle\Command\ClearOrphansCommand">

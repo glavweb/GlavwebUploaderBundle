@@ -97,5 +97,5 @@ interface FileInterface
      *
      * @return self A File object representing the new file
      */
-    public function move($directory, $name = null);
+    public function move(string $directory, string $name = null);
 }
