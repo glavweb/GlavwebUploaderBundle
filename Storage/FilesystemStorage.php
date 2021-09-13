@@ -17,8 +17,8 @@ use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\Util\CropImage;
 use Glavweb\UploaderBundle\Util\FileUtils;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * Class FilesystemStorage
@@ -173,6 +173,22 @@ class FilesystemStorage implements StorageInterface
     {
         $filesystem = new Filesystem();
         $filesystem->remove($file);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function copyFile(FileInterface $file, string $newPath = null): FileInterface
+    {
+        if ($file instanceof FilesystemFile) {
+            if ($newPath) {
+                $fileInfo = new \SplFileInfo($newPath);
+
+                return $file->copy($fileInfo->getPath(), $fileInfo->getBasename());
+            }
+
+            return $file->copy();
+        }
     }
 
     /**

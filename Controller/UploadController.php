@@ -11,7 +11,6 @@
 
 namespace Glavweb\UploaderBundle\Controller;
 
-use Glavweb\UploaderBundle\Entity\Media;
 use Glavweb\UploaderBundle\ErrorHandler\ErrorHandlerInterface;
 use Glavweb\UploaderBundle\Event\PostUploadEvent;
 use Glavweb\UploaderBundle\Event\PreUploadEvent;
@@ -354,8 +353,8 @@ class UploadController extends Controller
             throw new RequestIdNotFoundException('Request ID not found.');
         }
 
-        /** @var Media $media */
-        $uploadResult = $uploaderManager->upload($link, $context, $requestId);;
+        /** @var MediaInterface $media */
+        $uploadResult = $uploaderManager->upload($link, $context, $requestId);
         $media        = $uploadResult['media'];
 
         if ($media) {

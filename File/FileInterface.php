@@ -98,4 +98,11 @@ interface FileInterface
      * @return self A File object representing the new file
      */
     public function move($directory, $name = null);
+
+    /**
+     * @param string|null $directory
+     * @param string|null $name
+     * @return FileInterface new file copy
+     */
+    public function copy(string $directory = null, string $name = null): FileInterface;
 }

@@ -17,6 +17,29 @@ use Symfony\Component\HttpFoundation\File\File;
 class FileUtils
 {
     /**
+     * @param array $parts
+     * @return string
+     */
+    public static function path(string ...$parts): string
+    {
+        return implode(DIRECTORY_SEPARATOR, $parts);
+    }
+
+    /**
+     * @param string      $filePath
+     * @param string|null $extension
+     * @return string
+     */
+    public static function appendExtension(string $filePath, ?string $extension): string
+    {
+        if ($extension) {
+            return $filePath . '.' . $extension;
+        }
+
+        return $filePath;
+    }
+
+    /**
      * @param FileInterface $file
      * @return string
      */
@@ -25,18 +48,58 @@ class FileUtils
         $pathParts = pathinfo($file->getPathname());
         $directory = $pathParts['dirname'];
 
-        $filenameFarts = explode('_', $pathParts['filename']);
-        if (count($filenameFarts) > 1) {
-            $filenameFarts[1]++;
+        $filenameParts = explode('_', $pathParts['filename']);
+        if (count($filenameParts) > 1) {
+            $filenameParts[1]++;
 
         } else {
-            $filenameFarts[1] = '1';
+            $filenameParts[1] = '1';
         }
-        $fileName = implode('_', $filenameFarts) . '.' . $pathParts['extension'];
+        $fileName = implode('_', $filenameParts) . '.' . $pathParts['extension'];
 
         $newFile = $file->move($directory, $fileName);
 
         return $newFile->getPathname();
+    }
+
+    /**
+     * @param FileInterface $file
+     * @param callable|null $isNameAllowed
+     * @return string
+     */
+    public static function generateFileCopyBasename(FileInterface $file, callable $isNameAllowed = null): string
+    {
+        $fileInfo = pathinfo($file->getPathname());
+
+        $name = $fileInfo['filename'];
+        $extension = $fileInfo['extension'];
+        $newCopyNumber = 0;
+        $regexp = '/_copy(?:_(\d+))?$/';
+        $originalName = $name;
+
+        preg_match($regexp, $name, $matches);
+
+        if ($matches) {
+            [$match, $copyNumber] = $matches;
+
+            if ($match) {
+                if ($copyNumber) {
+                    $newCopyNumber = (int)$copyNumber + 1;
+                } else {
+                    $newCopyNumber = 1;
+                }
+
+                $originalName = preg_replace($regexp, '', $name);
+            }
+        }
+
+        do {
+            $newName = $originalName . '_copy' . ($newCopyNumber > 0 ? '_' . $newCopyNumber : '');
+            $newNameWithExtension = self::appendExtension($newName, $extension);
+            $newCopyNumber++;
+        } while ($isNameAllowed && !$isNameAllowed($newNameWithExtension));
+
+        return $newNameWithExtension;
     }
 
     /**

@@ -59,7 +59,6 @@ class FlysystemFile implements FileInterface
         $this->pathname = $path;
     }
 
-
     /**
      * @inheritDoc
      * @throws FileNotFoundException
@@ -108,7 +107,6 @@ class FlysystemFile implements FileInterface
         return $this->lastModifiedAt;
     }
 
-
     /**
      * @param \DateTime|null $lastModifiedAt
      * @return FlysystemFile
@@ -119,7 +117,6 @@ class FlysystemFile implements FileInterface
 
         return $this;
     }
-
 
     /**
      * @inheritDoc
@@ -214,13 +211,35 @@ class FlysystemFile implements FileInterface
      */
     public function move($directory, $name = null)
     {
+        if (!$name) {
+            $name = $this->getBasename();
+        }
+
         $newPath = sprintf('%s/%s', $directory, $name);
 
-        $this->storage->move($this, $newPath);
+        $this->storage->moveFile($this, $newPath);
 
         $this->pathname = $newPath;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function copy(string $directory = null, string $name = null): FileInterface
+    {
+        $newPath = null;
+
+        if ($directory) {
+            if (!$name) {
+                $name = $this->getBasename();
+            }
+
+            $newPath = sprintf('%s/%s', $directory, $name);
+        }
+
+        return $this->storage->copyFile($this, $newPath);
     }
 
     /**

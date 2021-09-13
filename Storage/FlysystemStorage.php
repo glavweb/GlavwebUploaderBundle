@@ -11,7 +11,7 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
-use Glavweb\UploaderBundle\Exception\CropImageException;
+use Glavweb\UploaderBundle\Exception\FileCopyException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\File\FlysystemFile;
@@ -182,9 +182,38 @@ class FlysystemStorage implements StorageInterface
      * @throws FileNotFoundException
      * @throws FileExistsException
      */
-    public function move(FlysystemFile $file, $newPath)
+    public function moveFile(FlysystemFile $file, $newPath)
     {
         $this->filesystem->rename($file->getPathname(), $newPath);
+    }
+
+    /**
+     * @inheritdoc
+     * @param FileInterface $file
+     * @param string|null   $newPath
+     * @return FileInterface
+     * @throws FileCopyException
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
+    public function copyFile(FileInterface $file, string $newPath = null): FileInterface
+    {
+        $path = $file->getPathname();
+
+        if ($newPath) {
+            if ($this->filesystem->has($newPath)) {
+                throw new FileCopyException($file, $newPath, "File already exists");
+            }
+        } else {
+            $fileName = FileUtils::generateFileCopyBasename($file, function($path) use ($file) {
+                return !$this->filesystem->has(FileUtils::path($file->getPath(), $path));
+            });
+            $newPath  = FileUtils::path($file->getPath(), $fileName);
+        }
+
+        $this->filesystem->copy($path, $newPath);
+
+        return new FlysystemFile($this, $newPath);
     }
 
     /**
