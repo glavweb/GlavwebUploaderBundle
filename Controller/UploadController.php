@@ -25,7 +25,9 @@ use Glavweb\UploaderBundle\Model\MediaInterface;
 use Glavweb\UploaderBundle\Response\Response as UploaderResponse;
 use Glavweb\UploaderBundle\Response\ResponseInterface;
 use Glavweb\UploaderBundle\UploadEvents;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\File;
@@ -41,8 +43,10 @@ use Symfony\Component\HttpFoundation\Response;
  * @package Glavweb\UploaderBundle
  * @author Andrey Nilov <nilov@glavweb.ru>
  */
-class UploadController extends AbstractController
+class UploadController implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     /**
      * @var array
      */
@@ -382,12 +386,13 @@ class UploadController extends AbstractController
                                               $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
-        $dispatcher    = $this->get('event_dispatcher');
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $this->get('event_dispatcher');
 
         // dispatch pre upload event (both the specific and the general)
         $event = new PreUploadEvent($uploadedFile, $response, $request, $context, $configContext);
-        $dispatcher->dispatch(UploadEvents::PRE_UPLOAD, $event);
-        $dispatcher->dispatch(sprintf('%s.%s', UploadEvents::PRE_UPLOAD, $context), $event);
+        $dispatcher->dispatch($event, UploadEvents::PRE_UPLOAD);
+        $dispatcher->dispatch($event, sprintf('%s.%s', UploadEvents::PRE_UPLOAD, $context));
     }
 
     /**
@@ -409,12 +414,13 @@ class UploadController extends AbstractController
                                           $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
-        $dispatcher    = $this->get('event_dispatcher');
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $this->get('event_dispatcher');
 
         // dispatch post upload event (both the specific and the general)
         $event = new PostUploadEvent($uploadedFile, $media, $response, $request, $context, $configContext);
-        $dispatcher->dispatch(UploadEvents::POST_UPLOAD, $event);
-        $dispatcher->dispatch(sprintf('%s.%s', UploadEvents::POST_UPLOAD, $context), $event);
+        $dispatcher->dispatch($event, UploadEvents::POST_UPLOAD);
+        $dispatcher->dispatch($event, sprintf('%s.%s', UploadEvents::POST_UPLOAD, $context));
     }
 
     /**
@@ -426,12 +432,13 @@ class UploadController extends AbstractController
     protected function validate(UploaderManager $uploaderManager, FileInterface $file, Request $request, $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
-        $dispatcher    = $this->get('event_dispatcher');
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $this->get('event_dispatcher');
 
         // dispatch validation event (both the specific and the general)
         $event = new ValidationEvent($file, $request, $configContext, $context);
-        $dispatcher->dispatch(UploadEvents::VALIDATION, $event);
-        $dispatcher->dispatch(sprintf('%s.%s', UploadEvents::VALIDATION, $context), $event);
+        $dispatcher->dispatch($event, UploadEvents::VALIDATION);
+        $dispatcher->dispatch($event, sprintf('%s.%s', UploadEvents::VALIDATION, $context));
     }
 
     /**
@@ -491,5 +498,21 @@ class UploadController extends AbstractController
     public function setErrorHandler($errorHandler)
     {
         $this->errorHandler = $errorHandler;
+    }
+
+    /**
+     * @param string $service
+     * @return object|null
+     */
+    private function get(string $service) {
+        return $this->container->get($service);
+    }
+
+    /**
+     * @param string $parameter
+     * @return array|bool|float|int|string|null
+     */
+    private function getParameter(string $parameter) {
+        return $this->container->getParameter($parameter);
     }
 }

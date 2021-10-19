@@ -41,6 +41,10 @@ class GlavwebUploaderExtension extends Extension
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
+        $this->addAnnotatedClassesToCompile([
+            'Glavweb\\UploaderBundle\\Controller\\'
+        ]);
+
         $container->setParameter('glavweb_uploader.config', $config);
     }
 
