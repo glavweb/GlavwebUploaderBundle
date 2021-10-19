@@ -437,6 +437,10 @@ class UploaderManager implements ContainerAwareInterface
         $contextConfig = $this->config['mappings'][$context];
 
         if ($option) {
+            if (!isset($contextConfig[$option])) {
+                throw new \RuntimeException('Context "' . $context . '" option "'. $option . '" not defined.');
+            }
+
             return $contextConfig[$option];
         }
 

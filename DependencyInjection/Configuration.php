@@ -53,6 +53,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->arrayNode('mappings_defaults')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->arrayNode('providers')
                             ->prototype('scalar')->end()

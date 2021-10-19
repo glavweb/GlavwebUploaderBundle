@@ -55,7 +55,7 @@ class GlavwebUploaderExtension extends Extension
     public function applyMappingsDefaults($config)
     {
         $defaults = $config['mappings_defaults'];
-        $mappings = $config['mappings'];
+        $mappings = &$config['mappings'];
 
         foreach ($mappings as &$contextConfig) {
 
