@@ -1,3 +1,3 @@
 error:
     invalid_type: Неверный формат файла
-    maxsize: Файл слишком большой ({filesize} MB). Максимальный допустимый размер файла {maxFilesize} MB
+    maxsize: Файл слишком большой ({filesize} байт). Максимальный допустимый размер файла {maxFilesize} байт
