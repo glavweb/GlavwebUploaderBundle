@@ -46,5 +46,7 @@ class ClearOrphansCommand extends Command implements ContainerAwareInterface
     {
         $uploaderManager = $this->container->get('glavweb_uploader.uploader_manager');
         $uploaderManager->clearOrphanage();
+
+        return 0;
     }
 }

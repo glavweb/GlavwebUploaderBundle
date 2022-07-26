@@ -374,15 +374,21 @@ class UploaderManager implements ContainerAwareInterface
     {
         $this->getModelManager()->removeOrphans($this->config['orphanage']['lifetime']);
 
+        $chunkedUploadDirectoryPath = $this->getChunkedUploadDirectoryPath();
+
+        if(!is_dir($chunkedUploadDirectoryPath)) {
+            return;
+        }
+
         $oldFilesFinder = new Finder();
-        $oldFilesFinder->in($this->getChunkedUploadDirectoryPath())
-            ->files()
-            ->date("before 1 hour ago");
+        $oldFilesFinder->in($chunkedUploadDirectoryPath)
+                       ->files()
+                       ->date("before 1 hour ago");
 
         $this->filesystem->remove(iterator_to_array($oldFilesFinder));
 
         $emptyDirFinder = new Finder();
-        $emptyDirFinder->in($this->getChunkedUploadDirectoryPath())
+        $emptyDirFinder->in($chunkedUploadDirectoryPath)
             ->directories()
             ->filter(function (\SplFileInfo $dirInfo) {
                 $dirFinder = new Finder();
