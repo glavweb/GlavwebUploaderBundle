@@ -243,30 +243,35 @@ class UploadController implements ContainerAwareInterface
     }
 
     /**
-     *  Flattens a given filebag to extract all files.
-     *
-     *  @param FileBag $bag The filebag to use
-     *  @return array An array of files
+     * @return array
      */
-    protected function getFiles(FileBag $bag)
+    public function getConfig()
     {
-        $files   = [];
-        $fileBag = $bag->all();
-
-        $fileIterator = new \RecursiveIteratorIterator(
-            new \RecursiveArrayIterator($fileBag),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($fileIterator as $file) {
-            if (is_array($file) || null === $file) {
-                continue;
-            }
-
-            $files[] = $file;
+        if (!$this->config) {
+            $this->config = $this->getParameter('glavweb_uploader.config');
         }
 
-        return $files;
+        return $this->config;
+    }
+
+    /**
+     * @return ErrorHandlerInterface
+     */
+    public function getErrorHandler()
+    {
+        if (!$this->errorHandler) {
+            $this->errorHandler = $this->get('glavweb_uploader.error_handler.standard');
+        }
+
+        return $this->errorHandler;
+    }
+
+    /**
+     * @param ErrorHandlerInterface $errorHandler
+     */
+    public function setErrorHandler($errorHandler)
+    {
+        $this->errorHandler = $errorHandler;
     }
 
     /**
@@ -335,39 +340,6 @@ class UploadController implements ContainerAwareInterface
 
         // post upload dispatch
         $this->dispatchPostEvents($uploaderManager, $uploadedFile, $media, $response, $request, $context);
-    }
-
-    /**
-     * @param string            $link
-     * @param ResponseInterface $response
-     * @param Request           $request
-     * @param string            $context
-     * @throws ProviderNotFoundException
-     * @throws RequestIdNotFoundException
-     * @throws \Glavweb\UploaderBundle\Exception\Exception
-     */
-    private function doUploadByLink($link, ResponseInterface $response, Request $request, $context)
-    {
-        $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
-        $uploaderManager = $this->get('glavweb_uploader.uploader_manager');
-
-        $requestId              = $request->get('request_id');
-        $thumbnailFilter = $request->get('thumbnail_filter');
-
-        if (!$requestId) {
-            throw new RequestIdNotFoundException('Request ID not found.');
-        }
-
-        /** @var Media $media */
-        $uploadResult = $uploaderManager->upload($link, $context, $requestId);;
-        $media        = $uploadResult['media'];
-
-        if ($media) {
-            $mediaStructure = $mediaStructure->getMediaStructure($media, $thumbnailFilter, true);
-            foreach ($mediaStructure as $key => $value) {
-                $response[$key] = $value;
-            }
-        }
     }
 
     /**
@@ -469,35 +441,63 @@ class UploadController implements ContainerAwareInterface
     }
 
     /**
-     * @return array
+     *  Flattens a given filebag to extract all files.
+     *
+     *  @param FileBag $bag The filebag to use
+     *  @return array An array of files
      */
-    public function getConfig()
+    protected function getFiles(FileBag $bag)
     {
-        if (!$this->config) {
-            $this->config = $this->getParameter('glavweb_uploader.config');
+        $files   = [];
+        $fileBag = $bag->all();
+
+        $fileIterator = new \RecursiveIteratorIterator(
+            new \RecursiveArrayIterator($fileBag),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($fileIterator as $file) {
+            if (is_array($file) || null === $file) {
+                continue;
+            }
+
+            $files[] = $file;
         }
 
-        return $this->config;
+        return $files;
     }
 
     /**
-     * @return ErrorHandlerInterface
+     * @param string            $link
+     * @param ResponseInterface $response
+     * @param Request           $request
+     * @param string            $context
+     * @throws ProviderNotFoundException
+     * @throws RequestIdNotFoundException
+     * @throws \Glavweb\UploaderBundle\Exception\Exception
      */
-    public function getErrorHandler()
+    private function doUploadByLink($link, ResponseInterface $response, Request $request, $context)
     {
-        if (!$this->errorHandler) {
-            $this->errorHandler = $this->get('glavweb_uploader.error_handler.standard');
+        $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
+        $uploaderManager = $this->get('glavweb_uploader.uploader_manager');
+
+        $requestId              = $request->get('request_id');
+        $thumbnailFilter = $request->get('thumbnail_filter');
+
+        if (!$requestId) {
+            throw new RequestIdNotFoundException('Request ID not found.');
         }
 
-        return $this->errorHandler;
-    }
+        /** @var Media $media */
+        $uploadResult = $uploaderManager->upload($link, $context, $requestId);;
+        $media        = $uploadResult['media'];
 
-    /**
-     * @param ErrorHandlerInterface $errorHandler
-     */
-    public function setErrorHandler($errorHandler)
-    {
-        $this->errorHandler = $errorHandler;
+        if ($media) {
+            $mediaStructure = $mediaStructure->getMediaStructure($media, $thumbnailFilter, true);
+            foreach ($mediaStructure as $key => $value) {
+                $response[$key] = $value;
+            }
+        }
     }
 
     /**

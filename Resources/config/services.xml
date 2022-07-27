@@ -69,6 +69,10 @@
             <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>
 
+        <service id="glavweb_uploader.validation_listener.dimensions" class="Glavweb\UploaderBundle\EventListener\DimensionsValidationListener">
+            <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
+        </service>
+
         <service id="glavweb_uploader.validation_listener.allowed_mimetype" class="Glavweb\UploaderBundle\EventListener\AllowedMimetypeValidationListener">
             <tag name="kernel.event_listener" event="glavweb_uploader.validation" method="onValidate" />
         </service>

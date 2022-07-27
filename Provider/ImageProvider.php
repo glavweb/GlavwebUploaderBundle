@@ -43,7 +43,7 @@ class ImageProvider extends FileProvider
         $file = $link;
         $this->file = $file;
 
-        list($width, $height) = @getimagesize($file->getPathname());
+        [$width, $height] = @getimagesize($file->getPathname());
 
         $this->setName($file->getClientOriginalName());
         $this->setProviderReference(null);
@@ -63,7 +63,7 @@ class ImageProvider extends FileProvider
      */
     public function checkLink($link)
     {
-        return $link instanceof FileInterface && @getimagesize($link->getPathname());
+        return $link instanceof FileInterface && (@getimagesize($link->getPathname()) || $this->isSvgFile($link));
     }
 
     /**
@@ -100,5 +100,14 @@ class ImageProvider extends FileProvider
         }
 
         return $imgTag;
+    }
+
+    /**
+     * @param FileInterface $file
+     * @return bool
+     */
+    private function isSvgFile(FileInterface $file): bool
+    {
+        return $file->getMimeType() === 'image/svg+xml';
     }
 }
