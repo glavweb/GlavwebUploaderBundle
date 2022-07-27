@@ -74,6 +74,8 @@ class CropImage
     {
         $imageType = exif_imagetype($sourcePath);
 
+        $sourceImage = null;
+
         switch ($imageType) {
             case IMAGETYPE_GIF:
                 $sourceImage = imagecreatefromgif($sourcePath);
