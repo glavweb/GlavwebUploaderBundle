@@ -88,6 +88,14 @@ class CropImage
             case IMAGETYPE_PNG:
                 $sourceImage = imagecreatefrompng($sourcePath);
                 break;
+
+            case IMAGETYPE_BMP:
+                $sourceImage = imagecreatefrombmp($sourceImage);
+                break;
+
+            case IMAGETYPE_WEBP:
+                $sourceImage = imagecreatefromwebp($sourceImage);
+                break;
         }
 
         if (!$sourceImage) {
