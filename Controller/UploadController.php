@@ -28,17 +28,17 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Class UploadController
  *
  * @package Glavweb\UploaderBundle
- * @author Andrey Nilov <nilov@glavweb.ru>
+ * @author  Andrey Nilov <nilov@glavweb.ru>
  */
 class UploadController extends Controller
 {
@@ -84,7 +84,7 @@ class UploadController extends Controller
      * @Route("/uploader/uploadlink/{context}", name="glavweb_uploader_uploadlink", methods={"POST"})
      *
      * @param Request $request
-     * @param string $context
+     * @param string  $context
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function uploadLinkAction(Request $request, $context)
@@ -120,7 +120,7 @@ class UploadController extends Controller
 
         // assemble session key
         // ref: http://php.net/manual/en/session.upload-progress.php
-        $key = sprintf('%s.%s', $prefix, $request->get($name));
+        $key   = sprintf('%s.%s', $prefix, $request->get($name));
         $value = $session->get($key);
 
         return new JsonResponse($value);
@@ -141,7 +141,7 @@ class UploadController extends Controller
 
         $key = sprintf('%s.%s', $prefix, $request->get($name));
 
-        $progress = $session->get($key);
+        $progress                  = $session->get($key);
         $progress['cancel_upload'] = false;
 
         $session->set($key, $progress);
@@ -165,7 +165,7 @@ class UploadController extends Controller
         $requestId = $request->get('request_id');
 
         $modelManager = $this->get('glavweb_uploader.uploader_manager')->getModelManager();
-        $media = $modelManager->findOneBySecuredId($id);
+        $media        = $modelManager->findOneBySecuredId($id);
 
         if ($media && $requestId) {
             if ($media->getIsOrphan()) {
@@ -205,8 +205,8 @@ class UploadController extends Controller
         }
 
         $uploaderManager = $this->get('glavweb_uploader.uploader_manager');
-        $modelManager = $uploaderManager->getModelManager();
-        $media = $modelManager->findOneBySecuredId($id);
+        $modelManager    = $uploaderManager->getModelManager();
+        $media           = $modelManager->findOneBySecuredId($id);
 
         if ($media && $requestId && ($name || $description)) {
             if ($softEdit) {
@@ -228,7 +228,8 @@ class UploadController extends Controller
             if ($cropData) {
                 $uploaderManager->cropImage($media, $cropData);
             }
-            $mediaStructure = $this->get('glavweb_uploader.util.media_structure')->getMediaStructure($media, null, true);
+            $mediaStructure =
+                $this->get('glavweb_uploader.util.media_structure')->getMediaStructure($media, null, true);
         }
 
         return new JsonResponse([
@@ -240,8 +241,8 @@ class UploadController extends Controller
     /**
      *  Flattens a given filebag to extract all files.
      *
-     *  @param FileBag $bag The filebag to use
-     *  @return array An array of files
+     * @param FileBag $bag The filebag to use
+     * @return array An array of files
      */
     protected function getFiles(FileBag $bag)
     {
@@ -271,29 +272,28 @@ class UploadController extends Controller
      *
      *  Note: The return value differs when
      *
-     * @param File $file The file to upload
+     * @param File              $file     The file to upload
      * @param ResponseInterface $response A response object.
-     * @param Request $request The request object.
-     * @param string $context The context
+     * @param Request           $request  The request object.
+     * @param string            $context  The context
      * @throws ProviderNotFoundException
      * @throws RequestIdNotFoundException
      * @throws \Glavweb\UploaderBundle\Exception\Exception
      * @throws \Exception
+     * @throws Throwable
      */
-    protected function doUpload(File $file, ResponseInterface $response, Request $request, $context)
+    protected function doUpload(File $requestFile, ResponseInterface $response, Request $request, $context)
     {
         /** @var UploaderManager $uploaderManager */
         $uploaderManager = $this->container->get('glavweb_uploader.uploader_manager');
-        $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
         $config          = $this->getConfig();
+        $file            = $requestFile instanceof FileInterface ? $requestFile : new FilesystemFile($requestFile);
 
         if (isset($config['chunk_upload']) && $uploaderManager->isChunkUpload($request)) {
-            $concatenatedFile = $uploaderManager->handleChunkUpload($request, $file);
+            $concatenatedFile = $uploaderManager->handleChunkUpload($request, $requestFile);
 
             if ($concatenatedFile) {
-                $originalFileName = $file instanceof UploadedFile ? $file->getClientOriginalName() : null;
-
-                $file = new FilesystemFile($concatenatedFile, $originalFileName);
+                $file = $concatenatedFile;
 
             } else {
                 return;
@@ -302,22 +302,29 @@ class UploadController extends Controller
 
         $requestId       = $request->get('request_id');
         $thumbnailFilter = $request->get('thumbnail_filter');
+        $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
 
         if (!$requestId) {
             throw new RequestIdNotFoundException('Request ID not found.');
         }
 
-        if (!$file instanceof FileInterface) {
-            $file = new FilesystemFile($file);
+        try {
+            // validate
+            $this->validate($uploaderManager, $file, $request, $context);
+
+            // pre upload dispatch
+            $this->dispatchPreUploadEvent($uploaderManager, $file, $response, $request, $context);
+
+            $uploadResult = $uploaderManager->upload($file, $context, $requestId);
+
+        } catch (\Throwable $e) {
+            try {
+                $uploaderManager->removeFileFromStorage($file);
+            } catch (\Exception $ignoredException) {}
+
+            throw $e;
         }
 
-        // validate
-        $this->validate($uploaderManager, $file, $request, $context);
-
-        // pre upload dispatch
-        $this->dispatchPreUploadEvent($uploaderManager, $file, $response, $request, $context);
-
-        $uploadResult = $uploaderManager->upload($file, $context, $requestId);
         $uploadedFile = $uploadResult['uploadedFile'];
         $media        = $uploadResult['media'];
 
@@ -346,7 +353,7 @@ class UploadController extends Controller
         $mediaStructure  = $this->get('glavweb_uploader.util.media_structure');
         $uploaderManager = $this->get('glavweb_uploader.uploader_manager');
 
-        $requestId              = $request->get('request_id');
+        $requestId       = $request->get('request_id');
         $thumbnailFilter = $request->get('thumbnail_filter');
 
         if (!$requestId) {
@@ -368,17 +375,17 @@ class UploadController extends Controller
     /**
      *  This function is a helper function which dispatches pre upload event
      *
-     * @param UploaderManager $uploaderManager
-     * @param FileInterface $uploadedFile
+     * @param UploaderManager   $uploaderManager
+     * @param FileInterface     $uploadedFile
      * @param ResponseInterface $response
-     * @param Request $request
-     * @param string $context
+     * @param Request           $request
+     * @param string            $context
      */
-    protected function dispatchPreUploadEvent(UploaderManager $uploaderManager,
-                                              FileInterface $uploadedFile,
+    protected function dispatchPreUploadEvent(UploaderManager   $uploaderManager,
+                                              FileInterface     $uploadedFile,
                                               ResponseInterface $response,
-                                              Request $request,
-                                              $context)
+                                              Request           $request,
+                                                                $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
         $dispatcher    = $this->container->get('event_dispatcher');
@@ -400,12 +407,12 @@ class UploadController extends Controller
      * @param Request           $request
      * @param                   $context
      */
-    protected function dispatchPostEvents(UploaderManager $uploaderManager,
-                                          FileInterface $uploadedFile,
-                                          MediaInterface $media,
+    protected function dispatchPostEvents(UploaderManager   $uploaderManager,
+                                          FileInterface     $uploadedFile,
+                                          MediaInterface    $media,
                                           ResponseInterface $response,
-                                          Request $request,
-                                          $context)
+                                          Request           $request,
+                                                            $context)
     {
         $configContext = $uploaderManager->getContextConfig($context);
         $dispatcher    = $this->container->get('event_dispatcher');
@@ -439,9 +446,9 @@ class UploadController extends Controller
      * On top of that, if the client does not support the application/json type,
      * then the content type of the response will be set to text/plain instead.
      *
-     * @param mixed $data
+     * @param mixed   $data
      * @param Request $request
-     * @param int $status
+     * @param int     $status
      * @return JsonResponse
      */
     protected function createSupportedJsonResponse($data, Request $request, $status = null)

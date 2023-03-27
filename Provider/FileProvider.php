@@ -62,8 +62,8 @@ class FileProvider extends BaseFileProvider
         $this->setContentType($file->getMimeType());
         $this->setDescription(null);
         $this->setThumbnailUrl(null);
-        $this->setHeight(null);
-        $this->setWidth(null);
+        $this->setHeight($file->getHeight());
+        $this->setWidth($file->getWidth());
 
         $this->isParsed = true;
     }

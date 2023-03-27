@@ -16,6 +16,7 @@ use Glavweb\UploaderBundle\Util\FileUtils;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Mime\MimeTypes;
 
 /**
  * Class FilesystemFile
@@ -59,6 +60,34 @@ class FilesystemFile extends UploadedFile implements FileInterface
     public function getExtension()
     {
         return $this->getClientOriginalExtension();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isImage(): ?bool
+    {
+        return (bool)getimagesize($this->getPathname());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getWidth(): ?int
+    {
+        [$width] = getimagesize($this->getPathname());
+
+        return $width;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHeight(): ?int
+    {
+        [,$height] = getimagesize($this->getPathname());
+
+        return $height;
     }
 
     /**

@@ -11,15 +11,16 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
+use Glavweb\UploaderBundle\File\FileMetadata;
 use Glavweb\UploaderBundle\Exception\FileCopyException;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
-use Glavweb\UploaderBundle\File\FlysystemFile;
+use Glavweb\UploaderBundle\File\StorageFile;
 use Glavweb\UploaderBundle\Util\CropImage;
 use Glavweb\UploaderBundle\Util\FileUtils;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FileExistsException;
-use League\Flysystem\FileNotFoundException;
+use League\Flysystem\FileNotFoundException as FlysystemFileNotFoundException;
 use League\Flysystem\FilesystemInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
@@ -28,9 +29,9 @@ use Symfony\Component\HttpFoundation\File\File;
  * Class FlysystemStorage
  *
  * @package Glavweb\UploaderBundle\Storage
- * @author Sergey Zvyagintsev <nitron.ru@gmail.com>
+ * @author  Sergey Zvyagintsev <nitron.ru@gmail.com>
  */
-class FlysystemStorage implements StorageInterface
+class FlysystemStorage extends LocalStorage
 {
 
     /**
@@ -42,9 +43,12 @@ class FlysystemStorage implements StorageInterface
      * FlysystemStorage constructor.
      *
      * @param FilesystemInterface $filesystem
+     * @param string              $tempDirectoryPath
      */
-    public function __construct(FilesystemInterface $filesystem)
+    public function __construct(FilesystemInterface $filesystem, string $tempDirectoryPath)
     {
+        parent::__construct(new Filesystem(), $tempDirectoryPath);
+
         $this->filesystem = $filesystem;
     }
 
@@ -68,22 +72,28 @@ class FlysystemStorage implements StorageInterface
                 'mimetype'   => $file->getMimeType()
             ]);
         } finally {
-            if (isset($source) && is_resource($source)) {
+            if (isset($source) && \is_resource($source)) {
                 fclose($source);
             }
         }
 
         $originalName = $file->getClientOriginalName();
-        $size = $file->getSize();
+        $size         = $file->getSize();
 
         $symfonyFilesystem = new Filesystem();
+
+        $storageFile = new StorageFile($this, $path, true);
+        $storageFile->setSize($size);
+        $storageFile->setOriginalName($originalName);
+        $storageFile->setMimeType($file->getMimeType());
+        $storageFile->setWidth($file->getWidth());
+        $storageFile->setHeight($file->getHeight());
+
         $symfonyFilesystem->remove($file);
 
-        $flysystemFile = new FlysystemFile($this, $path);
-        $flysystemFile->setSize($size);
-        $flysystemFile->setOriginalName($originalName);
+        $storageFile->fetchMetadata();
 
-        return $flysystemFile;
+        return $storageFile;
     }
 
     /**
@@ -101,16 +111,12 @@ class FlysystemStorage implements StorageInterface
      */
     public function uploadFiles(array $files, $directory)
     {
-        try {
-            $return = [];
-            foreach ($files as $file) {
-                $return[] = $this->upload($file, $directory);
-            }
-
-            return $return;
-        } catch (\Exception $e) {
-            return [];
+        $return = [];
+        foreach ($files as $file) {
+            $return[] = $this->upload($file, $directory);
         }
+
+        return $return;
     }
 
     /**
@@ -118,7 +124,7 @@ class FlysystemStorage implements StorageInterface
      */
     public function clearOldFiles($directory, $lifetime)
     {
-        /** @var FlysystemFile $file */
+        /** @var StorageFile $file */
         foreach ($this->getFilesByDirectory($directory) as $file) {
             $nowTimestamp  = (new \DateTime())->getTimestamp();
             $fileTimestamp = $file->getLastModifiedAt()->getTimestamp();
@@ -131,7 +137,7 @@ class FlysystemStorage implements StorageInterface
 
     /**
      * @inheritDoc
-     * @throws FileNotFoundException
+     * @throws FlysystemFileNotFoundException
      */
     public function removeFile(FileInterface $file)
     {
@@ -142,7 +148,6 @@ class FlysystemStorage implements StorageInterface
 
     /**
      * @inheritDoc
-     * @throws FileNotFoundException
      */
     public function cropImage(FileInterface $file, array $cropData): string
     {
@@ -167,22 +172,22 @@ class FlysystemStorage implements StorageInterface
             return $updatedPathname;
 
         } finally {
-            if (isset($sourceFile) && is_resource($sourceFile)) {
+            if (isset($sourceFile) && \is_resource($sourceFile)) {
                 fclose($sourceFile);
             }
-            if (isset($tempFile) && is_resource($tempFile)) {
+            if (isset($tempFile) && \is_resource($tempFile)) {
                 fclose($tempFile);
             }
         }
     }
 
     /**
-     * @param FlysystemFile $file
-     * @param string $newPath
-     * @throws FileNotFoundException
+     * @param StorageFile $file
+     * @param string      $newPath
+     * @throws FlysystemFileNotFoundException
      * @throws FileExistsException
      */
-    public function moveFile(FlysystemFile $file, $newPath)
+    public function moveFile(FileInterface $file, $newPath)
     {
         $this->filesystem->rename($file->getPathname(), $newPath);
     }
@@ -194,7 +199,7 @@ class FlysystemStorage implements StorageInterface
      * @return FileInterface
      * @throws FileCopyException
      * @throws FileExistsException
-     * @throws FileNotFoundException
+     * @throws FlysystemFileNotFoundException
      */
     public function copyFile(FileInterface $file, string $newPath = null): FileInterface
     {
@@ -202,7 +207,7 @@ class FlysystemStorage implements StorageInterface
 
         if ($newPath) {
             if ($this->filesystem->has($newPath)) {
-                throw new FileCopyException($file, $newPath, "File already exists");
+                throw new FileCopyException($file, $newPath, 'File already exists');
             }
         } else {
             $fileName = FileUtils::generateFileCopyBasename($file, function($path) use ($file) {
@@ -213,7 +218,7 @@ class FlysystemStorage implements StorageInterface
 
         $this->filesystem->copy($path, $newPath);
 
-        return new FlysystemFile($this, $newPath);
+        return new StorageFile($this, $newPath, true);
     }
 
     /**
@@ -228,14 +233,16 @@ class FlysystemStorage implements StorageInterface
             $path     = $item['path'];
             $basename = $item['basename'];
 
-            if ($onlyFileNames && !in_array($basename, $onlyFileNames, true)) {
+            if ($onlyFileNames && !\in_array($basename, $onlyFileNames, true)) {
                 continue;
             }
 
-            $flysystemFile = new FlysystemFile($this, $path);
-            $flysystemFile->setMetadata($item);
+            $storageFile = new StorageFile($this, $path, true);
+            $storageFile->setSize($item['size']);
+            $storageFile->setLastModifiedAt((new \DateTime())->setTimestamp($item['timestamp']));
+            $storageFile->setMimeType($item['mimetype']);
 
-            $files[] = $flysystemFile;
+            $files[] = $storageFile;
         }
 
         return $files;
@@ -248,7 +255,7 @@ class FlysystemStorage implements StorageInterface
     {
         $path = sprintf('%s/%s', $directory, $name);
 
-        return new FlysystemFile($this, $path);
+        return new StorageFile($this, $path, true);
     }
 
     /**
@@ -262,32 +269,18 @@ class FlysystemStorage implements StorageInterface
     }
 
     /**
-     * @param FlysystemFile $file
-     * @return false|int
-     * @throws FileNotFoundException
+     * @inheritDoc
      */
-    public function getSize(FlysystemFile $file)
+    public function getMetadata(string $filePathName): FileMetadata
     {
-        return $this->filesystem->getSize($file->getPathname());
-    }
+        $object    = $this->filesystem->getMetadata($filePathName);
+        $timestamp = $this->filesystem->getTimestamp($filePathName);
 
-    /**
-     * @param FlysystemFile $file
-     * @return false|int
-     * @throws FileNotFoundException
-     */
-    public function getTimestamp(FlysystemFile $file)
-    {
-        return $this->filesystem->getTimestamp($file->getPathname());
-    }
+        $metadata                   = new FileMetadata();
+        $metadata->size             = $object['size'];
+        $metadata->mimeType         = $object['mimetype'];
+        $metadata->modificationTime = (new \DateTime())->setTimestamp($timestamp);
 
-    /**
-     * @param FlysystemFile $file
-     * @return false|string
-     * @throws FileNotFoundException
-     */
-    public function getMimeType(FlysystemFile $file)
-    {
-        return $this->filesystem->getMimetype($file->getPathname());
+        return $metadata;
     }
 }

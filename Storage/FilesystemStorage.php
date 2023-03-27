@@ -11,29 +11,35 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
-use Glavweb\UploaderBundle\Exception\CropImageException;
+use Glavweb\UploaderBundle\File\FileMetadata;
 use Glavweb\UploaderBundle\File\FileInterface;
 use Glavweb\UploaderBundle\File\FilesystemFile;
 use Glavweb\UploaderBundle\Util\CropImage;
 use Glavweb\UploaderBundle\Util\FileUtils;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Mime\MimeTypes;
 
 /**
  * Class FilesystemStorage
  *
  * @package Glavweb\UploaderBundle
- * @author Andrey Nilov <nilov@glavweb.ru>
+ * @author  Andrey Nilov <nilov@glavweb.ru>
  */
-class FilesystemStorage implements StorageInterface
+class FilesystemStorage extends LocalStorage
 {
+    /**
+     * @param string $tempDirectoryPath
+     */
+    public function __construct(string $tempDirectoryPath)
+    {
+        parent::__construct(new Filesystem(), $tempDirectoryPath);
+    }
 
     /**
-     * @param FileInterface $file
-     * @param string        $directory
-     * @param string        $name
-     * @return FileInterface
+     * @inheritDoc
      */
     public function upload(FileInterface $file, $directory, $name = null)
     {
@@ -42,19 +48,17 @@ class FilesystemStorage implements StorageInterface
             $name = $file->getBasename();
         }
 
-        $path = sprintf('%s/%s', $directory, $name);
+        $path       = sprintf('%s/%s', $directory, $name);
         $targetName = basename($path);
-        $targetDir  = dirname($path);
+        $targetDir  = \dirname($path);
 
         $file = $file->move($targetDir, $targetName);
-        $file = new FilesystemFile($file);
 
-        return $file;
+        return new FilesystemFile($file);
     }
 
     /**
-     * @param string $link
-     * @return FileInterface|false
+     * @inheritDoc
      */
     public function uploadTmpFileByLink($link)
     {
@@ -64,28 +68,20 @@ class FilesystemStorage implements StorageInterface
     }
 
     /**
-     * @param array  $files
-     * @param string $directory
-     * @return array
+     * @inheritDoc
      */
     public function uploadFiles(array $files, $directory)
     {
-        try {
-            $return = array();
-            foreach ($files as $file) {
-                $return[] = $this->upload($file, $directory);
-            }
-
-            return $return;
-        } catch (\Exception $e) {
-            return array();
+        $return = [];
+        foreach ($files as $file) {
+            $return[] = $this->upload($file, $directory);
         }
+
+        return $return;
     }
 
     /**
-     * @param string $directory
-     * @param array  $onlyFileNames
-     * @return array
+     * @inheritDoc
      */
     public function getFilesByDirectory($directory, array $onlyFileNames = null)
     {
@@ -99,33 +95,33 @@ class FilesystemStorage implements StorageInterface
             //This can happen if getFilesByDirectory is called and no file has yet been uploaded
 
             //push empty array into the finder so we can emulate no files found
-            $finder->append(array());
+            $finder->append([]);
         }
 
         // filter
         if ($onlyFileNames) {
             $finder->filter(function($file) use ($onlyFileNames) {
-                /** @var \Symfony\Component\Finder\SplFileInfo $file */
-                return in_array($file->getFilename(), $onlyFileNames);
+                /** @var SplFileInfo $file */
+                return \in_array($file->getFilename(), $onlyFileNames, true);
             });
         }
 
-        $files = array();
+        $files = [];
         foreach ($finder as $file) {
             /** @var File $file */
             $files[] = new FilesystemFile(new File($file->getPathname()));
         }
+
         return $files;
     }
 
     /**
-     * @param $directory
-     * @param $lifetime
+     * @inheritDoc
      */
     public function clearOldFiles($directory, $lifetime)
     {
         $filesystem = new Filesystem();
-        $finder = new Finder();
+        $finder     = new Finder();
 
         try {
             $finder->in($directory)->date('<=' . -1 * (int)$lifetime . 'seconds')->files();
@@ -142,9 +138,7 @@ class FilesystemStorage implements StorageInterface
     }
 
     /**
-     * @param $directory
-     * @param $name
-     * @return FilesystemFile
+     * @inheritDoc
      */
     public function getFile($directory, $name)
     {
@@ -155,9 +149,7 @@ class FilesystemStorage implements StorageInterface
     }
 
     /**
-     * @param $directory
-     * @param $name
-     * @return bool
+     * @inheritDoc
      */
     public function isFile($directory, $name)
     {
@@ -167,7 +159,7 @@ class FilesystemStorage implements StorageInterface
     }
 
     /**
-     * @param FileInterface $file
+     * @inheritDoc
      */
     public function removeFile(FileInterface $file)
     {
@@ -180,26 +172,34 @@ class FilesystemStorage implements StorageInterface
      */
     public function copyFile(FileInterface $file, string $newPath = null): FileInterface
     {
-        if ($file instanceof FilesystemFile) {
-            if ($newPath) {
-                $fileInfo = new \SplFileInfo($newPath);
-
-                return $file->copy($fileInfo->getPath(), $fileInfo->getBasename());
-            }
-
-            return $file->copy();
+        if (!$file instanceof FilesystemFile) {
+            throw new \InvalidArgumentException('$file must be instance of ' . FilesystemFile::class);
         }
+
+        if ($newPath) {
+            $fileInfo = new \SplFileInfo($newPath);
+
+            return $file->copy($fileInfo->getPath(), $fileInfo->getBasename());
+        }
+
+        return $file->copy();
     }
 
     /**
-     * @param FileInterface $file
-     * @param array $cropData
-     * @return string
-     * @throws CropImageException
+     * @inheritDoc
+     */
+    public function moveFile(FileInterface $file, $newPath)
+    {
+        $filesystem = new Filesystem();
+        $filesystem->rename($file->getPathname(), $newPath);
+    }
+
+    /**
+     * @inheritDoc
      */
     public function cropImage(FileInterface $file, array $cropData): string
     {
-        $pathname = $file->getPathname();
+        $pathname   = $file->getPathname();
         $cropResult = CropImage::crop($pathname, $pathname, $cropData);
 
         $updatedPathname = $pathname;
@@ -208,5 +208,51 @@ class FilesystemStorage implements StorageInterface
         }
 
         return $updatedPathname;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMetadata(string $filePathName): FileMetadata
+    {
+        $metadata                   = new FileMetadata();
+        $metadata->size             = $this->getSize($filePathName);
+        $metadata->mimeType         = $this->getMimeType($filePathName);
+        $metadata->modificationTime = new \DateTime($this->getTimestamp($filePathName));
+        $metadata->isImage          = false;
+
+        [$width, $height] = getimagesize($filePathName);
+
+        if (isset($width) || isset($height)) {
+            $metadata->isImage = true;
+            $metadata->width   = $width;
+            $metadata->height  = $height;
+        }
+
+        return $metadata;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMimeType(string $filePathName)
+    {
+        return MimeTypes::getDefault()->guessMimeType($filePathName) ?: false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTimestamp(string $filePathName)
+    {
+        return \filemtime($filePathName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSize(string $filePathName)
+    {
+        return \filesize($filePathName);
     }
 }

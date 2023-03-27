@@ -9,6 +9,7 @@
         <parameter key="glavweb_uploader.provider.file.class">Glavweb\UploaderBundle\Provider\FileProvider</parameter>
         <parameter key="glavweb_uploader.provider.image.class">Glavweb\UploaderBundle\Provider\ImageProvider</parameter>
         <parameter key="glavweb_uploader.provider.youtube.class">Glavweb\UploaderBundle\Provider\YoutubeProvider</parameter>
+        <parameter key="glavweb_uploader.storage.filesystem.temp_directory_path">%kernel.project_dir%/var/temp</parameter>
     </parameters>
 
     <services>
@@ -29,7 +30,12 @@
             <argument type="service" id="doctrine" />
         </service>
 
+        <service id="glavweb_uploader.model.multipart_upload_manager.orm" class="\Glavweb\UploaderBundle\Model\MultipartUploadManager" public="true">
+            <argument type="service" id="doctrine" />
+        </service>
+
         <service id="glavweb_uploader.storage.filesystem" class="Glavweb\UploaderBundle\Storage\FilesystemStorage" public="true">
+            <argument>%glavweb_uploader.storage.filesystem.temp_directory_path%</argument>
         </service>
 
         <service id="glavweb_uploader.media_listener" class="Glavweb\UploaderBundle\Entity\Listener\MediaListener">

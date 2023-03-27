@@ -11,9 +11,15 @@
 
 namespace Glavweb\UploaderBundle\Storage;
 
+use Exception;
+use Glavweb\UploaderBundle\File\FileMetadata;
 use Glavweb\UploaderBundle\Exception\CropImageException;
 use Glavweb\UploaderBundle\Exception\FileCopyException;
 use Glavweb\UploaderBundle\File\FileInterface;
+use Glavweb\UploaderBundle\File\StorageFile;
+use League\Flysystem\FileExistsException;
+use League\Flysystem\FileNotFoundException as FlysystemFileNotFoundException;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * Interface StorageInterface
@@ -26,9 +32,9 @@ interface StorageInterface
     /**
      * Uploads a File instance to the configured storage.
      *
-     * @param        $file
-     * @param string $directory
-     * @param string $name
+     * @param FileInterface $file
+     * @param string        $directory
+     * @param string        $name
      * @return FileInterface
      */
     public function upload(FileInterface $file, $directory, $name);
@@ -47,8 +53,8 @@ interface StorageInterface
     public function uploadFiles(array $files, $directory);
 
     /**
-     * @param string $directory
-     * @param array  $onlyFileNames
+     * @param string     $directory
+     * @param array|null $onlyFileNames
      * @return array
      */
     public function getFilesByDirectory($directory, array $onlyFileNames = null);
@@ -87,10 +93,54 @@ interface StorageInterface
     public function copyFile(FileInterface $file, string $newPath = null): FileInterface;
 
     /**
+     * @param StorageFile $file
+     * @param string      $newPath
+     * @throws FlysystemFileNotFoundException
+     * @throws FileExistsException
+     */
+    public function moveFile(FileInterface $file, $newPath);
+
+    /**
      * @param FileInterface $file
      * @param array $cropData
      * @return string
      * @throws CropImageException
      */
     public function cropImage(FileInterface $file, array $cropData): string;
+
+    /**
+     * @param string $filePathName
+     * @return FileMetadata
+     */
+    public function getMetadata(string $filePathName): FileMetadata;
+
+    /**
+     * @param File   $file
+     * @param string $fileId
+     * @param int    $chunkIndex
+     */
+    public function addFileChunk(File $file, string $fileId, int $chunkIndex): void;
+
+    /**
+     * @param string $fileId
+     * @param int $chunkTotal
+     * @return bool
+     */
+    public function hasAllFileChunks(string $fileId, int $chunkTotal): bool;
+
+    /**
+     * @param File         $file
+     * @param FileMetadata $metadata
+     * @param string       $fileId
+     * @return FileInterface
+     * @throws Exception
+     */
+    public function concatFileChunks(File $file, FileMetadata $metadata, string $fileId): FileInterface;
+
+    /**
+     * Cleanup trash files
+     *
+     * @return void
+     */
+    public function cleanup(): void;
 }
