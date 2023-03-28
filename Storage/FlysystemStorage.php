@@ -273,12 +273,13 @@ class FlysystemStorage extends LocalStorage
      */
     public function getMetadata(string $filePathName): FileMetadata
     {
-        $object    = $this->filesystem->getMetadata($filePathName);
+        $size      = $this->filesystem->getSize($filePathName);
         $timestamp = $this->filesystem->getTimestamp($filePathName);
+        $mimetype  = $this->filesystem->getMimetype($filePathName);
 
         $metadata                   = new FileMetadata();
-        $metadata->size             = $object['size'];
-        $metadata->mimeType         = $object['mimetype'];
+        $metadata->size             = $size;
+        $metadata->mimeType         = $mimetype;
         $metadata->modificationTime = (new \DateTime())->setTimestamp($timestamp);
 
         return $metadata;

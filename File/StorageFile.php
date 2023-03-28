@@ -360,10 +360,10 @@ class StorageFile implements FileInterface
     }
 
     /**
-     * @param int $height
+     * @param int|null $height
      * @return StorageFile
      */
-    public function setHeight(int $height): StorageFile
+    public function setHeight(?int $height): StorageFile
     {
         $this->height = $height;
 
@@ -383,10 +383,10 @@ class StorageFile implements FileInterface
     }
 
     /**
-     * @param int $width
+     * @param int|null $width
      * @return StorageFile
      */
-    public function setWidth(int $width): StorageFile
+    public function setWidth(?int $width): StorageFile
     {
         $this->width = $width;
 
