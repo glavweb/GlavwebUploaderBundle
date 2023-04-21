@@ -240,7 +240,6 @@ class FlysystemStorage extends LocalStorage
             $storageFile = new StorageFile($this, $path, true);
             $storageFile->setSize($item['size']);
             $storageFile->setLastModifiedAt((new \DateTime())->setTimestamp($item['timestamp']));
-            $storageFile->setMimeType($item['mimetype']);
 
             $files[] = $storageFile;
         }
