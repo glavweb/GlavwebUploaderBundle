@@ -242,7 +242,7 @@ class AwsS3v2Storage implements StorageInterface
 
         $this->client->copyObject([
             'Bucket'     => $this->bucket,
-            'CopySource' => $path,
+            'CopySource' => "$this->bucket/{$path}",
             'Key'        => $newPath
         ]);
 
