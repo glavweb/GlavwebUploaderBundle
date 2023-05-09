@@ -160,6 +160,6 @@ class FileUtils
      */
     public static function basename(string $fileName): string
     {
-        return substr(strrchr(rawurldecode(basename(rawurlencode($fileName))), DIRECTORY_SEPARATOR), 1);
+        return substr(strrchr($fileName, DIRECTORY_SEPARATOR), 1) ?: $fileName;
     }
 }
