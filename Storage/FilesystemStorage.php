@@ -43,7 +43,7 @@ class FilesystemStorage implements StorageInterface
         }
 
         $path = sprintf('%s/%s', $directory, $name);
-        $targetName = basename($path);
+        $targetName = FileUtils::basename($path);
         $targetDir  = dirname($path);
 
         $file = $file->move($targetDir, $targetName);
