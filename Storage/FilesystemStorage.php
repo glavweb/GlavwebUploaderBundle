@@ -48,8 +48,8 @@ class FilesystemStorage extends LocalStorage
             $name = $file->getBasename();
         }
 
-        $path       = sprintf('%s/%s', $directory, $name);
-        $targetName = basename($path);
+        $path = sprintf('%s/%s', $directory, $name);
+        $targetName = FileUtils::basename($path);
         $targetDir  = \dirname($path);
 
         $file = $file->move($targetDir, $targetName);

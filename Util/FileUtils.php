@@ -151,4 +151,15 @@ class FileUtils
 
         return new File($path);
     }
+
+    /**
+     * Fix bug with cyrillic symbols
+     *
+     * @param string $fileName
+     * @return string
+     */
+    public static function basename(string $fileName): string
+    {
+        $newContentPath = rawurldecode(basename(rawurlencode($fileName)));
+    }
 }

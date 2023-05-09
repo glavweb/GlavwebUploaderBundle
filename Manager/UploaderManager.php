@@ -23,6 +23,7 @@ use Glavweb\UploaderBundle\Provider\ImageProvider;
 use Glavweb\UploaderBundle\Provider\ProviderFileInterface;
 use Glavweb\UploaderBundle\Provider\ProviderInterface;
 use Glavweb\UploaderBundle\Provider\ProviderTypes;
+use Glavweb\UploaderBundle\Util\FileUtils;
 use Glavweb\UploaderBundle\Storage\StorageInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
@@ -168,7 +169,7 @@ class UploaderManager implements ContainerAwareInterface
         if ($provider instanceof ProviderFileInterface) {
             $uploadedFile = $this->uploadFile($provider->getFile(), $context);
 
-            $contentPath = basename($uploadedFile->getPathname());
+            $contentPath = FileUtils::basename($uploadedFile->getPathname());
             if ($provider instanceof ImageProvider) {
                 $thumbnailPath = $contentPath;
             }
@@ -184,7 +185,7 @@ class UploaderManager implements ContainerAwareInterface
                 $tmpFile      = $this->getStorage()->uploadTmpFileByLink($thumbnailUrl);
                 $uploadedFile = $this->uploadFile($tmpFile, $context);
 
-                $thumbnailPath = basename($uploadedFile->getPathname());
+                $thumbnailPath = FileUtils::basename($uploadedFile->getPathname());
             }
         }
 
@@ -518,8 +519,9 @@ class UploaderManager implements ContainerAwareInterface
 
         // update file name
         $newFilename = $this->getStorage()->cropImage($file, $cropData);
-        $media->setContentPath(basename($newFilename));
-        $media->setThumbnailPath(basename($newFilename));
+        $newContentPath = FileUtils::basename($newFilename);
+        $media->setContentPath($newContentPath);
+        $media->setThumbnailPath($newContentPath);
 
         $this->getModelManager()->updateMedia($media);
     }
