@@ -97,6 +97,6 @@ class FileUtils
      */
     public static function basename(string $fileName): string
     {
-        $newContentPath = rawurldecode(basename(rawurlencode($fileName)));
+        return substr(strrchr(rawurldecode(basename(rawurlencode($fileName))), DIRECTORY_SEPARATOR), 1);
     }
 }
