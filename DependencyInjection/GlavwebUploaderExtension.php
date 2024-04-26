@@ -61,6 +61,9 @@ class GlavwebUploaderExtension extends Extension
         $defaults = $config['mappings_defaults'];
 
         foreach ($config['mappings'] as &$contextConfig) {
+            if (!$contextConfig['extend_defaults']) {
+                continue;
+            }
 
             foreach ($contextConfig as $key => $value) {
                 if ((is_array($value) && empty($value)) || $value === null) {

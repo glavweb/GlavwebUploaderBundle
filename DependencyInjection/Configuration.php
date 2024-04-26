@@ -103,6 +103,7 @@ class Configuration implements ConfigurationInterface
                                 ->info('Set max files.')
                             ->end()
                             ->booleanNode('use_orphanage')->end()
+                            ->booleanNode('extend_defaults')->defaultTrue()->end()
                             ->scalarNode('upload_directory')->end()
                             ->scalarNode('upload_directory_url')->end()
                             ->scalarNode('namer')->end()
