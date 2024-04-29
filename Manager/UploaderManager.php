@@ -487,7 +487,7 @@ class UploaderManager implements ContainerAwareInterface
         $extension = isset($pathinfo['extension']) ? $pathinfo['extension'] : null;
 
         if (!$extension) {
-            throw new \RuntimeException('Extension not found.');
+            return;
         }
 
         if (\in_array($extension, $this->blackListExtensions, true)) {
