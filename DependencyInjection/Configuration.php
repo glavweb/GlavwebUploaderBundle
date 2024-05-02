@@ -24,6 +24,17 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
+    public const DEFAULT_MAPPINGS_VALUES = [
+        'route_prefix' => '',
+        'max_size' => \PHP_INT_MAX,
+        'max_files' => \PHP_INT_MAX,
+        'use_orphanage' => false,
+        'namer' => 'glavweb_uploader.namer.uniqid',
+        'providers' => [],
+        'allowed_mimetypes' => [],
+        'disallowed_mimetypes' => []
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -59,7 +70,7 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('providers')
                             ->prototype('scalar')->end()
                         ->end()
-                        ->scalarNode('route_prefix')->defaultValue('')->end()
+                        ->scalarNode('route_prefix')->defaultValue(self::DEFAULT_MAPPINGS_VALUES['route_prefix'])->end()
                         ->arrayNode('allowed_mimetypes')
                             ->prototype('scalar')->end()
                         ->end()
@@ -67,17 +78,17 @@ class Configuration implements ConfigurationInterface
                             ->prototype('scalar')->end()
                         ->end()
                         ->scalarNode('max_size')
-                            ->defaultValue(\PHP_INT_MAX)
+                            ->defaultValue(self::DEFAULT_MAPPINGS_VALUES['max_size'])
                             ->info('Set max_size to -1 for gracefully downgrade this number to the systems max upload size.')
                         ->end()
                         ->scalarNode('max_files')
-                            ->defaultValue(\PHP_INT_MAX)
+                            ->defaultValue(self::DEFAULT_MAPPINGS_VALUES['max_files'])
                             ->info('Set max files.')
                         ->end()
-                        ->booleanNode('use_orphanage')->defaultFalse()->end()
+                        ->booleanNode('use_orphanage')->defaultValue(self::DEFAULT_MAPPINGS_VALUES['use_orphanage'])->end()
                         ->scalarNode('upload_directory')->end()
                         ->scalarNode('upload_directory_url')->end()
-                        ->scalarNode('namer')->defaultValue('glavweb_uploader.namer.uniqid')->end()
+                        ->scalarNode('namer')->defaultValue(self::DEFAULT_MAPPINGS_VALUES['namer'])->end()
                     ->end()
                 ->end()
                 ->arrayNode('mappings')
@@ -89,26 +100,20 @@ class Configuration implements ConfigurationInterface
                             ->arrayNode('providers')
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->scalarNode('route_prefix')->defaultValue('')->end()
+                            ->scalarNode('route_prefix')->end()
                             ->arrayNode('allowed_mimetypes')
                                 ->prototype('scalar')->end()
                             ->end()
                             ->arrayNode('disallowed_mimetypes')
                                 ->prototype('scalar')->end()
                             ->end()
-                            ->scalarNode('max_size')
-                                ->defaultValue(\PHP_INT_MAX)
-                                ->info('Set max_size to -1 for gracefully downgrade this number to the systems max upload size.')
-                            ->end()
-                            ->scalarNode('max_files')
-                                ->defaultValue(\PHP_INT_MAX)
-                                ->info('Set max files.')
-                            ->end()
-                            ->booleanNode('use_orphanage')->defaultFalse()->end()
+                            ->scalarNode('max_size')->end()
+                            ->scalarNode('max_files')->end()
+                            ->booleanNode('use_orphanage')->end()
                             ->booleanNode('extend_defaults')->defaultTrue()->end()
                             ->scalarNode('upload_directory')->end()
                             ->scalarNode('upload_directory_url')->end()
-                            ->scalarNode('namer')->defaultValue('glavweb_uploader.namer.uniqid')->end()
+                            ->scalarNode('namer')->end()
                         ->end()
                     ->end()
                 ->end()

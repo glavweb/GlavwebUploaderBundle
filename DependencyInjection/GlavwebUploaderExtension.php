@@ -58,21 +58,18 @@ class GlavwebUploaderExtension extends Extension
      */
     public function applyMappingsDefaults($config)
     {
-        $defaults = $config['mappings_defaults'];
-
         foreach ($config['mappings'] as &$contextConfig) {
-            if (!$contextConfig['extend_defaults']) {
-                continue;
-            }
-
-            foreach ($contextConfig as $key => $value) {
-                if ((is_array($value) && empty($value)) || $value === null) {
-                    $contextConfig[$key] = $defaults[$key];
-                }
-            }
+            $extendDefaults = $contextConfig['extend_defaults'];
+            $defaults = $extendDefaults ? $config['mappings_defaults'] : Configuration::DEFAULT_MAPPINGS_VALUES;
 
             foreach ($defaults as $defaultKey => $defaultValue) {
-                if (!isset($contextConfig[$defaultKey])) {
+                $value = $contextConfig[$defaultKey] ?? null;
+
+                if ($extendDefaults && is_array($value) && is_array($defaultValue)) {
+                    $contextConfig[$defaultKey] = array_unique(array_merge($defaultValue, $value));
+                }
+
+                if ($value === null) {
                     $contextConfig[$defaultKey] = $defaultValue;
                 }
             }
