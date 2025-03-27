@@ -113,15 +113,20 @@ abstract class LocalStorage implements StorageInterface
 
     public function cleanup(): void
     {
+        $chunkedUploadDirectoryPath = $this->getChunkedUploadDirectoryPath();
+        if (!is_dir($chunkedUploadDirectoryPath)) {
+            return;
+        }
+
         $oldFilesFinder = new Finder();
-        $oldFilesFinder->in($this->getChunkedUploadDirectoryPath())
+        $oldFilesFinder->in($chunkedUploadDirectoryPath)
                        ->files()
                        ->date('before 1 hour ago');
 
         $this->filesystem->remove(iterator_to_array($oldFilesFinder));
 
         $emptyDirFinder = new Finder();
-        $emptyDirFinder->in($this->getChunkedUploadDirectoryPath())
+        $emptyDirFinder->in($chunkedUploadDirectoryPath)
                        ->directories()
                        ->filter(function(\SplFileInfo $dirInfo) {
                            $dirFinder = new Finder();

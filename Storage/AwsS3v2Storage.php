@@ -3,6 +3,7 @@
 namespace Glavweb\UploaderBundle\Storage;
 
 use Aws\S3\Exception\NoSuchKeyException;
+use Aws\S3\Exception\NoSuchUploadException;
 use Aws\S3\S3Client;
 use Glavweb\UploaderBundle\File\FileMetadata;
 use Glavweb\UploaderBundle\Exception\Exception;
@@ -422,11 +423,16 @@ class AwsS3v2Storage implements StorageInterface
 
         foreach ($this->multipartUploadManager->list() as $multipartUpload) {
             if ($multipartUpload->getLastModifiedAt() < $actualTime) {
-                $this->client->abortMultipartUpload([
-                    'Bucket'   => $this->bucket,
-                    'Key'      => $multipartUpload->getKey(),
-                    'UploadId' => $multipartUpload->getId()
-                ]);
+                try {
+                    $this->client->abortMultipartUpload([
+                        'Bucket' => $this->bucket,
+                        'Key' => $multipartUpload->getKey(),
+                        'UploadId' => $multipartUpload->getId()
+                    ]);
+                } catch (NoSuchUploadException $e) {
+                    // ignore
+                }
+
                 $this->multipartUploadManager->delete($multipartUpload);
             }
         }
