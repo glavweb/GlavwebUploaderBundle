@@ -62,7 +62,7 @@ class AwsS3v2Storage implements StorageInterface
     /**
      * @inheritDoc
      */
-    public function upload(FileInterface $file, $directory, $name = null)
+    public function upload(FileInterface $file, $directory, $name = null, $attachment = false)
     {
         /** @var File $file */
         if ($name === null) {
@@ -82,15 +82,16 @@ class AwsS3v2Storage implements StorageInterface
 
         $this->client->putObject(
             [
-                'Bucket'      => $this->bucket,
-                'Key'         => $path,
-                'SourceFile'  => $file->getPathname(),
-                'ContentType' => $mimeType,
-                'Metadata'    => [
+                'Bucket'             => $this->bucket,
+                'Key'                => $path,
+                'SourceFile'         => $file->getPathname(),
+                'ContentDisposition' => $attachment ? 'attachment' : 'inline',
+                'ContentType'        => $mimeType,
+                'Metadata'           => [
                     'Is-Image'      => $file->isImage() ? 1 : 0,
                     'Width'         => $file->getWidth() ?: 0,
                     'Height'        => $file->getHeight() ?: 0,
-                    'Original-Name' => base64_encode($file->getClientOriginalName())
+                    'Original-Name' => base64_encode($originalName)
                 ]
             ]
         );

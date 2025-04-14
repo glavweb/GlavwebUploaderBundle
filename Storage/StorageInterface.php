@@ -33,11 +33,12 @@ interface StorageInterface
      * Uploads a File instance to the configured storage.
      *
      * @param FileInterface $file
-     * @param string        $directory
-     * @param string        $name
+     * @param string $directory
+     * @param string $name
+     * @param bool $attachment
      * @return FileInterface
      */
-    public function upload(FileInterface $file, $directory, $name);
+    public function upload(FileInterface $file, $directory, $name, $attachment);
 
     /**
      * @param string $link
@@ -46,7 +47,7 @@ interface StorageInterface
     public function uploadTmpFileByLink($link);
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $directory
      * @return array
      */

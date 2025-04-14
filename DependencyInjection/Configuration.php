@@ -32,7 +32,8 @@ class Configuration implements ConfigurationInterface
         'namer' => 'glavweb_uploader.namer.uniqid',
         'providers' => [],
         'allowed_mimetypes' => [],
-        'disallowed_mimetypes' => []
+        'disallowed_mimetypes' => [],
+        'attachment' => false
     ];
 
     /**
@@ -89,6 +90,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('upload_directory')->end()
                         ->scalarNode('upload_directory_url')->end()
                         ->scalarNode('namer')->defaultValue(self::DEFAULT_MAPPINGS_VALUES['namer'])->end()
+                        ->scalarNode('attachment')->defaultValue(self::DEFAULT_MAPPINGS_VALUES['attachment'])->end()
                     ->end()
                 ->end()
                 ->arrayNode('mappings')
@@ -114,6 +116,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('upload_directory')->end()
                             ->scalarNode('upload_directory_url')->end()
                             ->scalarNode('namer')->end()
+                            ->scalarNode('attachment')->end()
                         ->end()
                     ->end()
                 ->end()

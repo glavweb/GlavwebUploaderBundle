@@ -55,7 +55,7 @@ class FlysystemStorage extends LocalStorage
     /**
      * @inheritDoc
      */
-    public function upload(FileInterface $file, $directory, $name = null)
+    public function upload(FileInterface $file, $directory, $name = null, $attachment = false)
     {
         /** @var File $file */
         if ($name === null) {

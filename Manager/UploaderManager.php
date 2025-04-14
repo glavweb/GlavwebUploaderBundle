@@ -221,6 +221,7 @@ class UploaderManager implements ContainerAwareInterface
     public function uploadFile(FileInterface $file, $context)
     {
         $directory = $this->getContextConfig($context, 'upload_directory');
+        $attachment = $this->getContextConfig($context, 'attachment');
 
         // Upload file
         /** @var NamerInterface $namer */
@@ -229,7 +230,7 @@ class UploaderManager implements ContainerAwareInterface
 
         $this->checkHackingName($name);
 
-        return $this->getStorage()->upload($file, $directory, $name);
+        return $this->getStorage()->upload($file, $directory, $name, $attachment);
     }
 
     /**
