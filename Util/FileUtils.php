@@ -49,7 +49,7 @@ class FileUtils
     {
         $source = null;
         $target = null;
-        $path = null;
+        $path = tempnam(sys_get_temp_dir(), 'gup');
 
         try {
             if (StringUtils::isUrl($link)) {
@@ -58,7 +58,7 @@ class FileUtils
                     throw new FileNotFoundException("File '$link' not found");
                 }
 
-                $target = tmpfile();
+                $target = fopen($path, 'wb');
 
                 if (!stream_copy_to_stream($source, $target)) {
                     throw new \RuntimeException('Stream copy failed');
@@ -69,7 +69,7 @@ class FileUtils
                     throw new Base64DecodingException("File can't be decoded from string");
                 }
 
-                $target = tmpfile();
+                $target = fopen($path, 'wb');
 
                 if (!fwrite($target, $fileContents)) {
                     throw new \RuntimeException('Unable to write content into temporal file');
