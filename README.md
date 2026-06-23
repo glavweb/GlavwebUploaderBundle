@@ -40,65 +40,58 @@ glavweb_uploader:
             providers :
                 - glavweb_uploader.provider.image
             use_orphanage: true
-            upload_directory:     %kernel.root_dir%/../web/uploads/entity_images
+            upload_directory: '%kernel.project_dir%/public/uploads/entity_images'
             upload_directory_url: uploads/entity_images
             max_size: 4194304 # 4Mb
             allowed_mimetypes: [image/jpeg, image/gif, image/png]
             
     orphanage:
         lifetime: 86400
-        directory: %kernel.cache_dir%/uploader/orphanage
             
 ```
 
 To enable the dynamic routes, add the following to your routing configuration file.
 
 ```yaml
-#  app/config/routing.yml
+#  app/config/routing.yaml
 
 glavweb_uploader:
-    resource: "@GlavwebUploaderBundle/Resources/config/routing.yml"
+    resource: '@GlavwebUploaderBundle/config/routing.yaml'
     prefix:   /
 ```
 
 Basic Usage
 ===========
 
-1. Added annotations for the entity which needs to support "GlavwebUploadable".
-"@Glavweb\Uploadable" before you can define an entity class:
+1. Added attributes for the entity which needs to support "GlavwebUploadable".
+"#[Glavweb\Uploadable]" before you can define an entity class:
 
 ```
-use Glavweb\UploaderBundle\Mapping\Annotation as Glavweb;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Glavweb\UploaderBundle\Entity\Media;
+use Glavweb\UploaderBundle\Mapping\Attribute as Glavweb;
 
-/**
- * Entity
- * 
- * @Glavweb\Uploadable
- */
+#[ORM\Entity]
+#[Glavweb\Uploadable()]
 class Entity
 {
 }
 ```
 
-And another annotation "@Glavweb\UploadableField" before defining the properties of a many-to-many:
+And another attribute "#[Glavweb\UploadableField]" before defining the properties of a many-to-many:
 
 ```
-/**
- * @var \Doctrine\Common\Collections\Collection
- * 
- * @ORM\ManyToMany(targetEntity="Glavweb\UploaderBundle\Entity\Media", inversedBy="entities", orphanRemoval=true)
- * @ORM\OrderBy({"position" = "ASC"})
- * @Glavweb\UploadableField(mapping="entity_images")
- */
-private $images;
+#[ORM\ManyToMany(targetEntity: Media::class, inversedBy: "entities", orphanRemoval: true)]
+#[ORM\OrderBy(["position" => "ASC"])]
+#[Glavweb\UploadableField([mapping => "entity_images"])]
+private Collection $images;
 
-/**
- * Constructor
- */
 public function __construct()
 {
     ...
-    $this->images = new \Doctrine\Common\Collections\ArrayCollection();
+    $this->images = new ArrayCollection();
 }
 
 ```
@@ -106,13 +99,10 @@ public function __construct()
 Or many-to-one:
 
 ```
-/**
- * @var Media
- *
- * @ORM\OneToOne(targetEntity="Glavweb\UploaderBundle\Entity\Media", orphanRemoval=true)
- * @ORM\JoinColumn(name="image_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
- */
-private $image;
+#[ORM\OneToOne(targetEntity: Media::class, orphanRemoval: true)]
+#[ORM\JoinColumn(name: "image_id", referencedColumnName: "id", nullable: true, onDelete: "SET NULL")]
+#[Glavweb\UploadableField([mapping => "entity_images"])]
+private ?Media $image = null;
 ```
 
 2. For build form, you can use [GlavwebUploaderDropzoneBundle].

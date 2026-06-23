@@ -1,0 +1,140 @@
+parameters:
+  glavweb_uploader.namer.uniqid.class: Glavweb\UploaderBundle\Naming\UniqidNamer
+  glavweb_uploader.provider.file.class: Glavweb\UploaderBundle\Provider\FileProvider
+  glavweb_uploader.provider.image.class: Glavweb\UploaderBundle\Provider\ImageProvider
+  glavweb_uploader.provider.youtube.class: Glavweb\UploaderBundle\Provider\YoutubeProvider
+
+services:
+  Glavweb\UploaderBundle\Controller\:
+    resource: '../src/Controller/*'
+    public: true
+    autowire: true
+    tags: [ 'controller.service_arguments', 'container.service_subscriber' ]
+
+  glavweb_uploader.error_handler.standard:
+    class: 'Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler'
+    public: true
+    arguments:
+      - '@translator'
+
+  Glavweb\UploaderBundle\ErrorHandler\StandardErrorHandler:
+    alias: glavweb_uploader.error_handler.standard
+
+  glavweb_uploader.uploader_manager:
+    class: 'Glavweb\UploaderBundle\Manager\UploaderManager'
+    public: true
+    arguments:
+      - '%glavweb_uploader.config%'
+      - '@service_container'
+      - '@event_dispatcher'
+
+  Glavweb\UploaderBundle\Manager\UploaderManager:
+    alias: glavweb_uploader.uploader_manager
+
+  glavweb_uploader.model_manager.orm:
+    class: 'Glavweb\UploaderBundle\Model\OrmModelManager'
+    public: true
+    arguments:
+      - '@doctrine'
+
+  Glavweb\UploaderBundle\Model\OrmModelManager:
+    alias: glavweb_uploader.model_manager.orm
+
+  glavweb_uploader.storage.filesystem:
+    class: 'Glavweb\UploaderBundle\Storage\FilesystemStorage'
+    public: true
+
+  Glavweb\UploaderBundle\Storage\FilesystemStorage:
+    alias: glavweb_uploader.storage.filesystem
+
+  glavweb_uploader.media_listener:
+    class: 'Glavweb\UploaderBundle\Entity\Listener\MediaListener'
+    arguments:
+      - '@glavweb_uploader.uploader_manager'
+    tags:
+      - { name: 'doctrine.orm.entity_listener' }
+
+  glavweb_uploader.media_helper:
+    class: 'Glavweb\UploaderBundle\Helper\MediaHelper'
+    public: true
+    arguments:
+      - '%glavweb_uploader.config%'
+      - '@request_stack'
+      - '@glavweb_uploader.uploader_manager'
+
+  Glavweb\UploaderBundle\Helper\MediaHelper:
+    alias: glavweb_uploader.media_helper
+
+  glavweb_uploader.twig.uploader_extension:
+    class: 'Glavweb\UploaderBundle\Twig\Extension\UploaderExtension'
+    arguments:
+      - '@request_stack'
+      - '@glavweb_uploader.media_helper'
+      - '@glavweb_uploader.uploader_manager'
+    tags:
+      - { name: 'twig.extension' }
+
+  # providers
+  glavweb_uploader.provider.file:
+    class: '%glavweb_uploader.provider.file.class%'
+    public: true
+    arguments:
+      - '@glavweb_uploader.media_helper'
+
+  glavweb_uploader.provider.image:
+    class: '%glavweb_uploader.provider.image.class%'
+    public: true
+    arguments:
+      - '@glavweb_uploader.media_helper'
+
+  glavweb_uploader.provider.youtube:
+    class: '%glavweb_uploader.provider.youtube.class%'
+    public: true
+
+  # namer
+  glavweb_uploader.namer.uniqid:
+    class: '%glavweb_uploader.namer.uniqid.class%'
+    public: true
+
+  # validators
+  glavweb_uploader.validation_listener.max_size:
+    class: 'Glavweb\UploaderBundle\EventListener\MaxSizeValidationListener'
+    tags:
+      - { name: 'kernel.event_listener', event: 'glavweb_uploader.validation', method: 'onValidate' }
+
+  glavweb_uploader.validation_listener.dimensions:
+    class: 'Glavweb\UploaderBundle\EventListener\DimensionsValidationListener'
+    tags:
+      - { name: 'kernel.event_listener', event: 'glavweb_uploader.validation', method: 'onValidate' }
+
+  glavweb_uploader.validation_listener.allowed_mimetype:
+    class: 'Glavweb\UploaderBundle\EventListener\AllowedMimetypeValidationListener'
+    tags:
+      - { name: 'kernel.event_listener', event: 'glavweb_uploader.validation', method: 'onValidate' }
+
+  glavweb_uploader.validation_listener.disallowed_mimetype:
+    class: 'Glavweb\UploaderBundle\EventListener\DisallowedMimetypeValidationListener'
+    tags:
+      - { name: 'kernel.event_listener', event: 'glavweb_uploader.validation', method: 'onValidate' }
+
+  glavweb_uploader.data_driver.attribute:
+    class: 'Glavweb\UploaderBundle\Driver\AttributeDriver'
+    public: true
+
+  Glavweb\UploaderBundle\Driver\AttributeDriver:
+    alias: glavweb_uploader.data_driver.attribute
+
+  glavweb_uploader.util.media_structure:
+    class: 'Glavweb\UploaderBundle\Util\MediaStructure'
+    public: true
+    arguments:
+      - '@glavweb_uploader.media_helper'
+      - '@liip_imagine.cache.manager'
+
+  Glavweb\UploaderBundle\Util\MediaStructure:
+    alias: glavweb_uploader.util.media_structure
+
+  glavweb_uploader.command.clear_orphans_command:
+    class: 'Glavweb\UploaderBundle\Command\ClearOrphansCommand'
+    tags:
+      - { name: 'console.command' }

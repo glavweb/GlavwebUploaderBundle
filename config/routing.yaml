@@ -1,0 +1,3 @@
+_glavweb_uploader_upload_controller:
+    resource: '@GlavwebUploaderBundle/src/Controller/'
+    type: attribute

@@ -5,7 +5,7 @@
         {
             "name": "Andrey Nilov",
             "email": "nilov@glavweb.ru",
-            "homepage": "http://glavweb.ru"
+            "homepage": "https://glavweb.ru"
         },
         {
             "name": "Glavweb Community",
@@ -13,24 +13,28 @@
         }
     ],
     "require": {
-        "php": ">=7.2.5",
-        "symfony/http-foundation": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/form": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/templating": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/filesystem": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/finder": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/translation": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/mime": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/routing": "^4.0|^5.0|^6.0|^7.0",
-        "symfony/event-dispatcher": "^4.0|^5.0|^6.0|^7.0",
-        "doctrine/orm": "^2.3|^3.0",
-        "doctrine/doctrine-bundle": "^2.0",
-        "liip/imagine-bundle": "^2.3.1"
+        "php": ">=8.4",
+        "ext-gd": "*",
+        "ext-exif": "*",
+        "symfony/http-foundation": "^8.0",
+        "symfony/form": "^8.0",
+        "symfony/filesystem": "^8.0",
+        "symfony/finder": "^8.0",
+        "symfony/translation": "^8.0",
+        "symfony/translation-contracts": "^3.7",
+        "symfony/mime": "^8.0",
+        "symfony/routing": "^8.0",
+        "symfony/event-dispatcher": "^8.0",
+        "doctrine/orm": "^3.3",
+        "doctrine/doctrine-bundle": "^3.0",
+        "liip/imagine-bundle": "^2.17.0"
     },
     "suggest": {
         "oneup/flysystem-bundle": "Required for flysystem storage"
     },
     "autoload": {
-        "psr-4": { "Glavweb\\UploaderBundle\\": "" }
+        "psr-4": {
+            "Glavweb\\UploaderBundle\\": "src/"
+        }
     }
 }
