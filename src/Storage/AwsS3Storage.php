@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\File\File;
  */
 class AwsS3Storage implements StorageInterface
 {
-    private S3Client $client;
+    private ?S3Client $client;
 
     private string $bucket;
 
@@ -35,12 +35,21 @@ class AwsS3Storage implements StorageInterface
 
     private MultipartUploadManagerInterface $multipartUploadManager;
 
-    public function __construct(string $bucket, S3Client $client, MultipartUploadManagerInterface $multipartUploadManager)
+    public function __construct(string $bucket, ?S3Client $client, MultipartUploadManagerInterface $multipartUploadManager)
     {
         $this->bucket = $bucket;
         $this->client = $client;
         $this->filesystem = new Filesystem();
         $this->multipartUploadManager = $multipartUploadManager;
+    }
+
+    private function getClient(): S3Client
+    {
+        if (null === $this->client) {
+            throw new \LogicException('S3 client is not configured.');
+        }
+
+        return $this->client;
     }
 
     public function upload(FileInterface $file, string $directory, ?string $name = null, bool $attachment = false): FileInterface
@@ -61,7 +70,7 @@ class AwsS3Storage implements StorageInterface
         $size = $file->getSize();
         $mimeType = $file->getMimeType();
 
-        $this->client->putObject([
+        $this->getClient()->putObject([
             'Bucket' => $this->bucket,
             'Key' => $path,
             'SourceFile' => $file->getPathname(),
@@ -123,7 +132,7 @@ class AwsS3Storage implements StorageInterface
         $path = \sprintf('%s/%s', $file->getPath(), $file->getBasename());
 
         try {
-            $this->client->deleteObject([
+            $this->getClient()->deleteObject([
                 'Bucket' => $this->bucket,
                 'Key' => $path,
             ]);
@@ -145,7 +154,7 @@ class AwsS3Storage implements StorageInterface
         $pathname = $file->getPathname();
 
         try {
-            $object = $this->client->getObject([
+            $object = $this->getClient()->getObject([
                 'Bucket' => $this->bucket,
                 'Key' => $pathname,
                 'SaveAs' => $tempFilePathname,
@@ -160,7 +169,7 @@ class AwsS3Storage implements StorageInterface
 
         $cropResult = CropImage::crop($tempFilePathname, $tempFilePathname, $cropData);
 
-        $this->client->putObject([
+        $this->getClient()->putObject([
             'Bucket' => $this->bucket,
             'Key' => $pathname,
             'SourceFile' => $tempFilePathname,
@@ -186,7 +195,7 @@ class AwsS3Storage implements StorageInterface
             throw new FileCopyException($file, $newPath, 'File already exists');
         }
 
-        $this->client->copyObject([
+        $this->getClient()->copyObject([
             'Bucket' => $this->bucket,
             'CopySource' => "$this->bucket/{$file->getPathname()}",
             'Key' => $newPath,
@@ -211,7 +220,7 @@ class AwsS3Storage implements StorageInterface
             $newPath = FileUtils::path($file->getPath(), $fileName);
         }
 
-        $this->client->copyObject([
+        $this->getClient()->copyObject([
             'Bucket' => $this->bucket,
             'CopySource' => "$this->bucket/{$path}",
             'Key' => $newPath,
@@ -224,7 +233,7 @@ class AwsS3Storage implements StorageInterface
     {
         $files = [];
 
-        $iterator = $this->client->getIterator('ListObjects', [
+        $iterator = $this->getClient()->getIterator('ListObjects', [
             'Bucket' => $this->bucket,
             'Prefix' => $directory,
         ]);
@@ -292,7 +301,7 @@ class AwsS3Storage implements StorageInterface
             $fileResource = fopen($file->getPathname(), 'rb');
             $partNumber = $chunkIndex + 1;
 
-            $result = $this->client->uploadPart([
+            $result = $this->getClient()->uploadPart([
                 'Body' => $fileResource,
                 'Bucket' => $this->bucket,
                 'Key' => $this->createTempFileKey($fileId),
@@ -332,7 +341,7 @@ class AwsS3Storage implements StorageInterface
             'PartNumber' => $part->getNumber(),
         ], $parts);
 
-        $this->client->completeMultipartUpload([
+        $this->getClient()->completeMultipartUpload([
             'Bucket' => $this->bucket,
             'Key' => $key,
             'UploadId' => $multipartUpload->getId(),
@@ -341,12 +350,12 @@ class AwsS3Storage implements StorageInterface
 
         $this->multipartUploadManager->delete($multipartUpload);
 
-        $this->client->waitUntil('ObjectExists', [
+        $this->getClient()->waitUntil('ObjectExists', [
             'Bucket' => $this->bucket,
             'Key' => $key,
         ]);
 
-        $this->client->copyObject([
+        $this->getClient()->copyObject([
             'Bucket' => $this->bucket,
             'CopySource' => "$this->bucket/$key",
             'Key' => $key,
@@ -370,7 +379,7 @@ class AwsS3Storage implements StorageInterface
         foreach ($this->multipartUploadManager->list() as $multipartUpload) {
             if ($multipartUpload->getLastModifiedAt() < $actualTime) {
                 try {
-                    $this->client->abortMultipartUpload([
+                    $this->getClient()->abortMultipartUpload([
                         'Bucket' => $this->bucket,
                         'Key' => $multipartUpload->getKey(),
                         'UploadId' => $multipartUpload->getId(),
@@ -388,7 +397,7 @@ class AwsS3Storage implements StorageInterface
 
     private function hasObject(string $key): bool
     {
-        return $this->client->doesObjectExist($this->bucket, $key);
+        return $this->getClient()->doesObjectExist($this->bucket, $key);
     }
 
     /**
@@ -397,7 +406,7 @@ class AwsS3Storage implements StorageInterface
     private function headObject(string $key): Result
     {
         try {
-            return $this->client->headObject([
+            return $this->getClient()->headObject([
                 'Bucket' => $this->bucket,
                 'Key' => $key,
             ]);
@@ -417,11 +426,11 @@ class AwsS3Storage implements StorageInterface
     {
         $key = $this->createTempFileKey($fileId);
 
-        if ($this->client->doesObjectExist($this->bucket, $key)) {
+        if ($this->getClient()->doesObjectExist($this->bucket, $key)) {
             throw new Exception('File already exists');
         }
 
-        $result = $this->client->createMultipartUpload([
+        $result = $this->getClient()->createMultipartUpload([
             'Bucket' => $this->bucket,
             'Key' => $key,
         ]);
@@ -431,7 +440,7 @@ class AwsS3Storage implements StorageInterface
         try {
             return $this->multipartUploadManager->create($fileId, $uploadId);
         } catch (\Throwable $e) {
-            $this->client->abortMultipartUpload([
+            $this->getClient()->abortMultipartUpload([
                 'Bucket' => $this->bucket,
                 'Key' => $result['Key'],
                 'UploadId' => $result['UploadId'],
