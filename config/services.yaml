@@ -160,6 +160,9 @@ services:
 
   glavweb_uploader.command.clear_orphans_command:
     class: 'Glavweb\UploaderBundle\Command\ClearOrphansCommand'
+    # invokable command with a required ContainerInterface constructor arg, and no autowiring here
+    arguments:
+      - '@service_container'
     tags:
       - { name: 'console.command' }
 
