@@ -20,10 +20,8 @@ interface MediaInterface
 {
     /**
      * Get id.
-     *
-     * @return int
      */
-    public function getId();
+    public function getId(): ?\Symfony\Component\Uid\Uuid;
 
     /**
      * Set context.

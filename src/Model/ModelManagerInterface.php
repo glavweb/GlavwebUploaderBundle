@@ -34,9 +34,9 @@ interface ModelManagerInterface
     public function deleteMedia(MediaInterface $file): void;
 
     /**
-     * @param int $id Media ID
+     * @param \Symfony\Component\Uid\Uuid $id Media ID
      */
-    public function findMedia(int $id): ?MediaInterface;
+    public function findMedia(\Symfony\Component\Uid\Uuid $id): ?MediaInterface;
 
     public function removeOrphans(int $lifetime);
 

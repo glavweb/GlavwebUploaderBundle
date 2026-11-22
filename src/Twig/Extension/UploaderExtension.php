@@ -78,7 +78,7 @@ class UploaderExtension extends AbstractExtension
             $context = $media->getContext();
 
             return [
-                'id' => $media->getId(),
+                'id' => (string) $media->getId(),
                 'path' => $this->mediaHelper->getUploadDirectoryUrl($context).'/'.$media->getThumbnailPath(),
                 'name' => $media->getName(),
             ];

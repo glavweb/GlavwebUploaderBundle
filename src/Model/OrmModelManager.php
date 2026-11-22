@@ -124,10 +124,7 @@ class OrmModelManager implements ModelManagerInterface
         }
     }
 
-    /**
-     * @param int $id Media ID
-     */
-    public function findMedia(int $id): ?MediaInterface
+    public function findMedia(\Symfony\Component\Uid\Uuid $id): ?MediaInterface
     {
         $em = $this->doctrine->getManager();
         $repository = $em->getRepository(Media::class);
@@ -231,7 +228,7 @@ class OrmModelManager implements ModelManagerInterface
         $em = $this->doctrine->getManager();
 
         foreach ($medias as $media) {
-            $position = array_search($media->getId(), $positions, true);
+            $position = array_search((string) $media->getId(), array_map(static fn (mixed $item): string => (string) $item, $positions), true);
 
             if (false !== $position && $position != $media->getPosition()) {
                 $media->setPosition($position);
