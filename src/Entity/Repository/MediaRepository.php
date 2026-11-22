@@ -14,6 +14,7 @@ namespace Glavweb\UploaderBundle\Entity\Repository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Glavweb\UploaderBundle\Entity\Media;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class MediaRepository.
@@ -27,14 +28,12 @@ class MediaRepository extends EntityRepository
      */
     public function findOneBySecuredId(string $securedId): ?Media
     {
-        $pos = strpos($securedId, '-');
-
-        if (!$pos) {
+        if (37 > \strlen($securedId) || '-' !== $securedId[36] || !Uuid::isValid(substr($securedId, 0, 36))) {
             return null;
         }
 
-        $id = substr($securedId, 0, $pos);
-        $token = substr($securedId, $pos + 1);
+        $id = Uuid::fromString(substr($securedId, 0, 36));
+        $token = substr($securedId, 37);
 
         $qb = $this->createQueryBuilder('t')
             ->where('t.id = :id AND t.token = :token')

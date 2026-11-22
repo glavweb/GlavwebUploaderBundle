@@ -62,7 +62,7 @@ class MediaStructure
         }
 
         return [
-            'id' => $securedId ? $this->getSecuredId($media) : $media->getId(),
+            'id' => $securedId ? $this->getSecuredId($media) : (string) $media->getId(),
             'name' => $media->getName(),
             'description' => $media->getDescription(),
             'thumbnail_path' => $thumbnailPath,

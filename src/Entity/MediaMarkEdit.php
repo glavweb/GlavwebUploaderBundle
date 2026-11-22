@@ -12,6 +12,8 @@
 namespace Glavweb\UploaderBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class MediaMarkEdit.
@@ -23,10 +25,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class MediaMarkEdit
 {
-    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Column(name: 'id', type: UuidType::NAME)]
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    private ?int $id = null;
+    private ?Uuid $id = null;
 
     #[ORM\Column(name: 'request_id', type: 'string')]
     private ?string $requestId = null;
@@ -44,6 +45,11 @@ class MediaMarkEdit
     #[ORM\ManyToOne(targetEntity: Media::class, cascade: ['persist'], inversedBy: 'mediaMarkEdits')]
     private ?Media $media = null;
 
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+    }
+
     #[ORM\PrePersist]
     public function prePersist(): void
     {
@@ -53,7 +59,7 @@ class MediaMarkEdit
     /**
      * Get id.
      */
-    public function getId(): ?int
+    public function getId(): ?Uuid
     {
         return $this->id;
     }

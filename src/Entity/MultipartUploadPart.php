@@ -12,6 +12,8 @@
 namespace Glavweb\UploaderBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 use Glavweb\UploaderBundle\Model\MultipartUploadInterface;
 use Glavweb\UploaderBundle\Model\MultipartUploadPartInterface;
 
@@ -29,10 +31,19 @@ use Glavweb\UploaderBundle\Model\MultipartUploadPartInterface;
 #[ORM\Entity]
 class MultipartUploadPart implements MultipartUploadPartInterface
 {
-    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Column(name: 'id', type: UuidType::NAME)]
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    private ?int $id = null;
+    private ?Uuid $id = null;
+
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+    }
+
+    public function getId(): ?Uuid
+    {
+        return $this->id;
+    }
 
     #[ORM\Column(name: 'number', type: 'integer')]
     private ?int $number = null;

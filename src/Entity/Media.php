@@ -18,6 +18,8 @@ use Glavweb\UploaderBundle\Entity\Listener\MediaListener;
 use Glavweb\UploaderBundle\Entity\Repository\MediaRepository;
 use Glavweb\UploaderBundle\Model\MediaInterface;
 use Random\RandomException;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class Media.
@@ -30,10 +32,9 @@ use Random\RandomException;
 #[ORM\HasLifecycleCallbacks]
 class Media implements MediaInterface, \Stringable
 {
-    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Column(name: 'id', type: UuidType::NAME)]
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    private ?int $id = null;
+    private ?Uuid $id = null;
 
     #[ORM\Column(name: 'context', type: 'string')]
     private ?string $context = null;
@@ -97,6 +98,7 @@ class Media implements MediaInterface, \Stringable
      */
     public function __construct()
     {
+        $this->id = Uuid::v7();
         $this->mediaMarkRemoves = new ArrayCollection();
         $this->mediaMarkEdits = new ArrayCollection();
     }
@@ -133,10 +135,7 @@ class Media implements MediaInterface, \Stringable
         return rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
     }
 
-    /**
-     * Get id.
-     */
-    public function getId(): int
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
