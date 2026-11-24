@@ -77,9 +77,6 @@ class OrmModelManager implements ModelManagerInterface
     {
         $em = $this->doctrine->getManager();
 
-        /* @var Media $media */
-        $media->setRequestId($requestId);
-
         $mediaMarkRemove = new MediaMarkRemove();
         $mediaMarkRemove->setRequestId($requestId);
         $mediaMarkRemove->setMedia($media);
